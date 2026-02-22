@@ -141,7 +141,7 @@ export default function LocationPicker() {
           <div className="mt-2 text-xs text-slate-600">{t('location.pickOnMap')}</div>
         </div>
 
-        <div className="h-64 overflow-hidden rounded-md border border-slate-200">
+        <div className="relative z-0 h-64 overflow-hidden rounded-md border border-slate-200">
           <MapContainer center={center} zoom={5} style={{ height: '100%', width: '100%' }}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

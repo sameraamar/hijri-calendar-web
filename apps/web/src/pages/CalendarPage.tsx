@@ -39,9 +39,11 @@ type MonthStartHeat = {
 type CalendarDay = {
   day: number;
   hijri: string;
+  hijriDay?: number;
   isToday: boolean;
   isHijriMonthStart: boolean;
   isPotentialMonthStartEve: boolean;
+  showIndicator: boolean;
 };
 
 function pad2(n: number): string {
@@ -65,7 +67,55 @@ function clamp0to100(n: number): number {
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 
+type VisibilityStatusKey = 'noChance' | 'veryHigh' | 'high' | 'medium' | 'low' | 'unknown';
+
+function visibilityStatusFromEstimate(
+  est: ReturnType<typeof estimateMonthStartLikelihoodAtSunset> | undefined
+): VisibilityStatusKey {
+  if (!est) return 'unknown';
+  const lag = est.metrics.lagMinutes;
+  const percent = est.metrics.visibilityPercent;
+
+  if (typeof lag === 'number' && lag <= 0) return 'noChance';
+  if (typeof lag === 'number' && typeof percent === 'number' && percent >= 90 && lag >= 30) return 'veryHigh';
+
+  // Fall back to the heuristic estimator label.
+  const l = est.likelihood;
+  if (l === 'high' || l === 'medium' || l === 'low' || l === 'unknown') return l;
+  return 'unknown';
+}
+
+function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: string } {
+  // Keep this compact and consistent across calendar + details.
+  // Uses Tailwind's built-in semantic colors (no custom hex).
+  if (likelihood === 'noChance') {
+    return { badgeClass: 'bg-slate-100 text-slate-800 ring-1 ring-slate-200', dotClass: 'bg-slate-500' };
+  }
+  if (likelihood === 'veryHigh') {
+    return { badgeClass: 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-300', dotClass: 'bg-emerald-600' };
+  }
+  if (likelihood === 'high') {
+    return { badgeClass: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200', dotClass: 'bg-emerald-500' };
+  }
+  if (likelihood === 'medium') {
+    return { badgeClass: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200', dotClass: 'bg-amber-500' };
+  }
+  if (likelihood === 'low') {
+    return { badgeClass: 'bg-rose-50 text-rose-800 ring-1 ring-rose-200', dotClass: 'bg-rose-500' };
+  }
+  return { badgeClass: 'bg-slate-50 text-slate-700 ring-1 ring-slate-200', dotClass: 'bg-slate-400' };
+}
+
 type CalendarTab = 'calendar' | 'details';
+
+function MetricRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-[1fr_auto] gap-x-3">
+      <div className="text-slate-600">{label}</div>
+      <div className="text-slate-900 whitespace-nowrap">{value}</div>
+    </div>
+  );
+}
 
 export default function CalendarPage() {
   const { t, i18n } = useTranslation();
@@ -169,7 +219,8 @@ export default function CalendarPage() {
     // so we can show a per-day details table and a subtle month-start "heat".
     const estimateByIso = new Map<string, ReturnType<typeof estimateMonthStartLikelihoodAtSunset>>();
     const estimateStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
-    estimateStart.setUTCDate(estimateStart.getUTCDate() - 1);
+    // We look back far enough to support dynamic month-boundary windows.
+    estimateStart.setUTCDate(estimateStart.getUTCDate() - 40);
     const estimateEnd = new Date(Date.UTC(year, month - 1, dim, 0, 0, 0));
 
     for (let dt = new Date(estimateStart); dt.getTime() <= estimateEnd.getTime(); ) {
@@ -238,9 +289,14 @@ export default function CalendarPage() {
       estimate: DayEstimate;
     }> = [];
 
+    // Gregorian dates (ISO) that are Hijri day 1 (including possible month-start on the day
+    // immediately after this Gregorian month, so we can still mark the last days correctly).
+    const monthStartCandidatesIso = new Set<string>();
+
     for (let d = 1; d <= dim; d += 1) {
       const h = getHijriForDay(d);
       const hijriText = h ? `${h.day}/${h.month}/${h.year}` : '—';
+      const showIndicator = false;
 
       // Evening estimate for *this* date (affects next day after sunset)
       const est = estimateByIso.get(isoDate(year, month, d));
@@ -291,16 +347,125 @@ export default function CalendarPage() {
       const isToday = year === todayY && month === todayM && d === todayD;
       const isHijriMonthStart = h ? h.day === 1 : false;
 
+      if (isHijriMonthStart) {
+        monthStartCandidatesIso.add(isoDate(year, month, d));
+      }
+      if (isPotentialMonthStartEve) {
+        monthStartCandidatesIso.add(
+          isoDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate())
+        );
+      }
+
       days.push({
         day: d,
         hijri: hijriText,
+        hijriDay: h?.day,
         isToday,
         isHijriMonthStart,
-        isPotentialMonthStartEve
+        isPotentialMonthStartEve,
+        showIndicator
       });
     }
 
-    return { month, days, offset, heatByDay, details, estimateByIso };
+    // Dynamic indicator days around each month start.
+    // For each month start date S, find the first day X in the leading window where the Moon
+    // sets after sunset (lagMinutes > 0). Then show indicators on X-1, X, X+1.
+    const indicatorDays = new Set<number>();
+    for (const startIso of monthStartCandidatesIso) {
+      const s = new Date(`${startIso}T00:00:00.000Z`);
+      if (!Number.isFinite(s.getTime())) continue;
+
+      const sPrev = new Date(s);
+      sPrev.setUTCDate(sPrev.getUTCDate() - 1);
+      const sPrevIso = isoDate(sPrev.getUTCFullYear(), sPrev.getUTCMonth() + 1, sPrev.getUTCDate());
+      const sSignal = visibilityStatusFromEstimate(estimateByIso.get(sPrevIso));
+      const stopAfterMonthStart =
+        sSignal === 'veryHigh' && s.getUTCFullYear() === year && s.getUTCMonth() + 1 === month;
+
+      // Search the days leading up to S (exclude S itself).
+      const searchStart = new Date(s);
+      searchStart.setUTCDate(searchStart.getUTCDate() - 25);
+      const searchEnd = new Date(s);
+      searchEnd.setUTCDate(searchEnd.getUTCDate() - 1);
+
+      let foundXIso: string | null = null;
+      let prevLagWasPositive = false;
+
+      let latestPositiveLagIso: string | null = null;
+
+      for (let dt = new Date(searchStart); dt.getTime() <= searchEnd.getTime(); dt.setUTCDate(dt.getUTCDate() + 1)) {
+        const key = isoDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate());
+        const est = estimateByIso.get(key);
+        const lag = est?.metrics.lagMinutes;
+        const lagIsPositive = typeof lag === 'number' && lag > 0;
+
+        if (lagIsPositive) latestPositiveLagIso = key;
+
+        // Find transitions into positive lag. We want the one closest to the month start.
+        if (lagIsPositive && !prevLagWasPositive) foundXIso = key;
+
+        prevLagWasPositive = lagIsPositive;
+      }
+
+      // Fallback: if lag is always positive in the window (no transition), choose the latest
+      // positive-lag day (closest to the month start) so X lands near the boundary.
+      if (!foundXIso) foundXIso = latestPositiveLagIso;
+
+      if (!foundXIso) continue;
+
+      const x = new Date(`${foundXIso}T00:00:00.000Z`);
+      if (!Number.isFinite(x.getTime())) continue;
+
+      for (const delta of [-1, 0, 1, 2, 3]) {
+        const dd = new Date(x);
+        dd.setUTCDate(dd.getUTCDate() + delta);
+        if (dd.getUTCFullYear() !== year || dd.getUTCMonth() + 1 !== month) continue;
+
+        // If the month start is very-high confidence, don't keep showing indicators after it.
+        if (stopAfterMonthStart && dd.getTime() > s.getTime()) continue;
+
+        // Suppress pure "no chance" days unless they're immediately adjacent to the boundary.
+        const ddPrev = new Date(dd);
+        ddPrev.setUTCDate(ddPrev.getUTCDate() - 1);
+        const ddPrevIso = isoDate(ddPrev.getUTCFullYear(), ddPrev.getUTCMonth() + 1, ddPrev.getUTCDate());
+        const ddSignal = visibilityStatusFromEstimate(estimateByIso.get(ddPrevIso));
+        if (ddSignal === 'noChance') {
+          const daysFromX = Math.round((dd.getTime() - x.getTime()) / 86400000);
+          const daysFromS = Math.round((dd.getTime() - s.getTime()) / 86400000);
+          const isAdjacent = Math.abs(daysFromX) <= 1 || Math.abs(daysFromS) <= 1;
+          if (!isAdjacent) continue;
+        }
+
+        indicatorDays.add(dd.getUTCDate());
+      }
+    }
+
+    for (const d of days) {
+      d.showIndicator = indicatorDays.has(d.day);
+    }
+
+    // If two adjacent days would both display "noChance" (e.g., moonset before sunset),
+    // suppress the earlier one to reduce redundant noise.
+    const signalStatusForGregorianDay = (dayOfMonth: number): VisibilityStatusKey => {
+      const prev = new Date(Date.UTC(year, month - 1, dayOfMonth, 0, 0, 0));
+      prev.setUTCDate(prev.getUTCDate() - 1);
+      const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
+      return visibilityStatusFromEstimate(estimateByIso.get(prevIso));
+    };
+
+    for (let d = 1; d < dim; d += 1) {
+      if (!indicatorDays.has(d) || !indicatorDays.has(d + 1)) continue;
+      const a = signalStatusForGregorianDay(d);
+      const b = signalStatusForGregorianDay(d + 1);
+      if (a === 'noChance' && b === 'noChance') indicatorDays.delete(d);
+      if (a === 'veryHigh' && b === 'veryHigh') indicatorDays.delete(d + 1);
+    }
+
+    for (const d of days) {
+      d.showIndicator = indicatorDays.has(d.day);
+    }
+
+    return { month, days, offset, heatByDay, details, estimateByIso, indicatorDays };
   }, [location.latitude, location.longitude, methodId, month, year, todayD, todayM, todayY]);
 
   return (
@@ -357,7 +522,7 @@ export default function CalendarPage() {
       </div>
 
       {tab === 'calendar' ? (
-        <section className="card">
+        <section className="card overflow-visible relative z-10">
           <div className="card-header">
             {new Date(year, monthData.month - 1, 1).toLocaleString(i18n.language, { month: 'long', year: 'numeric' })}
           </div>
@@ -371,60 +536,180 @@ export default function CalendarPage() {
               <div key={`blank-${monthData.month}-${idx}`} className="bg-white p-2" />
             ))}
             {monthData.days.map((d) => {
-              const heat = monthData.heatByDay.get(d.day);
-              const bg = heat?.className ? heat.className : d.isHijriMonthStart ? 'bg-slate-50' : 'bg-white';
+              const bg = d.isHijriMonthStart ? 'bg-slate-50' : 'bg-white';
 
-              const heatTitle = (() => {
-                if (!heat) return undefined;
+              // The evening estimate on date D-1 affects the day D after sunset.
+              const prev = new Date(Date.UTC(year, month - 1, d.day, 0, 0, 0));
+              prev.setUTCDate(prev.getUTCDate() - 1);
+              const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
+              const eveEst = monthData.estimateByIso.get(prevIso);
 
-                const prev = new Date(Date.UTC(year, month - 1, d.day, 0, 0, 0));
-                prev.setUTCDate(prev.getUTCDate() - 1);
-                const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
-
-                const est = monthData.estimateByIso.get(prevIso);
-                if (!est) return `${t('probability.crescentScore')}: ${heat.percent}%`;
-
-                const likelihoodLabel = t(`probability.${est.likelihood}`);
-                const visibilityPercent =
-                  typeof est.metrics.visibilityPercent === 'number' ? est.metrics.visibilityPercent : heat.percent;
-
-                const sunsetLocal = fmtLocalTime(est.metrics.sunsetUtcIso) ?? '—';
-                const moonsetLocal = fmtLocalTime(est.metrics.moonsetUtcIso) ?? '—';
-                const lagMinutes = typeof est.metrics.lagMinutes === 'number' ? Math.round(est.metrics.lagMinutes) : null;
-                const alt = typeof est.metrics.moonAltitudeDeg === 'number' ? est.metrics.moonAltitudeDeg.toFixed(1) : null;
-                const elong = typeof est.metrics.moonElongationDeg === 'number' ? est.metrics.moonElongationDeg.toFixed(1) : null;
-                const age = typeof est.metrics.moonAgeHours === 'number' ? est.metrics.moonAgeHours.toFixed(1) : null;
-
-                const lines: string[] = [];
-                lines.push(t('holidays.monthStartRuleNote'));
-                lines.push(`${t('holidays.eveOf')} ${prevIso}`);
-                lines.push(`${t('probability.label')}: ${likelihoodLabel}`);
-                lines.push(`${t('probability.crescentScore')}: ${visibilityPercent}%`);
-                lines.push(`${t('probability.sunsetLocal')}: ${sunsetLocal}`);
-                lines.push(`${t('probability.moonsetLocal')}: ${moonsetLocal}`);
-                lines.push(`${t('probability.lagMinutes')}: ${lagMinutes ?? '—'}`);
-                if (alt) lines.push(`${t('holidays.moonAltitude')}: ${alt}°`);
-                if (elong) lines.push(`${t('holidays.moonElongation')}: ${elong}°`);
-                if (age) lines.push(`${t('holidays.moonAge')}: ${age}h`);
-
-                return lines.join('\n');
-              })();
+              // The evening estimate on date D affects the *next* day (D+1).
+              const thisIso = isoDate(year, month, d.day);
+              const thisEst = monthData.estimateByIso.get(thisIso);
+              const evePercent = clamp0to100(eveEst?.metrics.visibilityPercent ?? 0);
+              const eveLagMinutes = typeof eveEst?.metrics.lagMinutes === 'number' ? Math.round(eveEst.metrics.lagMinutes) : null;
+              const eveStatusKey = visibilityStatusFromEstimate(eveEst);
+              const eveStyle = likelihoodStyle(eveStatusKey);
+              const eveIllumPercent =
+                typeof eveEst?.metrics.moonIlluminationFraction === 'number'
+                  ? Math.round(eveEst.metrics.moonIlluminationFraction * 100)
+                  : null;
 
               return (
                 <div
                   key={d.day}
                   className={
-                    `${bg} p-2.5 text-start transition-colors hover:bg-slate-50 ` +
+                    `group relative ${bg} p-2.5 text-start transition-colors hover:bg-slate-50 ` +
                     `${d.isToday ? 'ring-1 ring-slate-300' : ''}`
                   }
-                  title={heatTitle}
+                  tabIndex={d.showIndicator ? 0 : -1}
                 >
                   <div className="flex min-h-16 flex-col gap-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="text-base font-semibold leading-none text-slate-900">{d.day}</div>
                       <div className="text-[11px] leading-none text-slate-700">{d.hijri}</div>
                     </div>
+
+                    {d.showIndicator ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={
+                            `inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${eveStyle.badgeClass}`
+                          }
+                          title={`${t('probability.monthStartSignalFor')}: ${thisIso} (${t('holidays.eveOf')} ${prevIso}) — ${t(`probability.${eveStatusKey}`)} (${t('probability.crescentScore')}: ${evePercent}%)`}
+                        >
+                          <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                          {t(`probability.${eveStatusKey}`)}
+                        </span>
+
+                        {typeof eveEst?.metrics.visibilityPercent === 'number' ? (
+                          <span className="text-[11px] text-slate-600">{evePercent}%</span>
+                        ) : null}
+
+                        {eveLagMinutes !== null ? (
+                          <span
+                            className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
+                            title={t('probability.lagMinutes')}
+                          >
+                            {eveLagMinutes}m
+                          </span>
+                        ) : null}
+
+                        {eveIllumPercent !== null ? (
+                          <span
+                            className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
+                            title={t('holidays.moonIllumination')}
+                          >
+                            {eveIllumPercent}%
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
+
+                  {d.showIndicator ? (
+                    <div className="absolute left-2 top-full z-50 mt-2 hidden w-96 max-w-[calc(100vw-2rem)] group-hover:block group-focus-within:block">
+                      <div className="max-h-[70vh] overflow-auto select-text rounded-md border border-slate-200 bg-white p-3 text-xs shadow-lg">
+                        <div className="space-y-3">
+                          <div className="text-[11px] leading-relaxed text-slate-600">{t('holidays.monthStartRuleNote')}</div>
+
+                          {eveEst ? (
+                            <div>
+                              <div className="text-[11px] font-semibold text-slate-900">
+                                {t('probability.monthStartSignalFor')}{' '}
+                                <span className="font-mono font-normal">{thisIso}</span>
+                              </div>
+                              <div className="mt-0.5 text-[11px] text-slate-600">
+                                {t('probability.basedOn')}: {t('holidays.eveOf')}{' '}
+                                <span className="font-mono">{prevIso}</span>
+                              </div>
+                              <div className="mt-2 space-y-1">
+                                <MetricRow label={t('probability.label')} value={t(`probability.${eveStatusKey}`)} />
+                                <MetricRow label={t('probability.crescentScore')} value={`${evePercent}%`} />
+                                <MetricRow
+                                  label={t('probability.lagMinutes')}
+                                  value={
+                                    typeof eveEst.metrics.lagMinutes === 'number'
+                                      ? String(Math.round(eveEst.metrics.lagMinutes))
+                                      : '—'
+                                  }
+                                />
+                                {eveStatusKey === 'noChance' ? (
+                                  <div className="text-[11px] text-slate-600">{t('probability.noChanceHint')}</div>
+                                ) : null}
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <div className="border-t border-slate-100 pt-3">
+                            <div className="text-[11px] font-semibold text-slate-900">
+                              {t('probability.eveningEstimate')}: {t('holidays.eveOf')}{' '}
+                              <span className="font-mono font-normal">{thisIso}</span>
+                            </div>
+
+                            {thisEst ? (
+                              <div className="mt-2 space-y-1">
+                                <MetricRow label={t('probability.label')} value={t(`probability.${visibilityStatusFromEstimate(thisEst)}`)} />
+                                <MetricRow
+                                  label={t('probability.crescentScore')}
+                                  value={
+                                    typeof thisEst.metrics.visibilityPercent === 'number'
+                                      ? `${clamp0to100(thisEst.metrics.visibilityPercent)}%`
+                                      : '—'
+                                  }
+                                />
+                                <MetricRow label={t('probability.sunsetLocal')} value={fmtLocalTime(thisEst.metrics.sunsetUtcIso) ?? '—'} />
+                                <MetricRow label={t('probability.moonsetLocal')} value={fmtLocalTime(thisEst.metrics.moonsetUtcIso) ?? '—'} />
+                                <MetricRow
+                                  label={t('probability.lagMinutes')}
+                                  value={
+                                    typeof thisEst.metrics.lagMinutes === 'number'
+                                      ? String(Math.round(thisEst.metrics.lagMinutes))
+                                      : '—'
+                                  }
+                                />
+                                <MetricRow
+                                  label={t('holidays.moonIllumination')}
+                                  value={
+                                    typeof thisEst.metrics.moonIlluminationFraction === 'number'
+                                      ? `${Math.round(thisEst.metrics.moonIlluminationFraction * 100)}%`
+                                      : '—'
+                                  }
+                                />
+                                <MetricRow
+                                  label={t('holidays.moonAltitude')}
+                                  value={
+                                    typeof thisEst.metrics.moonAltitudeDeg === 'number'
+                                      ? `${thisEst.metrics.moonAltitudeDeg.toFixed(1)}°`
+                                      : '—'
+                                  }
+                                />
+                                <MetricRow
+                                  label={t('holidays.moonElongation')}
+                                  value={
+                                    typeof thisEst.metrics.moonElongationDeg === 'number'
+                                      ? `${thisEst.metrics.moonElongationDeg.toFixed(1)}°`
+                                      : '—'
+                                  }
+                                />
+                                <MetricRow
+                                  label={t('holidays.moonAge')}
+                                  value={
+                                    typeof thisEst.metrics.moonAgeHours === 'number'
+                                      ? `${thisEst.metrics.moonAgeHours.toFixed(1)}h`
+                                      : '—'
+                                  }
+                                />
+                              </div>
+                            ) : (
+                              <div className="mt-2 text-[11px] text-slate-600">—</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -463,7 +748,35 @@ export default function CalendarPage() {
                       {row.gregorianIso}
                     </td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.hijriText}</td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{t(row.estimate.likelihoodKey)}</td>
+                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
+                      {(() => {
+                        const likelihood = row.estimate.likelihoodKey.replace('probability.', '');
+                        const lagMinutes = typeof row.estimate.lagMinutes === 'number' ? row.estimate.lagMinutes : null;
+                        const percent = typeof row.estimate.crescentScorePercent === 'number' ? row.estimate.crescentScorePercent : null;
+                        const statusKey: VisibilityStatusKey =
+                          lagMinutes !== null && lagMinutes <= 0
+                            ? 'noChance'
+                            : lagMinutes !== null && percent !== null && percent >= 90 && lagMinutes >= 30
+                              ? 'veryHigh'
+                              : (likelihood as VisibilityStatusKey);
+                        const style = likelihoodStyle(statusKey);
+                        const show = monthData.indicatorDays.has(row.day);
+
+                        if (!show) {
+                          return (
+                            <span className="text-slate-600">
+                              {t(`probability.${statusKey}`)}
+                            </span>
+                          );
+                        }
+                        return (
+                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${style.dotClass}`} />
+                            {t(`probability.${statusKey}`)}
+                          </span>
+                        );
+                      })()}
+                    </td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
                       {typeof row.estimate.crescentScorePercent === 'number' ? `${row.estimate.crescentScorePercent}%` : '—'}
                     </td>
