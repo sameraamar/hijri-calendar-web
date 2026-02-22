@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# NPM / Node logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs (do not commit npm builds)
+dist/
+build/
+out/
+lib/
+.esbuild/
+
+# Coverage / test artifacts
+coverage/
+*.lcov
+
+# Vite / bundler caches
+.vite/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Vitest cache
+.vitest/
+
+# Turborepo / task runner caches (in case added later)
+.turbo/
+
+# Env files
+.env
+.env.*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Misc
+*.log
