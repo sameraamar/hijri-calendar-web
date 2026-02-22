@@ -17,7 +17,7 @@ function readInitial(): CalculationMethodId {
     const m = METHODS.find((x) => x.id === raw);
     if (m?.enabled) return raw;
   }
-  return 'civil';
+  return 'estimate';
 }
 
 export function MethodProvider({ children }: { children: React.ReactNode }) {

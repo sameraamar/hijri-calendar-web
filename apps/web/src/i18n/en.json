@@ -146,8 +146,10 @@
     "lagMinutes": "Lag (min)",
     "visibilityPercent": "Visibility",
     "crescentScore": "Crescent score",
-    "lowDesc": "Low: Conditions are poor for a visible crescent (e.g., Moon very low/setting too soon, very small separation from the Sun, very young Moon, or wrong phase).",
-    "mediumDesc": "Medium: Borderline/mixed conditions; visibility depends on observer conditions and criteria.",
-    "highDesc": "High: Conditions are stronger (Moon higher, more separated from the Sun, older, and/or stays up longer after sunset)."
+    "noChanceDesc": "Moon sets at or before sunset, or is at/below the horizon at sunset; practical visibility is not possible.",
+    "veryLowDesc": "Extremely weak conditions; visibility is unlikely and confidence for month start is minimal.",
+    "lowDesc": "Conditions are poor for a visible crescent (e.g., Moon very low/setting too soon, very small separation from the Sun, very young Moon, or wrong phase).",
+    "mediumDesc": "Borderline/mixed conditions; visibility depends on observer conditions and criteria.",
+    "highDesc": "Conditions are stronger (Moon higher, more separated from the Sun, older, and/or stays up longer after sunset)."
   }
 }

@@ -104,33 +104,42 @@ export default function App() {
         </Routes>
       </main>
 
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-4 text-xs text-slate-600">
-          <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
-            <div>
-              {t('app.method.label')}: {t(METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.civil')}
+      <footer className="bg-white">
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="h-px bg-slate-300" />
+        </div>
+        <div className="mx-auto max-w-6xl px-4 py-5">
+          <div className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div className="space-y-2 md:max-w-[60%]">
+                <div>
+                  {t('app.method.label')}: {t(METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.estimate')}
+                </div>
+                <div className="text-slate-500">{t('app.footer.disclaimer')}</div>
+              </div>
+              <div className="space-y-1 border-t border-slate-200 pt-2 text-slate-500 md:border-t-0 md:pt-0 md:text-end">
+                <div>
+                  {t('app.footer.openSource')}{' '}
+                  <a
+                    href="https://github.com/sameraamar/hijri-calendar-web"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                  >
+                    {t('app.footer.repoLabel')}
+                  </a>
+                </div>
+                <div>
+                  {t('app.footer.contact')}{' '}
+                  <a
+                    href="mailto:samer.aamar@gmail.com"
+                    className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                  >
+                    samer.aamar@gmail.com
+                  </a>
+                </div>
+              </div>
             </div>
-            <div className="text-slate-500">
-              {t('app.footer.openSource')}{' '}
-              <a
-                href="https://github.com/sameraamar/hijri-calendar-web"
-                target="_blank"
-                rel="noreferrer"
-                className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
-              >
-                {t('app.footer.repoLabel')}
-              </a>
-            </div>
-          </div>
-          <div className="mt-1 text-slate-500">{t('app.footer.disclaimer')}</div>
-          <div className="mt-1 text-slate-500">
-            {t('app.footer.contact')}{' '}
-            <a
-              href="mailto:samer.aamar@gmail.com"
-              className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
-            >
-              samer.aamar@gmail.com
-            </a>
           </div>
         </div>
       </footer>

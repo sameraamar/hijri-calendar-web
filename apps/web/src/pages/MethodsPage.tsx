@@ -3,11 +3,29 @@ import { useTranslation } from 'react-i18next';
 import { useMethod } from '../method/MethodContext';
 import { METHODS } from '../method/types';
 
+type SignalLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high';
+
+function likelihoodStyle(level: SignalLevel): { badgeClass: string; dotClass: string } {
+  if (level === 'noChance') {
+    return { badgeClass: 'bg-slate-100 text-slate-800 ring-1 ring-slate-200', dotClass: 'bg-slate-500' };
+  }
+  if (level === 'veryLow') {
+    return { badgeClass: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100', dotClass: 'bg-rose-400' };
+  }
+  if (level === 'low') {
+    return { badgeClass: 'bg-rose-50 text-rose-800 ring-1 ring-rose-200', dotClass: 'bg-rose-500' };
+  }
+  if (level === 'medium') {
+    return { badgeClass: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200', dotClass: 'bg-amber-500' };
+  }
+  return { badgeClass: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200', dotClass: 'bg-emerald-500' };
+}
+
 export default function MethodsPage() {
   const { t } = useTranslation();
   const { methodId } = useMethod();
 
-  const selectedLabelKey = METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.civil';
+  const selectedLabelKey = METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.estimate';
 
   return (
     <div className="page">
@@ -97,14 +115,30 @@ export default function MethodsPage() {
 
             <div>
               <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.thresholdsTitle')}</div>
-              <ul className="mt-2 list-disc space-y-1 ps-5">
-                <li>{t('methods.estimate.threshold1')}</li>
-                <li>{t('methods.estimate.threshold2')}</li>
-                <li>{t('methods.estimate.threshold3')}</li>
-                <li>{t('methods.estimate.threshold4')}</li>
-                <li>{t('methods.estimate.threshold5')}</li>
-                <li>{t('methods.estimate.threshold6')}</li>
-              </ul>
+              <div className="mt-2 space-y-2">
+                {(
+                  [
+                    { level: 'noChance', textKey: 'methods.estimate.threshold1' },
+                    { level: 'veryLow', textKey: 'methods.estimate.threshold2' },
+                    { level: 'low', textKey: 'methods.estimate.threshold3' },
+                    { level: 'medium', textKey: 'methods.estimate.threshold4' },
+                    { level: 'high', textKey: 'methods.estimate.threshold5' }
+                  ] as const
+                ).map((item) => {
+                  const style = likelihoodStyle(item.level);
+                  return (
+                    <div key={item.level} className="flex flex-wrap items-start gap-2 text-sm">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${style.dotClass}`} />
+                        {t(`probability.${item.level}`)}
+                      </span>
+                      <span>{t(item.textKey)}</span>
+                    </div>
+                  );
+                })}
+
+                <div className="text-sm text-slate-700">• {t('methods.estimate.threshold6')}</div>
+              </div>
             </div>
 
             <div>

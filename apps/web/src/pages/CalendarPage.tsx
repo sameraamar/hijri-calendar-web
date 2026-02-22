@@ -809,10 +809,19 @@ export default function CalendarPage() {
 
           <div className="card p-3">
             <div className="text-xs font-semibold text-slate-900">{t('probability.legendTitle')}</div>
-            <div className="mt-2 space-y-1 leading-relaxed">
-              <div>{t('probability.lowDesc')}</div>
-              <div>{t('probability.mediumDesc')}</div>
-              <div>{t('probability.highDesc')}</div>
+            <div className="mt-2 space-y-2 leading-relaxed">
+              {(['noChance', 'veryLow', 'low', 'medium', 'high'] as VisibilityStatusKey[]).map((k) => {
+                const style = likelihoodStyle(k);
+                return (
+                  <div key={k} className="flex flex-wrap items-start gap-2">
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${style.dotClass}`} />
+                      {t(`probability.${k}`)}
+                    </span>
+                    <span className="text-slate-600">{t(`probability.${k}Desc`)}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

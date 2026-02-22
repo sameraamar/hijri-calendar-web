@@ -7,7 +7,7 @@ export type CalculationMethod = {
 };
 
 export const METHODS: CalculationMethod[] = [
-  { id: 'civil', labelKey: 'app.method.civil', enabled: true },
   { id: 'estimate', labelKey: 'app.method.estimate', enabled: true },
+  { id: 'civil', labelKey: 'app.method.civil', enabled: true },
   { id: 'ummalqura', labelKey: 'app.method.ummalqura', enabled: false }
 ];
