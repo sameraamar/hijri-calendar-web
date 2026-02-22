@@ -60,6 +60,9 @@
     "moonAge": "Age",
     "moonIllumination": "Illum",
     "monthStartRuleNote": "Estimate suggests the crescent may be visible this evening → next day could start a new Hijri month.",
+    "possibleEventDates": "Possible event dates",
+    "dependsOnMonthStart": "Depends on month start",
+    "monthStart": "Month start",
     "islamicNewYear": "Islamic New Year (1 Muharram)",
     "ashura": "Ashura (10 Muharram)",
     "ramadan1": "Ramadan begins (1 Ramadan)",
@@ -93,11 +96,11 @@
     },
     "estimate": {
       "title": "Astronomical visibility estimate (for probability)",
-      "summary": "An astronomy-based heuristic that estimates crescent-visibility conditions on the evening (around local sunset) at the selected location.",
-      "ch1": "Uses location and event times (sunset, moonset) + sky geometry",
-      "ch2": "Produces Low/Medium/High labels and a visibility percent",
-      "ch3": "Sensitive to location and observation criteria",
-      "note": "Important: this is an estimate, not an official determination. If you select this method, the app will show an estimated Hijri mapping derived from the evening criteria and your selected location."
+      "summary": "An astronomy-based estimator that answers two separate questions for each evening at your selected location.",
+      "ch1": "Question 1 (observation): Is the crescent likely visible this evening?",
+      "ch2": "Question 2 (calendar): How likely is the next Gregorian date to be Hijri day 1?",
+      "ch3": "Uses a canonical scale: No chance / Very low / Low / Medium / High, with an exclusivity rule (if day X is Medium/High month-start signal, day X+1 is forced to No chance)",
+      "note": "Important: this is an estimate, not an official religious announcement. The app uses sunset/evening astronomy metrics (moonset lag, altitude, elongation, age, illumination, and score) to derive a normalized month-start signal."
     }
   },
   "probability": {
@@ -109,6 +112,7 @@
     "noChance": "No chance",
     "noChanceHint": "Moon sets at/before sunset (no crescent possible).",
     "veryHigh": "Very high",
+    "veryLow": "Very low",
     "low": "Low",
     "medium": "Medium",
     "high": "High",

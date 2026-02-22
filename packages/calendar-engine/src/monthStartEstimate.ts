@@ -30,6 +30,19 @@ export type MonthStartEstimate = {
   };
 };
 
+export type MoonVisibilityLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high' | 'unknown';
+export type MonthStartSignalLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high' | 'unknown';
+
+export type DailyMonthStartSignal = {
+  gregorian: GregorianDate;
+  basedOnEve: GregorianDate;
+  moonVisibility: MoonVisibilityLevel;
+  monthStartSignal: MonthStartSignalLevel;
+  monthStartPercent: number;
+  rawEstimate: MonthStartEstimate;
+  normalizedByPreviousDay: boolean;
+};
+
 export type CrescentVisibilityCriteria = {
   /** Moonset minus sunset, in minutes. 0 means “sets at sunset”. */
   minLagMinutes?: number;
@@ -226,4 +239,101 @@ export function estimateMonthStartLikelihoodAtSunset(date: GregorianDate, locati
       visibilityPercent
     }
   };
+}
+
+function clampPercent(n: number): number {
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function addDaysUtc(date: GregorianDate, deltaDays: number): GregorianDate {
+  const dt = new Date(Date.UTC(date.year, date.month - 1, date.day, 0, 0, 0));
+  dt.setUTCDate(dt.getUTCDate() + deltaDays);
+  return { year: dt.getUTCFullYear(), month: dt.getUTCMonth() + 1, day: dt.getUTCDate() };
+}
+
+function utcDayKey(date: GregorianDate): number {
+  return Date.UTC(date.year, date.month - 1, date.day, 0, 0, 0);
+}
+
+function classifyFromPercent(percent: number): Exclude<MonthStartSignalLevel, 'unknown'> {
+  if (percent <= 0) return 'noChance';
+  if (percent <= 10) return 'veryLow';
+  if (percent <= 35) return 'low';
+  if (percent <= 65) return 'medium';
+  return 'high';
+}
+
+export function getMoonVisibilityLevel(est: MonthStartEstimate | undefined): MoonVisibilityLevel {
+  if (!est) return 'unknown';
+  const lag = est.metrics.lagMinutes;
+  const moonAltitudeDeg = est.metrics.moonAltitudeDeg;
+  const percent = clampPercent(est.metrics.visibilityPercent ?? 0);
+
+  if ((typeof lag === 'number' && lag <= 0) || (typeof moonAltitudeDeg === 'number' && moonAltitudeDeg <= 0)) {
+    return 'noChance';
+  }
+  return classifyFromPercent(percent);
+}
+
+export function getMonthStartSignalLevel(est: MonthStartEstimate | undefined): MonthStartSignalLevel {
+  if (!est) return 'unknown';
+  const lag = est.metrics.lagMinutes;
+  if (typeof lag === 'number' && lag <= 0) return 'noChance';
+  const percent = clampPercent(est.metrics.visibilityPercent ?? 0);
+  return classifyFromPercent(percent);
+}
+
+export function applyExclusiveMonthStartRule(levels: MonthStartSignalLevel[]): MonthStartSignalLevel[] {
+  const normalized = [...levels];
+  for (let i = 1; i < normalized.length; i += 1) {
+    const prev = normalized[i - 1];
+    if (prev === 'medium' || prev === 'high') {
+      normalized[i] = 'noChance';
+    }
+  }
+  return normalized;
+}
+
+export function buildDailyMonthStartSignals(
+  startDate: GregorianDate,
+  endDate: GregorianDate,
+  location: ObserverLocation
+): DailyMonthStartSignal[] {
+  const startKey = utcDayKey(startDate);
+  const endKey = utcDayKey(endDate);
+  if (!Number.isFinite(startKey) || !Number.isFinite(endKey) || startKey > endKey) return [];
+
+  const rows: DailyMonthStartSignal[] = [];
+  let d = startDate;
+  while (utcDayKey(d) <= endKey) {
+    const eve = addDaysUtc(d, -1);
+    const rawEstimate = estimateMonthStartLikelihoodAtSunset(eve, location);
+    const monthStartSignal = getMonthStartSignalLevel(rawEstimate);
+    const moonVisibility = getMoonVisibilityLevel(rawEstimate);
+    const monthStartPercent = clampPercent(rawEstimate.metrics.visibilityPercent ?? 0);
+
+    rows.push({
+      gregorian: d,
+      basedOnEve: eve,
+      moonVisibility,
+      monthStartSignal,
+      monthStartPercent,
+      rawEstimate,
+      normalizedByPreviousDay: false
+    });
+
+    d = addDaysUtc(d, 1);
+  }
+
+  const normalizedLevels = applyExclusiveMonthStartRule(rows.map((r) => r.monthStartSignal));
+  for (let i = 0; i < rows.length; i += 1) {
+    if (rows[i].monthStartSignal !== normalizedLevels[i]) {
+      rows[i].monthStartSignal = normalizedLevels[i];
+      rows[i].monthStartPercent = 0;
+      rows[i].normalizedByPreviousDay = true;
+    }
+  }
+
+  return rows;
 }

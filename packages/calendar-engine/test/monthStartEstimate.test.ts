@@ -2,7 +2,12 @@ import { describe, expect, test } from 'vitest';
 
 import * as Astronomy from 'astronomy-engine';
 
-import { estimateMonthStartLikelihoodAtSunset } from '../src/monthStartEstimate.js';
+import {
+  applyExclusiveMonthStartRule,
+  estimateMonthStartLikelihoodAtSunset,
+  getMonthStartSignalLevel,
+  getMoonVisibilityLevel
+} from '../src/monthStartEstimate.js';
 
 function minutesBetween(a: Date, b: Date): number {
   return Math.abs(a.getTime() - b.getTime()) / 60000;
@@ -89,5 +94,24 @@ describe('month-start estimate (heuristic)', () => {
     // Lag should be roughly 3 minutes (moonset - sunset).
     expect(typeof est.metrics.lagMinutes).toBe('number');
     expect(Math.abs((est.metrics.lagMinutes ?? 0) - 3)).toBeLessThanOrEqual(10);
+  });
+
+  test('applies exclusive-day normalization: medium/high on X forces X+1 to noChance', () => {
+    expect(applyExclusiveMonthStartRule(['veryLow', 'medium', 'high'])).toEqual(['veryLow', 'medium', 'noChance']);
+    expect(applyExclusiveMonthStartRule(['low', 'high', 'medium', 'low'])).toEqual(['low', 'high', 'noChance', 'low']);
+    expect(applyExclusiveMonthStartRule(['noChance', 'low', 'medium'])).toEqual(['noChance', 'low', 'medium']);
+  });
+
+  test('classifies visibility and month-start signal with canonical scales', () => {
+    const est = estimateMonthStartLikelihoodAtSunset(
+      { year: 2026, month: 2, day: 18 },
+      { latitude: 21.3891, longitude: 39.8579 }
+    );
+
+    const visibility = getMoonVisibilityLevel(est);
+    const signal = getMonthStartSignalLevel(est);
+
+    expect(['noChance', 'veryLow', 'low', 'medium', 'high', 'unknown']).toContain(visibility);
+    expect(['noChance', 'veryLow', 'low', 'medium', 'high', 'unknown']).toContain(signal);
   });
 });

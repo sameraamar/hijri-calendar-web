@@ -1,5 +1,5 @@
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
-import { useCallback, useMemo, useState } from 'react';
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LeafletMouseEvent } from 'leaflet';
 
@@ -21,6 +21,18 @@ function MapClickHandler({ onPick }: { onPick: (lat: number, lng: number) => voi
       onPick(e.latlng.lat, e.latlng.lng);
     }
   });
+  return null;
+}
+
+function MapRecenter({ center }: { center: [number, number] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    // React-Leaflet's `MapContainer` center prop is only used on initial mount.
+    // Keep the current zoom level; just pan/animate to the new center.
+    map.setView(center, map.getZoom(), { animate: true });
+  }, [map, center]);
+
   return null;
 }
 
@@ -146,6 +158,7 @@ export default function LocationPicker() {
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+            <MapRecenter center={center} />
             <MapClickHandler onPick={pick} />
             <Marker position={center} />
           </MapContainer>

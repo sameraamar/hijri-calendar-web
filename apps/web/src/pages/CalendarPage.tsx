@@ -1,6 +1,7 @@
 import {
   buildEstimatedHijriCalendarRange,
   estimateMonthStartLikelihoodAtSunset,
+  getMonthStartSignalLevel,
   gregorianToHijriCivil,
   meetsCrescentVisibilityCriteriaAtSunset
 } from '@hijri/calendar-engine';
@@ -67,22 +68,13 @@ function clamp0to100(n: number): number {
   return Math.max(0, Math.min(100, Math.round(n)));
 }
 
-type VisibilityStatusKey = 'noChance' | 'veryHigh' | 'high' | 'medium' | 'low' | 'unknown';
+type VisibilityStatusKey = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high' | 'unknown';
 
 function visibilityStatusFromEstimate(
   est: ReturnType<typeof estimateMonthStartLikelihoodAtSunset> | undefined
 ): VisibilityStatusKey {
-  if (!est) return 'unknown';
-  const lag = est.metrics.lagMinutes;
-  const percent = est.metrics.visibilityPercent;
-
-  if (typeof lag === 'number' && lag <= 0) return 'noChance';
-  if (typeof lag === 'number' && typeof percent === 'number' && percent >= 90 && lag >= 30) return 'veryHigh';
-
-  // Fall back to the heuristic estimator label.
-  const l = est.likelihood;
-  if (l === 'high' || l === 'medium' || l === 'low' || l === 'unknown') return l;
-  return 'unknown';
+  const status = getMonthStartSignalLevel(est);
+  return status === 'unknown' ? 'unknown' : status;
 }
 
 function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: string } {
@@ -91,8 +83,8 @@ function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: st
   if (likelihood === 'noChance') {
     return { badgeClass: 'bg-slate-100 text-slate-800 ring-1 ring-slate-200', dotClass: 'bg-slate-500' };
   }
-  if (likelihood === 'veryHigh') {
-    return { badgeClass: 'bg-emerald-100 text-emerald-900 ring-1 ring-emerald-300', dotClass: 'bg-emerald-600' };
+  if (likelihood === 'veryLow') {
+    return { badgeClass: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100', dotClass: 'bg-rose-400' };
   }
   if (likelihood === 'high') {
     return { badgeClass: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200', dotClass: 'bg-emerald-500' };
@@ -380,7 +372,7 @@ export default function CalendarPage() {
       const sPrevIso = isoDate(sPrev.getUTCFullYear(), sPrev.getUTCMonth() + 1, sPrev.getUTCDate());
       const sSignal = visibilityStatusFromEstimate(estimateByIso.get(sPrevIso));
       const stopAfterMonthStart =
-        sSignal === 'veryHigh' && s.getUTCFullYear() === year && s.getUTCMonth() + 1 === month;
+        (sSignal === 'medium' || sSignal === 'high') && s.getUTCFullYear() === year && s.getUTCMonth() + 1 === month;
 
       // Search the days leading up to S (exclude S itself).
       const searchStart = new Date(s);
@@ -458,7 +450,7 @@ export default function CalendarPage() {
       const a = signalStatusForGregorianDay(d);
       const b = signalStatusForGregorianDay(d + 1);
       if (a === 'noChance' && b === 'noChance') indicatorDays.delete(d);
-      if (a === 'veryHigh' && b === 'veryHigh') indicatorDays.delete(d + 1);
+      if ((a === 'medium' || a === 'high') && b !== 'unknown') indicatorDays.delete(d + 1);
     }
 
     for (const d of days) {
@@ -750,15 +742,13 @@ export default function CalendarPage() {
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.hijriText}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
                       {(() => {
-                        const likelihood = row.estimate.likelihoodKey.replace('probability.', '');
-                        const lagMinutes = typeof row.estimate.lagMinutes === 'number' ? row.estimate.lagMinutes : null;
-                        const percent = typeof row.estimate.crescentScorePercent === 'number' ? row.estimate.crescentScorePercent : null;
-                        const statusKey: VisibilityStatusKey =
-                          lagMinutes !== null && lagMinutes <= 0
-                            ? 'noChance'
-                            : lagMinutes !== null && percent !== null && percent >= 90 && lagMinutes >= 30
-                              ? 'veryHigh'
-                              : (likelihood as VisibilityStatusKey);
+                        const statusKey: VisibilityStatusKey = getMonthStartSignalLevel({
+                          likelihood: row.estimate.likelihoodKey.replace('probability.', '') as 'low' | 'medium' | 'high' | 'unknown',
+                          metrics: {
+                            lagMinutes: row.estimate.lagMinutes,
+                            visibilityPercent: row.estimate.crescentScorePercent
+                          }
+                        });
                         const style = likelihoodStyle(statusKey);
                         const show = monthData.indicatorDays.has(row.day);
 
