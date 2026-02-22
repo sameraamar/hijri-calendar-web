@@ -8,6 +8,9 @@ A bilingual (English/Arabic) web app to:
 This site is free and open source:
 - https://github.com/sameraamar/hijri-calendar-web
 
+Direct contact / suggestions:
+- samer.aamar@gmail.com
+
 Disclaimer:
 - The estimate mode is astronomy-based guidance and not an official religious announcement.
 

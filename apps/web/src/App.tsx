@@ -123,6 +123,15 @@ export default function App() {
             </div>
           </div>
           <div className="mt-1 text-slate-500">{t('app.footer.disclaimer')}</div>
+          <div className="mt-1 text-slate-500">
+            {t('app.footer.contact')}{' '}
+            <a
+              href="mailto:samer.aamar@gmail.com"
+              className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+            >
+              samer.aamar@gmail.com
+            </a>
+          </div>
         </div>
       </footer>
     </div>
