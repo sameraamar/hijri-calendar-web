@@ -17,6 +17,11 @@
       "estimate": "Astronomical estimate (visibility-based)",
       "ummalqura": "Umm al-Qura",
       "comingSoon": "coming soon"
+    },
+    "footer": {
+      "openSource": "Free and open source:",
+      "repoLabel": "github.com/sameraamar/hijri-calendar-web",
+      "disclaimer": "Disclaimer: this website provides estimated astronomical guidance and is not an official religious announcement."
     }
   },
   "calendar": {
@@ -100,6 +105,18 @@
       "ch1": "Question 1 (observation): Is the crescent likely visible this evening?",
       "ch2": "Question 2 (calendar): How likely is the next Gregorian date to be Hijri day 1?",
       "ch3": "Uses a canonical scale: No chance / Very low / Low / Medium / High, with an exclusivity rule (if day X is Medium/High month-start signal, day X+1 is forced to No chance)",
+      "thresholdsTitle": "Tag thresholds used in code",
+      "threshold1": "No chance: lag <= 0 minutes (moon sets at/before sunset) OR moon altitude <= 0°.",
+      "threshold2": "Very low: score percent in (0..10].",
+      "threshold3": "Low: score percent in (10..35].",
+      "threshold4": "Medium: score percent in (35..65].",
+      "threshold5": "High: score percent > 65.",
+      "threshold6": "Exclusivity normalization: if day X month-start signal is Medium or High, day X+1 is forced to No chance (0%).",
+      "formulaTitle": "How score percent is calculated",
+      "formula1": "Each component is normalized linearly to [0..1]: altitude from 0°..10°, elongation from 6°..15°, age from 12h..24h, lag from 0..60 min.",
+      "formula2": "Visibility score = 0.35*altitude + 0.35*elongation + 0.20*age + 0.10*lag.",
+      "formula3": "Visibility percent = round(100 * visibility score).",
+      "formula4": "Near-new-moon constraints are applied before final labeling (e.g., far from conjunction -> low/zero signal).",
       "note": "Important: this is an estimate, not an official religious announcement. The app uses sunset/evening astronomy metrics (moonset lag, altitude, elongation, age, illumination, and score) to derive a normalized month-start signal."
     }
   },

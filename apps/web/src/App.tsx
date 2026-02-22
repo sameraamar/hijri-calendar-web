@@ -105,9 +105,24 @@ export default function App() {
       </main>
 
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-4 text-xs text-slate-600 md:flex-row md:items-center md:justify-between">
-          {t('app.method.label')}: {t(METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.civil')}
-          <div className="text-slate-500">{t('app.title')}</div>
+        <div className="mx-auto max-w-6xl px-4 py-4 text-xs text-slate-600">
+          <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+            <div>
+              {t('app.method.label')}: {t(METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.civil')}
+            </div>
+            <div className="text-slate-500">
+              {t('app.footer.openSource')}{' '}
+              <a
+                href="https://github.com/sameraamar/hijri-calendar-web"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+              >
+                {t('app.footer.repoLabel')}
+              </a>
+            </div>
+          </div>
+          <div className="mt-1 text-slate-500">{t('app.footer.disclaimer')}</div>
         </div>
       </footer>
     </div>

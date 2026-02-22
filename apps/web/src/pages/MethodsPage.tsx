@@ -95,6 +95,28 @@ export default function MethodsPage() {
               </ul>
             </div>
 
+            <div>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.thresholdsTitle')}</div>
+              <ul className="mt-2 list-disc space-y-1 ps-5">
+                <li>{t('methods.estimate.threshold1')}</li>
+                <li>{t('methods.estimate.threshold2')}</li>
+                <li>{t('methods.estimate.threshold3')}</li>
+                <li>{t('methods.estimate.threshold4')}</li>
+                <li>{t('methods.estimate.threshold5')}</li>
+                <li>{t('methods.estimate.threshold6')}</li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.formulaTitle')}</div>
+              <ul className="mt-2 list-disc space-y-1 ps-5">
+                <li>{t('methods.estimate.formula1')}</li>
+                <li>{t('methods.estimate.formula2')}</li>
+                <li>{t('methods.estimate.formula3')}</li>
+                <li>{t('methods.estimate.formula4')}</li>
+              </ul>
+            </div>
+
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
               {t('methods.estimate.note')}
             </div>
