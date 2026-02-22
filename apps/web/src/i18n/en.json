@@ -1,0 +1,126 @@
+{
+  "app": {
+    "title": "Hijri Calendar",
+    "nav": {
+      "calendar": "Calendar",
+      "convert": "Convert",
+      "holidays": "Holidays",
+      "methods": "Methods"
+    },
+    "language": {
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "method": {
+      "label": "Method",
+      "civil": "Tabular (Islamic Civil)",
+      "estimate": "Astronomical estimate (visibility-based)",
+      "ummalqura": "Umm al-Qura",
+      "comingSoon": "coming soon"
+    }
+  },
+  "calendar": {
+    "year": "Year",
+    "month": "Month",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "prevMonthShort": "Prev",
+    "nextMonthShort": "Next",
+    "tabCalendar": "Calendar",
+    "tabDetails": "Details"
+  },
+  "location": {
+    "title": "Location",
+    "useMyLocation": "Use my location",
+    "locationUsed": "Location used",
+    "timezone": "Timezone",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "pickOnMap": "Pick on map"
+  },
+  "convert": {
+    "title": "Convert",
+    "gregorianToHijri": "Gregorian → Hijri",
+    "hijriToGregorian": "Hijri → Gregorian",
+    "gregorianDate": "Gregorian date",
+    "hijriDate": "Hijri date",
+    "year": "Year",
+    "month": "Month",
+    "day": "Day"
+  },
+  "holidays": {
+    "title": "Holidays & events",
+    "civil": "Civil",
+    "estimated": "Estimated",
+    "moonStatus": "Moon status at sunset",
+    "eveningEstimate": "Evening estimate",
+    "eveOf": "eve of",
+    "moonAltitude": "Moon alt",
+    "moonElongation": "Elong",
+    "moonAge": "Age",
+    "moonIllumination": "Illum",
+    "monthStartRuleNote": "Estimate suggests the crescent may be visible this evening → next day could start a new Hijri month.",
+    "islamicNewYear": "Islamic New Year (1 Muharram)",
+    "ashura": "Ashura (10 Muharram)",
+    "ramadan1": "Ramadan begins (1 Ramadan)",
+    "eidAlFitr": "Eid al-Fitr (1 Shawwal)",
+    "dhulHijjah1": "Dhul Hijjah begins (1 Dhul Hijjah)",
+    "arafah": "Day of Arafah (9 Dhul Hijjah)",
+    "eidAlAdha": "Eid al-Adha (10 Dhul Hijjah)"
+  },
+  "methods": {
+    "title": "Calculation methods",
+    "characteristics": "Characteristics",
+    "pros": "Pros",
+    "cons": "Cons",
+    "civil": {
+      "title": "Tabular / Islamic Civil (default)",
+      "summary": "A deterministic (algorithmic) Hijri calendar based on fixed arithmetic rules, not on local moon sighting.",
+      "ch1": "30-year leap-year cycle (11 leap years)",
+      "ch2": "Months alternate 30/29 days; month 12 is 30 in leap years",
+      "ch3": "Conversion via Julian Day Number (JDN) rules",
+      "pro1": "Stable and predictable; no external data needed",
+      "pro2": "Works offline and is easy to test",
+      "con1": "May differ from official country calendars",
+      "con2": "Does not reflect actual crescent visibility"
+    },
+    "ummalqura": {
+      "title": "Umm al-Qura (Saudi official)",
+      "summary": "A published official calendar used in Saudi Arabia. It usually requires trusted rules/data to match published results.",
+      "pro1": "Matches many published Saudi calendars",
+      "con1": "Depends on a trusted dataset/library to be accurate",
+      "comingSoon": "This method is planned but not enabled yet."
+    },
+    "estimate": {
+      "title": "Astronomical visibility estimate (for probability)",
+      "summary": "An astronomy-based heuristic that estimates crescent-visibility conditions on the evening (around local sunset) at the selected location.",
+      "ch1": "Uses location and event times (sunset, moonset) + sky geometry",
+      "ch2": "Produces Low/Medium/High labels and a visibility percent",
+      "ch3": "Sensitive to location and observation criteria",
+      "note": "Important: this is an estimate, not an official determination. If you select this method, the app will show an estimated Hijri mapping derived from the evening criteria and your selected location."
+    }
+  },
+  "probability": {
+    "label": "Month start likelihood",
+    "estimate": "Estimate",
+    "eveningEstimate": "Evening estimate",
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "unknown": "Unknown",
+    "disclaimer": "Month-start likelihood is an estimate for the evening (around local sunset) at the selected location. If the crescent is seen on this evening, the next Gregorian date becomes Hijri day 1.",
+    "legendTitle": "What these labels mean",
+    "legendHint": "See legend below.",
+    "eveningEstimateHint": "Estimate for this evening; it affects the next day after sunset.",
+    "sunriseLocal": "Sunrise (local)",
+    "sunsetLocal": "Sunset (local)",
+    "moonriseLocal": "Moonrise (local)",
+    "moonsetLocal": "Moonset (local)",
+    "lagMinutes": "Lag (min)",
+    "visibilityPercent": "Visibility",
+    "crescentScore": "Crescent score",
+    "lowDesc": "Low: Conditions are poor for a visible crescent (e.g., Moon very low/setting too soon, very small separation from the Sun, very young Moon, or wrong phase).",
+    "mediumDesc": "Medium: Borderline/mixed conditions; visibility depends on observer conditions and criteria.",
+    "highDesc": "High: Conditions are stronger (Moon higher, more separated from the Sun, older, and/or stays up longer after sunset)."
+  }
+}

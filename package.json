@@ -1,0 +1,26 @@
+{
+  "name": "hijri_date_calculator",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run -w @hijri/web dev",
+    "build": "npm-run-all -s build:engine build:web",
+    "build:engine": "npm run -w @hijri/calendar-engine build",
+    "build:web": "npm run -w @hijri/web build",
+    "test": "npm-run-all -s test:engine test:web",
+    "test:engine": "npm run -w @hijri/calendar-engine test",
+    "test:web": "npm run -w @hijri/web test",
+    "lint": "echo \"No lint configured yet\""
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
