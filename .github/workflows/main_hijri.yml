@@ -29,6 +29,11 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
+      - name: Verify build output exists
+        run: |
+          test -f apps/web/dist/index.html
+          ls -la apps/web/dist
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -48,6 +53,21 @@ jobs:
         with:
           name: web-dist
           path: dist
+
+      - name: Resolve deploy package path
+        id: resolve-package
+        run: |
+          if [ -f dist/index.html ]; then
+            echo "package_path=dist" >> "$GITHUB_OUTPUT"
+          elif [ -f dist/apps/web/dist/index.html ]; then
+            echo "package_path=dist/apps/web/dist" >> "$GITHUB_OUTPUT"
+          else
+            echo "Unable to find index.html in downloaded artifact"
+            find dist -maxdepth 6 -type f | head -n 200
+            exit 1
+          fi
+
+          echo "Using package path: $(cat $GITHUB_OUTPUT | grep package_path | cut -d'=' -f2-)"
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -62,5 +82,12 @@ jobs:
         with:
           app-name: 'hijri'
           slot-name: 'Production'
-          package: ./dist
+          package: ${{ steps.resolve-package.outputs.package_path }}
+
+      - name: Configure startup command for static SPA
+        run: |
+          az webapp config set \
+            --resource-group hijri-calculator \
+            --name hijri \
+            --startup-file "pm2 serve /home/site/wwwroot --no-daemon --spa"
           
