@@ -1,14 +1,16 @@
 import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n, { isRtlLanguage, type SupportedLanguage } from './i18n/i18n';
-import CalendarPage from './pages/CalendarPage';
-import ConvertPage from './pages/ConvertPage';
-import HolidaysPage from './pages/HolidaysPage';
-import MethodsPage from './pages/MethodsPage';
 import { useMethod } from './method/MethodContext';
 import { METHODS } from './method/types';
 import type { CalculationMethodId } from './method/types';
+
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const ConvertPage = lazy(() => import('./pages/ConvertPage'));
+const HolidaysPage = lazy(() => import('./pages/HolidaysPage'));
+const MethodsPage = lazy(() => import('./pages/MethodsPage'));
 
 function isCalculationMethodId(value: string): value is CalculationMethodId {
   return value === 'civil' || value === 'estimate' || value === 'ummalqura';
@@ -95,13 +97,15 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-8">
-        <Routes>
-          <Route path="/" element={<Navigate to="/calendar" replace />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/convert" element={<ConvertPage />} />
-          <Route path="/holidays" element={<HolidaysPage />} />
-          <Route path="/methods" element={<MethodsPage />} />
-        </Routes>
+        <Suspense fallback={<div className="py-12 text-center text-sm text-slate-400">Loading…</div>}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/calendar" replace />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/convert" element={<ConvertPage />} />
+            <Route path="/holidays" element={<HolidaysPage />} />
+            <Route path="/methods" element={<MethodsPage />} />
+          </Routes>
+        </Suspense>
       </main>
 
       <footer className="border-t border-slate-200 bg-white">
