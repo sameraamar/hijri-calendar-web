@@ -178,8 +178,6 @@ export default function AboutPage() {
 
             <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
               <span>{t('methods.references')}:</span>
-              <a href="https://en.wikipedia.org/wiki/Lunar_crescent" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wikipedia: Lunar crescent</a>
-              <span>•</span>
               <a href="https://en.wikipedia.org/wiki/New_moon" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wikipedia: New moon</a>
               <span>•</span>
               <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop (1997)</a>
@@ -237,9 +235,6 @@ export default function AboutPage() {
               </li>
               <li>
                 <a href="https://en.wikipedia.org/wiki/Umm_al-Qura_calendar" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Umm al-Qura calendar</a>
-              </li>
-              <li>
-                <a href="https://en.wikipedia.org/wiki/Lunar_crescent" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lunar crescent</a>
               </li>
               <li>
                 <a href="https://en.wikipedia.org/wiki/New_moon" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">New moon</a>
