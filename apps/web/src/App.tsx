@@ -48,7 +48,7 @@ export default function App() {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  className={({ isActive }) =>
+                  className={({ isActive }: { isActive: boolean }) =>
                     `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                       isActive
                         ? 'bg-slate-900 text-white shadow-sm'
@@ -101,7 +101,7 @@ export default function App() {
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 `flex-shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-slate-900 text-white shadow-sm'
