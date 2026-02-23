@@ -100,7 +100,6 @@ function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: st
   return { badgeClass: 'bg-slate-50 text-slate-700 ring-1 ring-slate-200', dotClass: 'bg-slate-400', scoreClass: 'bg-slate-200/80 text-slate-700' };
 }
 
-type CalendarTab = 'calendar' | 'details';
 
 function MetricRow({ label, value }: { label: string; value: string }) {
   return (
@@ -117,7 +116,6 @@ export default function CalendarPage() {
   const currentMonth = new Date().getMonth() + 1;
   const [year, setYear] = useState<number>(currentYear);
   const [month, setMonth] = useState<number>(currentMonth);
-  const [tab, setTab] = useState<CalendarTab>('calendar');
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const { location } = useAppLocation();
   const { methodId } = useMethod();
@@ -516,24 +514,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          className={`btn-sm ${tab === 'calendar' ? 'bg-slate-100' : ''}`}
-          onClick={() => setTab('calendar')}
-        >
-          {t('calendar.tabCalendar')}
-        </button>
-        <button
-          type="button"
-          className={`btn-sm ${tab === 'details' ? 'bg-slate-100' : ''}`}
-          onClick={() => setTab('details')}
-        >
-          {t('calendar.tabDetails')}
-        </button>
-      </div>
-
-      {tab === 'calendar' ? (() => {
+      {(() => {
         // Compute Hijri month/year range from the first and last day of the Gregorian month.
         const hijriRangeLabel = (() => {
           const first = monthData.days[0];
@@ -591,28 +572,36 @@ export default function CalendarPage() {
                 <div
                   key={d.day}
                   className={
-                    `group relative ${bg} p-1.5 text-start transition-colors hover:bg-slate-50 sm:p-2.5 ` +
-                    `${d.isToday ? 'ring-1 ring-slate-300' : ''} ` +
-                    `${d.showIndicator ? 'cursor-pointer' : ''}`
+                    `group relative ${bg} p-1 text-start transition-colors sm:p-2.5 ` +
+                    `${d.isToday ? 'ring-2 ring-blue-400' : ''} ` +
+                    `${expandedDay === d.day ? 'bg-blue-50' : 'hover:bg-slate-50'} ` +
+                    'cursor-pointer'
                   }
-                  tabIndex={d.showIndicator ? 0 : -1}
+                  tabIndex={0}
                   onClick={() => {
-                    if (d.showIndicator) setExpandedDay(expandedDay === d.day ? null : d.day);
+                    setExpandedDay(expandedDay === d.day ? null : d.day);
                   }}
                   onKeyDown={(e) => {
-                    if (d.showIndicator && (e.key === 'Enter' || e.key === ' ')) {
+                    if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       setExpandedDay(expandedDay === d.day ? null : d.day);
                     }
                   }}
                 >
-                  <div className="flex min-h-10 flex-col gap-0.5 sm:min-h-16 sm:gap-1">
-                    <div className="flex items-baseline justify-between gap-1 sm:gap-2">
-                      <div className="text-sm font-semibold leading-none text-slate-900 sm:text-base">{d.day}</div>
-                      <div className="text-[9px] leading-none text-slate-700 sm:text-[11px]">
-                        <span className="sm:hidden">{d.hijriDay ?? '—'}</span>
-                        <span className="hidden sm:inline">{d.hijri}</span>
-                      </div>
+                  {/* ── Mobile cell: compact ── */}
+                  <div className="flex flex-col items-center gap-0.5 sm:hidden" style={{ minHeight: '2.25rem' }}>
+                    <div className="text-sm font-semibold leading-none text-slate-900">{d.day}</div>
+                    <div className="text-[8px] leading-none text-slate-500">{d.hijriDay ?? ''}</div>
+                    {d.showIndicator ? (
+                      <span className={`mt-auto h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                    ) : null}
+                  </div>
+
+                  {/* ── Desktop cell: full detail ── */}
+                  <div className="hidden sm:flex sm:min-h-16 sm:flex-col sm:gap-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <div className="text-base font-semibold leading-none text-slate-900">{d.day}</div>
+                      <div className="text-[11px] leading-none text-slate-700">{d.hijri}</div>
                     </div>
 
                     {d.showIndicator ? (
@@ -659,8 +648,8 @@ export default function CalendarPage() {
                     ) : null}
                   </div>
 
-                  {d.showIndicator && expandedDay === d.day ? (
-                    <div className="absolute left-0 right-0 top-full z-50 mt-1 sm:left-2 sm:right-auto sm:w-96 sm:max-w-[calc(100vw-2rem)]">
+                  {expandedDay === d.day ? (
+                    <div className="hidden sm:block absolute left-0 right-0 top-full z-50 mt-1 sm:left-2 sm:right-auto sm:w-96 sm:max-w-[calc(100vw-2rem)]">
                       <div className="max-h-[60vh] overflow-auto select-text rounded-md border border-slate-200 bg-white p-2.5 text-xs shadow-lg sm:max-h-[70vh] sm:p-3">
                         <div className="space-y-3">
                           <div className="text-[11px] leading-relaxed text-slate-600">{t('holidays.monthStartRuleNote')}</div>
@@ -764,95 +753,55 @@ export default function CalendarPage() {
             })}
           </div>
         </section>
-      ); })() : (
-        <section className="card">
-          <div className="card-header">
-            <div className="card-title">{t('probability.eveningEstimate')}</div>
-            <div className="text-xs text-slate-600">{t('probability.eveningEstimateHint')}</div>
-          </div>
+      ); })()}
 
-          <div className="overflow-x-auto">
-            <table className="min-w-[1200px] w-full border-separate border-spacing-0">
-              <thead>
-                <tr className="text-left text-xs font-semibold text-slate-700">
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.gregorianDate')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.hijriDate')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.label')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.crescentScore')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonIllumination')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonAltitude')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonElongation')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonAge')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.sunriseLocal')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.sunsetLocal')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.moonriseLocal')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.moonsetLocal')}</th>
-                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.lagMinutes')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthData.details.map((row) => (
-                  <tr key={row.gregorianIso} className="text-xs text-slate-800">
-                    <td className="border-b border-slate-100 px-3 py-2 font-medium text-slate-900 whitespace-nowrap">
-                      {row.gregorianIso}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.hijriText}</td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {(() => {
-                        const statusKey: VisibilityStatusKey = getMonthStartSignalLevel({
-                          likelihood: row.estimate.likelihoodKey.replace('probability.', '') as 'low' | 'medium' | 'high' | 'unknown',
-                          metrics: {
-                            lagMinutes: row.estimate.lagMinutes,
-                            visibilityPercent: row.estimate.crescentScorePercent
-                          }
-                        });
-                        const style = likelihoodStyle(statusKey);
-                        const show = monthData.indicatorDays.has(row.day);
+      {/* ── Mobile: detail panel below grid for tapped day ── */}
+      {expandedDay !== null ? (() => {
+        const d = monthData.days.find(dd => dd.day === expandedDay);
+        if (!d) return null;
+        const prev = new Date(Date.UTC(year, month - 1, d.day, 0, 0, 0));
+        prev.setUTCDate(prev.getUTCDate() - 1);
+        const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
+        const eveEst = monthData.estimateByIso.get(prevIso);
+        const thisIso = isoDate(year, month, d.day);
+        const thisEst = monthData.estimateByIso.get(thisIso);
+        const eveStatusKey = visibilityStatusFromEstimate(eveEst);
+        const eveStyle = likelihoodStyle(eveStatusKey);
+        const evePercent = clamp0to100(eveEst?.metrics.visibilityPercent ?? 0);
 
-                        if (!show) {
-                          return (
-                            <span className="text-slate-600">
-                              {t(`probability.${statusKey}`)}
-                            </span>
-                          );
-                        }
-                        return (
-                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
-                            <span className={`h-1.5 w-1.5 rounded-full ${style.dotClass}`} />
-                            {t(`probability.${statusKey}`)}
-                          </span>
-                        );
-                      })()}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {typeof row.estimate.crescentScorePercent === 'number' ? `${row.estimate.crescentScorePercent}%` : '—'}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {typeof row.estimate.moonIlluminationPercent === 'number' ? `${row.estimate.moonIlluminationPercent}%` : '—'}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {typeof row.estimate.moonAltitudeDeg === 'number' ? `${row.estimate.moonAltitudeDeg.toFixed(1)}°` : '—'}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {typeof row.estimate.moonElongationDeg === 'number' ? `${row.estimate.moonElongationDeg.toFixed(1)}°` : '—'}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {typeof row.estimate.moonAgeHours === 'number' ? `${row.estimate.moonAgeHours.toFixed(1)}h` : '—'}
-                    </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{fmtLocalTime(row.estimate.sunriseUtcIso) ?? '—'}</td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{fmtLocalTime(row.estimate.sunsetUtcIso) ?? '—'}</td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{fmtLocalTime(row.estimate.moonriseUtcIso) ?? '—'}</td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{fmtLocalTime(row.estimate.moonsetUtcIso) ?? '—'}</td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
-                      {typeof row.estimate.lagMinutes === 'number' ? Math.round(row.estimate.lagMinutes) : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        return (
+          <div className="sm:hidden card p-3 text-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-semibold text-slate-900">
+                {d.day} — <span className="text-slate-600 font-normal">{d.hijri}</span>
+              </div>
+              <button type="button" className="text-slate-400 hover:text-slate-600" onClick={() => setExpandedDay(null)} aria-label="Close">✕</button>
+            </div>
+
+            <div className="mb-2">
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${eveStyle.badgeClass}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                {t(`probability.${eveStatusKey}`)} {evePercent}%
+              </span>
+            </div>
+
+            {thisEst ? (
+              <div className="text-xs space-y-0.5">
+                <MetricRow label={t('probability.crescentScore')} value={typeof thisEst.metrics.visibilityPercent === 'number' ? `${clamp0to100(thisEst.metrics.visibilityPercent)}%` : '—'} />
+                <MetricRow label={t('probability.lagMinutes')} value={typeof thisEst.metrics.lagMinutes === 'number' ? String(Math.round(thisEst.metrics.lagMinutes)) : '—'} />
+                <MetricRow label={t('holidays.moonIllumination')} value={typeof thisEst.metrics.moonIlluminationFraction === 'number' ? `${Math.round(thisEst.metrics.moonIlluminationFraction * 100)}%` : '—'} />
+                <MetricRow label={t('holidays.moonAltitude')} value={typeof thisEst.metrics.moonAltitudeDeg === 'number' ? `${thisEst.metrics.moonAltitudeDeg.toFixed(1)}°` : '—'} />
+                <MetricRow label={t('holidays.moonElongation')} value={typeof thisEst.metrics.moonElongationDeg === 'number' ? `${thisEst.metrics.moonElongationDeg.toFixed(1)}°` : '—'} />
+                <MetricRow label={t('holidays.moonAge')} value={typeof thisEst.metrics.moonAgeHours === 'number' ? `${thisEst.metrics.moonAgeHours.toFixed(1)}h` : '—'} />
+                <div className="border-t border-slate-100 pt-1 mt-1">
+                  <MetricRow label={t('probability.sunsetLocal')} value={fmtLocalTime(thisEst.metrics.sunsetUtcIso) ?? '—'} />
+                  <MetricRow label={t('probability.moonsetLocal')} value={fmtLocalTime(thisEst.metrics.moonsetUtcIso) ?? '—'} />
+                </div>
+              </div>
+            ) : <div className="text-xs text-slate-500">—</div>}
           </div>
-        </section>
-      )}
+        );
+      })() : null}
 
       <LocationPicker />
 

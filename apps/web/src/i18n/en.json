@@ -4,6 +4,7 @@
     "nav": {
       "calendar": "Calendar",
       "convert": "Convert",
+      "details": "Details",
       "holidays": "Holidays",
       "methods": "Methods"
     },

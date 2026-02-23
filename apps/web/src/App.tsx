@@ -9,6 +9,7 @@ import type { CalculationMethodId } from './method/types';
 
 const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const ConvertPage = lazy(() => import('./pages/ConvertPage'));
+const DetailsPage = lazy(() => import('./pages/DetailsPage'));
 const HolidaysPage = lazy(() => import('./pages/HolidaysPage'));
 const MethodsPage = lazy(() => import('./pages/MethodsPage'));
 
@@ -42,6 +43,9 @@ export default function App() {
               </Link>
               <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/convert">
                 {t('app.nav.convert')}
+              </Link>
+              <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/details">
+                {t('app.nav.details')}
               </Link>
               <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/holidays">
                 {t('app.nav.holidays')}
@@ -87,6 +91,9 @@ export default function App() {
           <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/convert">
             {t('app.nav.convert')}
           </Link>
+          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/details">
+            {t('app.nav.details')}
+          </Link>
           <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/holidays">
             {t('app.nav.holidays')}
           </Link>
@@ -102,6 +109,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/calendar" replace />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/convert" element={<ConvertPage />} />
+            <Route path="/details" element={<DetailsPage />} />
             <Route path="/holidays" element={<HolidaysPage />} />
             <Route path="/methods" element={<MethodsPage />} />
           </Routes>
