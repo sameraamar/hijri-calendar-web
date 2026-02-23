@@ -6,7 +6,8 @@
       "convert": "Convert",
       "details": "Details",
       "holidays": "Holidays",
-      "methods": "About"
+      "methods": "Methods",
+      "about": "About"
     },
     "language": {
       "en": "English",
@@ -17,6 +18,7 @@
       "civil": "Tabular (Islamic Civil)",
       "estimate": "Astronomical estimate (visibility-based)",
       "yallop": "Yallop q-test (1997)",
+      "odeh": "Odeh criterion (2004)",
       "ummalqura": "Umm al-Qura",
       "comingSoon": "coming soon"
     },
@@ -38,7 +40,8 @@
     "nextMonthShort": "Next",
     "tabCalendar": "Calendar",
     "tabDetails": "Details",
-    "today": "Today"
+    "today": "Today",
+    "dayOfWeek": "Day"
   },
   "hijriMonths": {
     "1": "Muharram",
@@ -163,6 +166,39 @@
       "zoneE": "Zone E (−0.293 < q ≤ −0.232): not visible even with a telescope.",
       "zoneF": "Zone F (q ≤ −0.293): below Danjon limit — not visible.",
       "note": "Optical-aid sighting (zones C–D) is accepted by many Islamic jurisprudential schools, so those zones are mapped to Fair. Zones A–B (naked-eye) map to High, while E–F map to Faint/None."
+    },
+    "odeh": {
+      "title": "Odeh criterion (2004)",
+      "summary": "A refined single-parameter crescent visibility criterion developed by Mohammad Sh. Odeh, calibrated against 737 observations. It computes a V-value from the arc of vision (ARCV) and topocentric crescent width (W'), classifying visibility into four zones (A–D).",
+      "ch1": "Computes best observation time Tb = Ts + (4/9) × Lag (same as Yallop).",
+      "ch2": "Uses a cubic polynomial: V = ARCV − (−0.1018·W'³ + 0.7319·W'² − 6.3226·W' + 7.1651). Note: V is NOT divided by 10.",
+      "ch3": "Classifies the crescent into 4 zones (A–D) based on V-value thresholds, with a Danjon limit of 6.4°.",
+      "zonesTitle": "Zone → label mapping",
+      "zoneA": "Zone A (V ≥ 5.65): crescent visible by naked eye.",
+      "zoneB": "Zone B (2 ≤ V < 5.65): visible by optical aid; may be seen by naked eye.",
+      "zoneC": "Zone C (−0.96 ≤ V < 2): crescent visible by optical aid only.",
+      "zoneD": "Zone D (V < −0.96): not visible, even with optical aid.",
+      "note": "Optical-aid sighting (zone C) is accepted by many Islamic jurisprudential schools, so it is mapped to Fair. Zones A–B (naked-eye possible) map to High, while D maps to Low/None."
+    },
+    "toc": "On this page",
+    "implementedSection": "Implemented Methods",
+    "otherSection": "Other Notable Methods (not implemented)",
+    "notImplemented": "Not implemented",
+    "schaefer": {
+      "title": "Schaefer criterion (1988 / 1996)",
+      "summary": "A physically-motivated model developed by Bradley E. Schaefer that accounts for atmospheric extinction, sky brightness, and the physiological threshold of the human eye. Rather than a single polynomial, Schaefer builds a forward model of contrast between the lunar crescent and the twilight sky, then compares it against empirical visibility thresholds."
+    },
+    "sultan": {
+      "title": "SAAO / Sultan criterion (2006)",
+      "summary": "An empirical criterion developed by Abdul Haq Sultan at the South African Astronomical Observatory using a dataset of 2,401 observations. It defines a visibility curve in the (DAZ, ARCV) plane, where DAZ is the relative azimuth difference between the sun and moon at sunset."
+    },
+    "danjon": {
+      "title": "Danjon limit",
+      "summary": "An observational lower bound on the geocentric elongation below which the lunar crescent has never been reliably observed. André Danjon (1936) estimated this limit at about 7°; later Odeh (2004) refined it to 6.4° and Schaefer (1991) suggested it may vary with atmospheric conditions. Methods like Yallop and Odeh incorporate a Danjon cut-off; if elongation is below this limit, the crescent is automatically classified as not visible."
+    },
+    "babylonian": {
+      "title": "Babylonian / Lag-based rule",
+      "summary": "One of the oldest known empirical rules, dating back to Babylonian astronomy: the crescent is declared visible when the moonset lag (time between sunset and moonset) exceeds a fixed threshold, typically about 48 minutes. This simple rule captures the basic idea that the moon must be above the horizon long enough after sunset, but it ignores factors such as elongation, atmospheric extinction, and location."
     }
   },
   "probability": {
@@ -196,6 +232,12 @@
     "yallopArcv": "ARCV (arc of vision)",
     "yallopArcl": "ARCL (elongation)",
     "yallopWidth": "W' (crescent width)",
+    "odehV": "Odeh V-value",
+    "odehZone": "Odeh zone",
+    "odehBestTime": "Best obs. time (local)",
+    "odehArcv": "ARCV (arc of vision)",
+    "odehArcl": "ARCL (elongation)",
+    "odehWidth": "W' (crescent width)",
     "noChanceDesc": "Moon sets at or before sunset, or is at/below the horizon at sunset; practical visibility is not possible.",
     "veryLowDesc": "Extremely weak conditions; crescent is unlikely visible and confidence for month start is minimal.",
     "lowDesc": "Poor conditions for a visible crescent (e.g., Moon very low, setting too soon, or very young).",
@@ -203,6 +245,7 @@
     "highDesc": "Strong conditions (Moon higher, well separated from the Sun, older, stays up longer after sunset)."
   },
   "about": {
+    "title": "About",
     "privacyTitle": "Privacy & Your Data",
     "privacyBody": "Your privacy matters. This application is designed to work entirely in your browser:",
     "privacyNoServer": "No data is ever sent to a remote server — all date calculations and astronomical computations happen locally on your device.",

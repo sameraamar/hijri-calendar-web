@@ -31,7 +31,7 @@ export default function ConvertPage() {
     const [y, m, d] = gregIso.split('-').map((x) => Number(x));
     if (!y || !m || !d) return null;
     if (methodId === 'civil') return gregorianToHijriCivil({ year: y, month: m, day: d });
-    if (methodId === 'estimate' || methodId === 'yallop') {
+    if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
       const center = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
       const start = new Date(center);
       start.setUTCDate(start.getUTCDate() - 60);
@@ -42,7 +42,7 @@ export default function ConvertPage() {
         { year: start.getUTCFullYear(), month: start.getUTCMonth() + 1, day: start.getUTCDate() },
         { year: end.getUTCFullYear(), month: end.getUTCMonth() + 1, day: end.getUTCDate() },
         { latitude: location.latitude, longitude: location.longitude },
-        { monthStartRule: methodId === 'yallop' ? 'yallop' : 'geometric' }
+        { monthStartRule: methodId === 'yallop' ? 'yallop' : methodId === 'odeh' ? 'odeh' : 'geometric' }
       );
 
       const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -60,7 +60,7 @@ export default function ConvertPage() {
   const gregorianFromHijri = useMemo(() => {
     try {
       if (methodId === 'civil') return hijriCivilToGregorian(hijri);
-      if (methodId === 'estimate' || methodId === 'yallop') {
+      if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
         const target = hijriCivilToGregorian(hijri);
         const center = new Date(Date.UTC(target.year, target.month - 1, target.day, 0, 0, 0));
         const start = new Date(center);
@@ -72,7 +72,7 @@ export default function ConvertPage() {
           { year: start.getUTCFullYear(), month: start.getUTCMonth() + 1, day: start.getUTCDate() },
           { year: end.getUTCFullYear(), month: end.getUTCMonth() + 1, day: end.getUTCDate() },
           { latitude: location.latitude, longitude: location.longitude },
-          { monthStartRule: methodId === 'yallop' ? 'yallop' : 'geometric' }
+          { monthStartRule: methodId === 'yallop' ? 'yallop' : methodId === 'odeh' ? 'odeh' : 'geometric' }
         );
 
         const match = findEstimatedGregorianForHijriDate(calendar, hijri, target);

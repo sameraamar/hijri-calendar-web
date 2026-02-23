@@ -5,7 +5,9 @@ import {
   gregorianToHijriCivil,
   meetsCrescentVisibilityCriteriaAtSunset,
   yallopMonthStartEstimate,
-  meetsYallopCriteriaAtSunset
+  meetsYallopCriteriaAtSunset,
+  odehMonthStartEstimate,
+  meetsOdehCriteriaAtSunset
 } from '@hijri/calendar-engine';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -204,7 +206,7 @@ export default function CalendarPage() {
     // Build estimate-mode Hijri mapping with some "warm-up" days before the month,
     // otherwise starting mid-stream can seed the estimated calendar incorrectly.
     const estimatedByIso = new Map<string, { year: number; month: number; day: number }>();
-    if (methodId === 'estimate' || methodId === 'yallop') {
+    if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
       const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
       startDate.setUTCDate(startDate.getUTCDate() - 90);
       const endDate = new Date(Date.UTC(year, month - 1, dim, 0, 0, 0));
@@ -219,7 +221,9 @@ export default function CalendarPage() {
         { latitude: location.latitude, longitude: location.longitude },
         methodId === 'yallop'
           ? { monthStartRule: 'yallop' }
-          : { monthStartRule: 'geometric' }
+          : methodId === 'odeh'
+            ? { monthStartRule: 'odeh' }
+            : { monthStartRule: 'geometric' }
       );
 
       for (const item of calendar) {
@@ -229,7 +233,7 @@ export default function CalendarPage() {
 
     // Precompute evening estimates for all days in the month (+ the day before),
     // so we can show a per-day details table and a subtle month-start "heat".
-    const estimateFn = methodId === 'yallop' ? yallopMonthStartEstimate : estimateMonthStartLikelihoodAtSunset;
+    const estimateFn = methodId === 'yallop' ? yallopMonthStartEstimate : methodId === 'odeh' ? odehMonthStartEstimate : estimateMonthStartLikelihoodAtSunset;
     const estimateByIso = new Map<string, ReturnType<typeof estimateMonthStartLikelihoodAtSunset>>();
     const estimateStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     // We look back far enough to support dynamic month-boundary windows.
@@ -254,7 +258,7 @@ export default function CalendarPage() {
     const getHijriForDay = (d: number) => {
       const iso = isoDate(year, month, d);
       if (methodId === 'civil') return gregorianToHijriCivil({ year, month, day: d });
-      if (methodId === 'estimate' || methodId === 'yallop') return estimatedByIso.get(iso) ?? null;
+      if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') return estimatedByIso.get(iso) ?? null;
       return null;
     };
 
@@ -269,7 +273,9 @@ export default function CalendarPage() {
       if (!est) return 0;
       const meetsCriteria = methodId === 'yallop'
         ? meetsYallopCriteriaAtSunset(est)
-        : meetsCrescentVisibilityCriteriaAtSunset(est);
+        : methodId === 'odeh'
+          ? meetsOdehCriteriaAtSunset(est)
+          : meetsCrescentVisibilityCriteriaAtSunset(est);
       if (!meetsCriteria) return 0;
       return clamp0to100(est.metrics.visibilityPercent ?? 0);
     };
@@ -355,7 +361,7 @@ export default function CalendarPage() {
               month: nextDate.getMonth() + 1,
               day: nextDate.getDate()
             })
-          : (methodId === 'estimate' || methodId === 'yallop')
+          : (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh')
             ? (estimatedByIso.get(isoDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate())) ?? null)
             : null;
 
@@ -695,6 +701,15 @@ export default function CalendarPage() {
                                     {thisEst.metrics.yallopBestTimeUtcIso ? <MetricRow label={t('probability.yallopBestTime')} value={fmtLocalTime(thisEst.metrics.yallopBestTimeUtcIso) ?? '—'} /> : null}
                                     <div className="border-t border-slate-100 pt-1 mt-1" />
                                   </>
+                                ) : methodId === 'odeh' && thisEst.metrics.odehV != null ? (
+                                  <>
+                                    <MetricRow label={t('probability.odehV')} value={thisEst.metrics.odehV.toFixed(3)} />
+                                    <MetricRow label={t('probability.odehZone')} value={thisEst.metrics.odehZone ? `${thisEst.metrics.odehZone} — ${thisEst.metrics.odehZoneDescription ?? ''}` : '—'} />
+                                    {typeof thisEst.metrics.odehArcvDeg === 'number' ? <MetricRow label={t('probability.odehArcv')} value={`${thisEst.metrics.odehArcvDeg.toFixed(2)}°`} /> : null}
+                                    {typeof thisEst.metrics.odehWidthArcmin === 'number' ? <MetricRow label={t('probability.odehWidth')} value={`${thisEst.metrics.odehWidthArcmin.toFixed(2)}'`} /> : null}
+                                    {thisEst.metrics.odehBestTimeUtcIso ? <MetricRow label={t('probability.odehBestTime')} value={fmtLocalTime(thisEst.metrics.odehBestTimeUtcIso) ?? '—'} /> : null}
+                                    <div className="border-t border-slate-100 pt-1 mt-1" />
+                                  </>
                                 ) : (
                                   <>
                                     <MetricRow
@@ -768,6 +783,11 @@ export default function CalendarPage() {
                                     <MetricRow label={t('probability.yallopQ')} value={eveEst.metrics.yallopQ.toFixed(3)} />
                                     <MetricRow label={t('probability.yallopZone')} value={eveEst.metrics.yallopZone ? `${eveEst.metrics.yallopZone} — ${eveEst.metrics.yallopZoneDescription ?? ''}` : '—'} />
                                   </>
+                                ) : methodId === 'odeh' && eveEst.metrics.odehV != null ? (
+                                  <>
+                                    <MetricRow label={t('probability.odehV')} value={eveEst.metrics.odehV.toFixed(3)} />
+                                    <MetricRow label={t('probability.odehZone')} value={eveEst.metrics.odehZone ? `${eveEst.metrics.odehZone} — ${eveEst.metrics.odehZoneDescription ?? ''}` : '—'} />
+                                  </>
                                 ) : (
                                   <MetricRow label={t('probability.crescentScore')} value={`${evePercent}%`} />
                                 )}
@@ -836,6 +856,14 @@ export default function CalendarPage() {
                     {typeof thisEst.metrics.yallopWidthArcmin === 'number' ? <MetricRow label={t('probability.yallopWidth')} value={`${thisEst.metrics.yallopWidthArcmin.toFixed(2)}'`} /> : null}
                     {thisEst.metrics.yallopBestTimeUtcIso ? <MetricRow label={t('probability.yallopBestTime')} value={fmtLocalTime(thisEst.metrics.yallopBestTimeUtcIso) ?? '—'} /> : null}
                   </>
+                ) : methodId === 'odeh' && thisEst.metrics.odehV != null ? (
+                  <>
+                    <MetricRow label={t('probability.odehV')} value={thisEst.metrics.odehV.toFixed(3)} />
+                    <MetricRow label={t('probability.odehZone')} value={thisEst.metrics.odehZone ? `${thisEst.metrics.odehZone} — ${thisEst.metrics.odehZoneDescription ?? ''}` : '—'} />
+                    {typeof thisEst.metrics.odehArcvDeg === 'number' ? <MetricRow label={t('probability.odehArcv')} value={`${thisEst.metrics.odehArcvDeg.toFixed(2)}°`} /> : null}
+                    {typeof thisEst.metrics.odehWidthArcmin === 'number' ? <MetricRow label={t('probability.odehWidth')} value={`${thisEst.metrics.odehWidthArcmin.toFixed(2)}'`} /> : null}
+                    {thisEst.metrics.odehBestTimeUtcIso ? <MetricRow label={t('probability.odehBestTime')} value={fmtLocalTime(thisEst.metrics.odehBestTimeUtcIso) ?? '—'} /> : null}
+                  </>
                 ) : (
                   <>
                     <MetricRow label={t('probability.crescentScore')} value={typeof thisEst.metrics.visibilityPercent === 'number' ? `${clamp0to100(thisEst.metrics.visibilityPercent)}%` : '—'} />
@@ -863,7 +891,7 @@ export default function CalendarPage() {
         {t('app.method.label')}: {t(`app.method.${methodId}`)}
       </div>
 
-      {methodId === 'civil' || methodId === 'estimate' || methodId === 'yallop' ? (
+      {methodId === 'civil' || methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh' ? (
         <div className="space-y-2 text-xs text-slate-600">
           <div>{t('probability.disclaimer')}</div>
 

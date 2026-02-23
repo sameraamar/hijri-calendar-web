@@ -35,6 +35,14 @@ export type MonthStartEstimate = {
     yallopArclDeg?: number; // ARCL
     yallopArcvDeg?: number; // ARCV
     yallopWidthArcmin?: number; // W'
+    // Odeh-specific fields (only present when method is Odeh)
+    odehV?: number;
+    odehZone?: string; // 'A'..'D'
+    odehZoneDescription?: string;
+    odehBestTimeUtcIso?: string;
+    odehArclDeg?: number; // ARCL
+    odehArcvDeg?: number; // ARCV
+    odehWidthArcmin?: number; // W'
   };
 };
 

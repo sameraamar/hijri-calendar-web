@@ -2,10 +2,15 @@ import {
   estimateMonthStartLikelihoodAtSunset,
   getCivilHolidaysForGregorianYearWithEstimate,
   getMonthStartSignalLevel,
-  meetsCrescentVisibilityCriteriaAtSunset
+  meetsCrescentVisibilityCriteriaAtSunset,
+  yallopMonthStartEstimate,
+  meetsYallopCriteriaAtSunset,
+  odehMonthStartEstimate,
+  meetsOdehCriteriaAtSunset
 } from '@hijri/calendar-engine';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/i18n';
 import LocationPicker from '../components/LocationPicker';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
@@ -16,6 +21,10 @@ function pad2(n: number): string {
 
 function fmtGregorianIso(d: { year: number; month: number; day: number }): string {
   return `${d.year}-${pad2(d.month)}-${pad2(d.day)}`;
+}
+
+function weekday(d: { year: number; month: number; day: number }): string {
+  return new Date(d.year, d.month - 1, d.day).toLocaleDateString(i18n.language, { weekday: 'short' });
 }
 
 function addDaysUtc(d: { year: number; month: number; day: number }, deltaDays: number): { year: number; month: number; day: number } {
@@ -69,7 +78,7 @@ export default function HolidaysPage() {
   const [year, setYear] = useState<number>(currentYear);
 
   const holidays = useMemo(() => {
-    if (methodId === 'civil' || methodId === 'estimate' || methodId === 'yallop') {
+    if (methodId === 'civil' || methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
       return getCivilHolidaysForGregorianYearWithEstimate(year, {
         latitude: location.latitude,
         longitude: location.longitude
@@ -105,10 +114,18 @@ export default function HolidaysPage() {
       monthStartDays.push(addDaysUtc(monthStartDays[monthStartDays.length - 1], 1));
     }
 
+    const estimateFn = methodId === 'yallop' ? yallopMonthStartEstimate
+      : methodId === 'odeh' ? odehMonthStartEstimate
+      : estimateMonthStartLikelihoodAtSunset;
+
+    const meetsCriteriaFn = methodId === 'yallop' ? (est: ReturnType<typeof estimateMonthStartLikelihoodAtSunset>) => meetsYallopCriteriaAtSunset(est)
+      : methodId === 'odeh' ? (est: ReturnType<typeof estimateMonthStartLikelihoodAtSunset>) => meetsOdehCriteriaAtSunset(est)
+      : meetsCrescentVisibilityCriteriaAtSunset;
+
     let candidates = monthStartDays
       .map((monthStart) => {
         const eve = addDaysUtc(monthStart, -1);
-        const est = estimateMonthStartLikelihoodAtSunset(
+        const est = estimateFn(
           { year: eve.year, month: eve.month, day: eve.day },
           { latitude: location.latitude, longitude: location.longitude }
         );
@@ -123,6 +140,14 @@ export default function HolidaysPage() {
             ? Math.round(est.metrics.moonIlluminationFraction * 100)
             : null;
 
+        // Method-specific score data
+        const yallopQ = typeof est.metrics.yallopQ === 'number' ? est.metrics.yallopQ : null;
+        const yallopZone = est.metrics.yallopZone ?? null;
+        const yallopZoneDesc = est.metrics.yallopZoneDescription ?? null;
+        const odehV = typeof est.metrics.odehV === 'number' ? est.metrics.odehV : null;
+        const odehZone = est.metrics.odehZone ?? null;
+        const odehZoneDesc = est.metrics.odehZoneDescription ?? null;
+
         const event = addDaysUtc(monthStart, offsetDays);
 
         return {
@@ -136,7 +161,9 @@ export default function HolidaysPage() {
           percent,
           lagMinutes,
           illumPercent,
-          showMonthStartRuleNote: meetsCrescentVisibilityCriteriaAtSunset(est)
+          yallopQ, yallopZone, yallopZoneDesc,
+          odehV, odehZone, odehZoneDesc,
+          showMonthStartRuleNote: meetsCriteriaFn(est)
         };
       })
       .filter((x): x is NonNullable<typeof x> => Boolean(x));
@@ -165,16 +192,25 @@ export default function HolidaysPage() {
           {candidates.map((c) => (
             <div key={c.eventIso} className="flex flex-wrap items-center gap-2">
               <span className="text-[13px] font-semibold text-slate-900">{isMonthStartEvent ? c.monthStartIso : c.eventIso}</span>
+              <span className="text-[11px] text-slate-500">{weekday(isMonthStartEvent ? c.monthStart : c.event)}</span>
 
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${c.style.badgeClass}`}
-                title={`${t('probability.monthStartSignalFor')}: ${c.monthStartIso} (${t('holidays.eveOf')} ${c.eveIso}) — ${t(`probability.${c.statusKey}`)}${typeof c.percent === 'number' ? ` (${t('probability.crescentScore')}: ${c.percent}%)` : ''}`}
+                title={`${t('probability.monthStartSignalFor')}: ${c.monthStartIso} (${t('holidays.eveOf')} ${c.eveIso}) — ${t(`probability.${c.statusKey}`)}${methodId === 'yallop' && c.yallopQ !== null ? ` (q=${c.yallopQ.toFixed(3)}, ${c.yallopZone})` : methodId === 'odeh' && c.odehV !== null ? ` (V=${c.odehV.toFixed(3)}, ${c.odehZone})` : typeof c.percent === 'number' ? ` (${t('probability.crescentScore')}: ${c.percent}%)` : ''}`}
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${c.style.dotClass}`} />
                 {t(`probability.${c.statusKey}`)}
               </span>
 
-              {typeof c.percent === 'number' ? <span className="text-[11px] text-slate-600">{c.percent}%</span> : null}
+              {methodId === 'yallop' && c.yallopQ !== null ? (
+                <span className="text-[11px] text-slate-600" title={t('probability.yallopQ')}>
+                  q={c.yallopQ.toFixed(3)}{c.yallopZone ? ` (${c.yallopZone})` : ''}
+                </span>
+              ) : methodId === 'odeh' && c.odehV !== null ? (
+                <span className="text-[11px] text-slate-600" title={t('probability.odehV')}>
+                  V={c.odehV.toFixed(3)}{c.odehZone ? ` (${c.odehZone})` : ''}
+                </span>
+              ) : typeof c.percent === 'number' ? <span className="text-[11px] text-slate-600">{c.percent}%</span> : null}
               {typeof c.lagMinutes === 'number' ? (
                 <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('probability.lagMinutes')}>
                   {c.lagMinutes}m
@@ -255,13 +291,14 @@ export default function HolidaysPage() {
             >
               <div className="text-sm font-medium">{t(h.nameKey)}</div>
 
-              {(methodId === 'estimate' || methodId === 'yallop') ? (
+              {(methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') ? (
                 <>
                   {renderCandidateDates(h.gregorian, h.hijri, h.estimatedGregorian ?? undefined)}
                 </>
               ) : (
                 <div className="mt-1 text-xs text-slate-600">
                   <span className="text-slate-900 font-semibold">{fmtGregorianIso(h.gregorian)}</span>
+                  <span className="ms-1 text-slate-500">{weekday(h.gregorian)}</span>
                   {' — '}
                   {h.hijri.day}/{h.hijri.month}/{h.hijri.year}
                 </div>
@@ -271,7 +308,7 @@ export default function HolidaysPage() {
         </div>
       </div>
 
-      {(methodId === 'estimate' || methodId === 'yallop') ? <LocationPicker /> : null}
+      {(methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') ? <LocationPicker /> : null}
 
       <div className="text-xs text-slate-600">
         {t('app.method.label')}: {t(`app.method.${methodId}`)}

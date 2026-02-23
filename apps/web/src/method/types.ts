@@ -1,4 +1,4 @@
-export type CalculationMethodId = 'civil' | 'estimate' | 'yallop' | 'ummalqura';
+export type CalculationMethodId = 'civil' | 'estimate' | 'yallop' | 'odeh';
 
 export type CalculationMethod = {
   id: CalculationMethodId;
@@ -9,6 +9,6 @@ export type CalculationMethod = {
 export const METHODS: CalculationMethod[] = [
   { id: 'estimate', labelKey: 'app.method.estimate', enabled: true },
   { id: 'yallop', labelKey: 'app.method.yallop', enabled: true },
-  { id: 'civil', labelKey: 'app.method.civil', enabled: true },
-  { id: 'ummalqura', labelKey: 'app.method.ummalqura', enabled: false }
+  { id: 'odeh', labelKey: 'app.method.odeh', enabled: true },
+  { id: 'civil', labelKey: 'app.method.civil', enabled: true }
 ];

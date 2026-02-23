@@ -3,7 +3,8 @@ import {
   getMonthStartSignalLevel,
   gregorianToHijriCivil,
   buildEstimatedHijriCalendarRange,
-  yallopMonthStartEstimate
+  yallopMonthStartEstimate,
+  odehMonthStartEstimate
 } from '@hijri/calendar-engine';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +40,7 @@ function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: st
 type DetailRow = {
   gregorianIso: string;
   day: number;
+  dayOfWeek: string;
   hijriText: string;
   estimate: {
     likelihoodKey: string;
@@ -59,6 +61,13 @@ type DetailRow = {
     yallopArcvDeg?: number;
     yallopWidthArcmin?: number;
     yallopBestTimeUtcIso?: string;
+    // Odeh-specific
+    odehV?: number;
+    odehZone?: string;
+    odehZoneDescription?: string;
+    odehArcvDeg?: number;
+    odehWidthArcmin?: number;
+    odehBestTimeUtcIso?: string;
   };
   isIndicatorDay: boolean;
 };
@@ -126,7 +135,7 @@ export default function DetailsPage() {
 
     // Build estimated Hijri mapping
     const estimatedByIso = new Map<string, { year: number; month: number; day: number }>();
-    if (methodId === 'estimate' || methodId === 'yallop') {
+    if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
       const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
       startDate.setUTCDate(startDate.getUTCDate() - 90);
       const endDate = new Date(Date.UTC(year, month - 1, dim, 0, 0, 0));
@@ -136,7 +145,7 @@ export default function DetailsPage() {
       const calendar = buildEstimatedHijriCalendarRange(
         start, end,
         { latitude: location.latitude, longitude: location.longitude },
-        { monthStartRule: methodId === 'yallop' ? 'yallop' : 'geometric' }
+        { monthStartRule: methodId === 'yallop' ? 'yallop' : methodId === 'odeh' ? 'odeh' : 'geometric' }
       );
       for (const item of calendar) {
         estimatedByIso.set(isoDate(item.gregorian.year, item.gregorian.month, item.gregorian.day), item.hijri);
@@ -144,7 +153,7 @@ export default function DetailsPage() {
     }
 
     // Evening estimates
-    const estimateFn = methodId === 'yallop' ? yallopMonthStartEstimate : estimateMonthStartLikelihoodAtSunset;
+    const estimateFn = methodId === 'yallop' ? yallopMonthStartEstimate : methodId === 'odeh' ? odehMonthStartEstimate : estimateMonthStartLikelihoodAtSunset;
     const estimateByIso = new Map<string, ReturnType<typeof estimateMonthStartLikelihoodAtSunset>>();
     const estimateStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     estimateStart.setUTCDate(estimateStart.getUTCDate() - 40);
@@ -162,7 +171,7 @@ export default function DetailsPage() {
     const getHijriForDay = (d: number) => {
       const iso = isoDate(year, month, d);
       if (methodId === 'civil') return gregorianToHijriCivil({ year, month, day: d });
-      if (methodId === 'estimate' || methodId === 'yallop') return estimatedByIso.get(iso) ?? null;
+      if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') return estimatedByIso.get(iso) ?? null;
       return null;
     };
 
@@ -175,7 +184,7 @@ export default function DetailsPage() {
       nextDate.setDate(nextDate.getDate() + 1);
       const nextHijri = methodId === 'civil'
         ? gregorianToHijriCivil({ year: nextDate.getFullYear(), month: nextDate.getMonth() + 1, day: nextDate.getDate() })
-        : (methodId === 'estimate' || methodId === 'yallop')
+        : (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh')
           ? (estimatedByIso.get(isoDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate())) ?? null)
           : null;
       if (nextHijri?.day === 1) monthStartCandidatesIso.add(isoDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate()));
@@ -243,6 +252,7 @@ export default function DetailsPage() {
     for (let d = 1; d <= dim; d++) {
       const h = getHijriForDay(d);
       const hijriText = h ? `${h.day}/${h.month}/${h.year}` : '—';
+      const dayOfWeek = new Date(year, month - 1, d).toLocaleDateString(i18n.language, { weekday: 'short' });
       const est = estimateByIso.get(isoDate(year, month, d));
       const metrics = (est?.metrics ?? {}) as ReturnType<typeof estimateMonthStartLikelihoodAtSunset>['metrics'] & {
         sunriseUtcIso?: string; moonriseUtcIso?: string;
@@ -250,6 +260,7 @@ export default function DetailsPage() {
       rows.push({
         gregorianIso: isoDate(year, month, d),
         day: d,
+        dayOfWeek,
         hijriText,
         estimate: {
           likelihoodKey: `probability.${est?.likelihood ?? 'unknown'}`,
@@ -269,14 +280,21 @@ export default function DetailsPage() {
           yallopZoneDescription: est?.metrics.yallopZoneDescription,
           yallopArcvDeg: est?.metrics.yallopArcvDeg,
           yallopWidthArcmin: est?.metrics.yallopWidthArcmin,
-          yallopBestTimeUtcIso: est?.metrics.yallopBestTimeUtcIso
+          yallopBestTimeUtcIso: est?.metrics.yallopBestTimeUtcIso,
+          // Odeh-specific
+          odehV: est?.metrics.odehV,
+          odehZone: est?.metrics.odehZone,
+          odehZoneDescription: est?.metrics.odehZoneDescription,
+          odehArcvDeg: est?.metrics.odehArcvDeg,
+          odehWidthArcmin: est?.metrics.odehWidthArcmin,
+          odehBestTimeUtcIso: est?.metrics.odehBestTimeUtcIso
         },
         isIndicatorDay: indicatorDays.has(d)
       });
     }
 
     return { rows, indicatorDays };
-  }, [location.latitude, location.longitude, methodId, month, year]);
+  }, [i18n.language, location.latitude, location.longitude, methodId, month, year]);
 
   return (
     <div className="page">
@@ -327,12 +345,18 @@ export default function DetailsPage() {
             <thead>
               <tr className="text-left text-xs font-semibold text-slate-700">
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.gregorianDate')}</th>
+                <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('calendar.dayOfWeek')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.hijriDate')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.label')}</th>
                 {methodId === 'yallop' ? (
                   <>
                     <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.yallopQ')}</th>
                     <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.yallopZone')}</th>
+                  </>
+                ) : methodId === 'odeh' ? (
+                  <>
+                    <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.odehV')}</th>
+                    <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.odehZone')}</th>
                   </>
                 ) : (
                   <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.crescentScore')}</th>
@@ -358,6 +382,7 @@ export default function DetailsPage() {
                 return (
                   <tr key={row.gregorianIso} className="text-xs text-slate-800">
                     <td className="border-b border-slate-100 px-3 py-2 font-medium text-slate-900 whitespace-nowrap">{row.gregorianIso}</td>
+                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap text-slate-600">{row.dayOfWeek}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.hijriText}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
                       {row.isIndicatorDay ? (
@@ -373,6 +398,11 @@ export default function DetailsPage() {
                       <>
                         <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.yallopQ === 'number' ? row.estimate.yallopQ.toFixed(3) : '—'}</td>
                         <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.estimate.yallopZone ? `${row.estimate.yallopZone} — ${row.estimate.yallopZoneDescription ?? ''}` : '—'}</td>
+                      </>
+                    ) : methodId === 'odeh' ? (
+                      <>
+                        <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.odehV === 'number' ? row.estimate.odehV.toFixed(3) : '—'}</td>
+                        <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.estimate.odehZone ? `${row.estimate.odehZone} — ${row.estimate.odehZoneDescription ?? ''}` : '—'}</td>
                       </>
                     ) : (
                       <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.crescentScorePercent === 'number' ? `${Math.round(row.estimate.crescentScorePercent)}%` : '—'}</td>
@@ -416,6 +446,7 @@ export default function DetailsPage() {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-slate-900">{row.day}</span>
+                  <span className="text-xs text-slate-500">{row.dayOfWeek}</span>
                   <span className="text-xs text-slate-500">{row.hijriText}</span>
                 </div>
                 {row.isIndicatorDay ? (
@@ -436,6 +467,15 @@ export default function DetailsPage() {
                       {typeof row.estimate.yallopArcvDeg === 'number' ? <MetricRow label={t('probability.yallopArcv')} value={`${row.estimate.yallopArcvDeg.toFixed(2)}°`} /> : null}
                       {typeof row.estimate.yallopWidthArcmin === 'number' ? <MetricRow label={t('probability.yallopWidth')} value={`${row.estimate.yallopWidthArcmin.toFixed(2)}'`} /> : null}
                       {row.estimate.yallopBestTimeUtcIso ? <MetricRow label={t('probability.yallopBestTime')} value={fmtLocalTime(row.estimate.yallopBestTimeUtcIso) ?? '—'} /> : null}
+                      <div className="mt-1 border-t border-slate-50 pt-1" />
+                    </>
+                  ) : methodId === 'odeh' && typeof row.estimate.odehV === 'number' ? (
+                    <>
+                      <MetricRow label={t('probability.odehV')} value={row.estimate.odehV.toFixed(3)} />
+                      <MetricRow label={t('probability.odehZone')} value={row.estimate.odehZone ? `${row.estimate.odehZone} — ${row.estimate.odehZoneDescription ?? ''}` : '—'} />
+                      {typeof row.estimate.odehArcvDeg === 'number' ? <MetricRow label={t('probability.odehArcv')} value={`${row.estimate.odehArcvDeg.toFixed(2)}°`} /> : null}
+                      {typeof row.estimate.odehWidthArcmin === 'number' ? <MetricRow label={t('probability.odehWidth')} value={`${row.estimate.odehWidthArcmin.toFixed(2)}'`} /> : null}
+                      {row.estimate.odehBestTimeUtcIso ? <MetricRow label={t('probability.odehBestTime')} value={fmtLocalTime(row.estimate.odehBestTimeUtcIso) ?? '—'} /> : null}
                       <div className="mt-1 border-t border-slate-50 pt-1" />
                     </>
                   ) : (

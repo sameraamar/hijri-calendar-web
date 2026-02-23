@@ -7,6 +7,7 @@ import {
   type CrescentVisibilityCriteria
 } from './monthStartEstimate.js';
 import { yallopMonthStartEstimate, meetsYallopCriteriaAtSunset } from './yallop.js';
+import { odehMonthStartEstimate, meetsOdehCriteriaAtSunset } from './odeh.js';
 
 function toUtcDate(g: GregorianDate): Date {
   return new Date(Date.UTC(g.year, g.month - 1, g.day, 0, 0, 0));
@@ -58,7 +59,7 @@ export type EstimatedCalendarOptions = {
    * Which rule to use when deciding whether the crescent conditions on evening D
    * imply that D+1 becomes Hijri day 1.
    */
-  monthStartRule?: 'geometric' | 'score-threshold' | 'yallop';
+  monthStartRule?: 'geometric' | 'score-threshold' | 'yallop' | 'odeh';
 
   /**
    * Criteria for the "geometric" rule.
@@ -130,15 +131,19 @@ export function buildEstimatedHijriCalendarRange(
 
     const est = monthStartRule === 'yallop'
       ? yallopMonthStartEstimate(g, location)
-      : estimateMonthStartLikelihoodAtSunset(g, location);
+      : monthStartRule === 'odeh'
+        ? odehMonthStartEstimate(g, location)
+        : estimateMonthStartLikelihoodAtSunset(g, location);
     const canEndThisMonth = h.day >= minEndOfMonthDay;
 
     const astronomySaysMonthStartTomorrow =
       monthStartRule === 'yallop'
         ? meetsYallopCriteriaAtSunset(est)
-        : monthStartRule === 'score-threshold'
-          ? meetsScoreThresholdAtSunset(est, visibilityScoreThreshold)
-          : meetsCrescentVisibilityCriteriaAtSunset(est, geometricCriteria);
+        : monthStartRule === 'odeh'
+          ? meetsOdehCriteriaAtSunset(est)
+          : monthStartRule === 'score-threshold'
+            ? meetsScoreThresholdAtSunset(est, visibilityScoreThreshold)
+            : meetsCrescentVisibilityCriteriaAtSunset(est, geometricCriteria);
 
     const monthStartTomorrow =
       (canEndThisMonth && astronomySaysMonthStartTomorrow) ||
