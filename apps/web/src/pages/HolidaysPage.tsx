@@ -208,16 +208,45 @@ export default function HolidaysPage() {
           <div className="text-2xl font-semibold tracking-tight">{t('holidays.title')}</div>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
-        <input
-          className="control w-32"
-          type="number"
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          aria-label={t('calendar.year')}
-        />
       </div>
 
       <div className="card">
+        <div className="card-header flex items-center justify-center gap-1">
+          <button
+            type="button"
+            onClick={() => setYear((y) => y - 1)}
+            aria-label={t('calendar.prevMonth')}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 rtl:rotate-180"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd"/></svg>
+          </button>
+          <input
+            className="control-sm w-20 text-center font-medium"
+            type="number"
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            aria-label={t('calendar.year')}
+          />
+          <button
+            type="button"
+            onClick={() => setYear((y) => y + 1)}
+            aria-label={t('calendar.nextMonth')}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 rtl:rotate-180"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd"/></svg>
+          </button>
+          {year !== currentYear && (
+            <button
+              type="button"
+              onClick={() => setYear(currentYear)}
+              aria-label={t('calendar.today')}
+              title={t('calendar.today')}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 divide-y divide-slate-200">
           {holidays.map((h) => (
             <div

@@ -6,7 +6,7 @@
       "convert": "Convert",
       "details": "Details",
       "holidays": "Holidays",
-      "methods": "Methods"
+      "methods": "About"
     },
     "language": {
       "en": "English",
@@ -101,8 +101,11 @@
     "eidAlAdha": "Eid al-Adha (10 Dhul Hijjah)"
   },
   "methods": {
-    "title": "Calculation methods",
+    "title": "About",
+    "about": "Hijri Calendar is a free, open-source tool for exploring the Islamic (Hijri) calendar. It lets you browse monthly calendars, convert dates between Hijri and Gregorian, view upcoming Islamic holidays, and inspect astronomical crescent-visibility estimates for any location. All calculations run entirely in your browser — no data is sent to any server.",
+    "methodsHeading": "Calculation Methods",
     "characteristics": "Characteristics",
+    "references": "References",
     "pros": "Pros",
     "cons": "Cons",
     "civil": {
@@ -114,7 +117,8 @@
       "pro1": "Stable and predictable; no external data needed",
       "pro2": "Works offline and is easy to test",
       "con1": "May differ from official country calendars",
-      "con2": "Does not reflect actual crescent visibility"
+      "con2": "Does not reflect actual crescent visibility",
+      "impl": "Implementation: custom JDN-based algorithm (no external library)"
     },
     "ummalqura": {
       "title": "Umm al-Qura (Saudi official)",
@@ -141,7 +145,8 @@
       "formula2": "Visibility score = 0.35*altitude + 0.35*elongation + 0.20*age + 0.10*lag.",
       "formula3": "Visibility percent = round(100 * visibility score).",
       "formula4": "Near-new-moon constraints are applied before final labeling (e.g., far from conjunction -> low/zero signal).",
-      "note": "Important: this is an estimate, not an official religious announcement. The app uses sunset/evening astronomy metrics (moonset lag, altitude, elongation, age, illumination, and score) to derive a normalized month-start signal."
+      "note": "Important: this is an estimate, not an official religious announcement. The app uses sunset/evening astronomy metrics (moonset lag, altitude, elongation, age, illumination, and score) to derive a normalized month-start signal.",
+      "impl": "Package: astronomy-engine (npm) for sun/moon ephemeris"
     }
   },
   "probability": {
@@ -174,5 +179,18 @@
     "lowDesc": "Poor conditions for a visible crescent (e.g., Moon very low, setting too soon, or very young).",
     "mediumDesc": "Borderline/mixed conditions; visibility depends on observer skill and local atmosphere.",
     "highDesc": "Strong conditions (Moon higher, well separated from the Sun, older, stays up longer after sunset)."
+  },
+  "about": {
+    "privacyTitle": "Privacy & Your Data",
+    "privacyBody": "Your privacy matters. This application is designed to work entirely in your browser:",
+    "privacyNoServer": "No data is ever sent to a remote server — all date calculations and astronomical computations happen locally on your device.",
+    "privacyNoTracking": "No analytics, tracking pixels, or third-party scripts are used.",
+    "privacyNoCookies": "No cookies are stored. Your preferences (language, location, method) are kept in your browser's local storage and never shared.",
+    "privacyLocation": "If you choose to share your location, it is used only for local sunset/moonset calculations and is never transmitted anywhere.",
+    "disclaimerTitle": "Disclaimer",
+    "disclaimerBody": "This tool is for informational and educational purposes only. It is not an official religious authority and should not be used as a substitute for local moon-sighting committees or official Hijri calendar announcements in your country. Crescent-visibility estimates are based on astronomical models and may differ from actual observed conditions.",
+    "openSourceTitle": "Open Source",
+    "openSourceBody": "Hijri Calendar is free and open-source software. Contributions, bug reports, and suggestions are welcome.",
+    "furtherReadingTitle": "References & Credits"
   }
 }
