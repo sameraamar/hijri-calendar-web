@@ -10,15 +10,15 @@
 2. [Umm al-Qura Calendar](#2-umm-al-qura-calendar)
 3. [Global Conjunction ("Moon Birth on Earth")](#3-global-conjunction-moon-birth-on-earth)
 4. [New Moon at Makkah](#4-new-moon-at-makkah)
-5. [Babylonian Criterion (Age + Lag)](#5-babylonian-criterion-age--lag)
-6. [Altitude / Azimuth Criteria (Maunder, Indian, Fotheringham)](#6-altitude--azimuth-criteria)
-7. [Bruin Physical Model (1977)](#7-bruin-physical-model-1977)
+5. [Segura Illuminance Model (2021)](#5-segura-illuminance-model-2021)
+6. [Odeh Criterion (2004)](#6-odeh-criterion-2004)
+7. [SAAO Criterion (Caldwell & Laney 2001)](#7-saao-criterion-caldwell--laney-2001)
 8. [Yallop q-Test (1997)](#8-yallop-q-test-1997)
-9. [Odeh Criterion (2004)](#9-odeh-criterion-2004)
-10. [Schaefer Modern Theoretical Algorithm (1988 / 1996)](#10-schaefer-modern-theoretical-algorithm)
-11. [SAAO Criterion (Caldwell & Laney 2001)](#11-saao-criterion-caldwell--laney-2001)
-12. [Segura Illuminance Model (2021)](#12-segura-illuminance-model-2021)
-13. [Danjon Limit](#13-danjon-limit)
+9. [Schaefer Modern Theoretical Algorithm (1988 / 1996)](#9-schaefer-modern-theoretical-algorithm)
+10. [Bruin Physical Model (1977)](#10-bruin-physical-model-1977)
+11. [Danjon Limit (1936)](#11-danjon-limit-1936)
+12. [Altitude / Azimuth Criteria (Maunder 1911, Indian/Schoch 1930)](#12-altitude--azimuth-criteria)
+13. [Babylonian Criterion (Age + Lag)](#13-babylonian-criterion-age--lag)
 14. [Country-Specific Rules](#14-country-specific-rules)
 15. [Our Implementation — Weighted Heuristic (MVP)](#15-our-implementation--weighted-heuristic-mvp)
 16. [References & Credits](#16-references--credits)
@@ -222,96 +222,126 @@ Umm al-Qura adds a second condition: moonset must also be after sunset at Makkah
 
 ---
 
-## 5. Babylonian Criterion (Age + Lag)
+## 5. Segura Illuminance Model (2021)
 
 ### What it is
 
-The oldest known crescent visibility criterion, dating back to the Babylonian era. Two simple checks:
+Wenceslao Segura proposes a **probabilistic** physical method. Rather than producing a binary visible/invisible answer, the model outputs a **probability of seeing the crescent Moon**.
 
-1. **Moon's age** (hours since conjunction) > 24 hours.
-2. **Lag time** (moonset − sunset) > 48 minutes.
+### Key Insight
+
+Blackwell (1946) showed that threshold vision is a probabilistic process with three zones:
+1. **100% visibility**: contrast is very high → always seen.
+2. **0% visibility**: contrast is too low → never seen.
+3. **Critical zone**: intermediate contrast → probability depends on C / C_th.
+
+### Approach
+
+1. Find the **topocentric altitude, azimuth difference (DZ), Sun depression (d)**, Earth-Moon distance, and phase angle.
+2. Compute the **luminance** of the Moon (without atmospheric absorption) using the phase angle.
+3. Apply the **atmospheric extinction coefficient** for the observation site to get B_m (Moon luminance at Earth's surface).
+4. Compute the **twilight sky luminance** B_s as f(d, DZ).
+5. Compute contrast C = B_m / B_s and threshold illuminance E_th from Blackwell data.
+6. Use E / E_th and Blackwell's probability distribution to find the **probability of seeing the crescent**.
+
+### Important observations
+
+- When the crescent width is **smaller than the eye's optical resolution** (~1 arcminute), we must use **illuminance** (flux reaching the pupil) rather than **luminance**, since the retina responds to photon count per unit area.
+- Danjon (1932, 1936) showed that lunar horns shorten with increasing phase angle, so only the **central part** of the crescent needs analysis.
+- The extinction coefficient is impossible to predict even one day in advance, and even small variations significantly affect visibility prediction.
+
+> **Source**: Segura, W. (2021), "Predicting the First Visibility of the Lunar Crescent," *Academia Letters*, Article 2878. PDF: [`docs/Predicting_the_First_Visibility_of_the_L.pdf`](Predicting_the_First_Visibility_of_the_L.pdf).
+
+---
+
+## 6. Odeh Criterion (2004)
+
+### What it is
+
+An updated criterion by Mohammad Sh. Odeh (Arab Union for Astronomy and Space Sciences), calibrated against a much larger database of **737 observations** — nearly half from the Islamic Crescent Observation Project (ICOP, established 1998).
+
+### Key Advance
+
+- Uses **topocentric** values (not geocentric) for both ARCV and W.
+- Predicts visibility for **both naked eye and optical aid**.
+- Found a **Danjon limit of 6.4°** (from observation #697).
+
+### Variables
+
+| Symbol | Definition |
+|---|---|
+| ARCV | **Airless topocentric** arc of vision (degrees) |
+| W | **Topocentric** crescent width (arcminutes) |
+| V | Visibility prediction value |
+
+The calculations are performed at **best time** (Yallop's formula: Tb = Ts + (4/9) × Lag).
+
+### The V Formula
+
+V = ARCV − (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)
+
+### Visibility Zones
+
+| Zone | V range | Meaning |
+|---|---|---|
+| **A** | V ≥ 5.65 | Visible by **naked eye** |
+| **B** | 2 ≤ V < 5.65 | Visible by **optical aid**, may be seen by naked eye |
+| **C** | −0.96 ≤ V < 2 | Visible by **optical aid only** |
+| **D** | V < −0.96 | **Not visible** even with optical aid |
+
+### Tabular Form
+
+| W | 0.1' | 0.2' | 0.3' | 0.4' | 0.5' | 0.6' | 0.7' | 0.8' | 0.9' |
+|---|---|---|---|---|---|---|---|---|---|
+| ARCV₁ (Zone C lower) | 5.6° | 5.0° | 4.4° | 3.8° | 3.2° | 2.7° | 2.1° | 1.6° | 1.0° |
+| ARCV₂ (Zone B lower) | 8.5° | 7.9° | 7.3° | 6.7° | 6.2° | 5.6° | 5.1° | 4.5° | 4.0° |
+| ARCV₃ (Zone A lower) | 12.2° | 11.6° | 11.0° | 10.4° | 9.8° | 9.3° | 8.7° | 8.2° | 7.6° |
 
 ### Pseudocode
 
 ```
-function babylonianCriterion(sunset, moonset, conjunctionTime):
-    age = (sunset - conjunctionTime) in hours
-    lag = (moonset - sunset) in minutes
-    return age > 24 AND lag > 48
+function odehCriterion(ARCV_topo, W_topo):
+    // ARCV and W must be airless, topocentric, at best time
+    V = ARCV_topo - (-0.1018 * W_topo^3 + 0.7319 * W_topo^2
+                      - 6.3226 * W_topo + 7.1651)
+
+    if V >= 5.65:   return "A — Naked-eye visible"
+    if V >= 2.0:    return "B — Optical aid, possibly naked-eye"
+    if V >= -0.96:  return "C — Optical aid only"
+    return                   "D — Not visible"
 ```
 
-### Performance
+### Youngest Crescent Records (from 737 observations)
 
-Schaefer (1996) tested this criterion against 294 individual observations and the five Moonwatches (1490 reports) and concluded:
+| Record | Age | Observer |
+|---|---|---|
+| Youngest by optical aid | 13 h 14 min (topocentric) | Jim Stamm, 21 Jan 1996 |
+| Youngest by naked eye | 15 h 33 min (topocentric) | John Pierce, 25 Feb 1990 |
+| Minimum elongation (optical) | 6.4° | Stamm #697 |
+| Minimum elongation (naked eye) | 7.7° | Pierce #274 |
 
-- **Age criterion**: Zone of uncertainty spans the **entire world** (~238° of longitude). A 15.0-hour crescent has been sighted; a 51.3-hour crescent has been missed. Age is a "bad predictor of lunar visibility."
-- **Moonset lag criterion**: Zone of uncertainty covers the entire world (~240° of longitude). Crescents with lags as short as 35 min have been seen; crescents with lags of 75 min have been missed.
-
-> **Sources**: Odeh (2004), §2.1; Schaefer (1996), "Age" and "Moonset Lag" sections.
-
----
-
-## 6. Altitude / Azimuth Criteria
-
-### Maunder (1911)
-
-The crescent is visible if:
-
-ARCV > 11 − |DAZ|/20 − DAZ²/100
-
-| DAZ | 0° | 5° | 10° | 15° | 20° |
-|---|---|---|---|---|---|
-| ARCV threshold | 11.0° | 10.5° | 9.5° | 8.0° | 6.0° |
-
-> **Source**: Maunder, E.W. (1911), "On the smallest visible phase of the Moon," *Journal of the British Astronomical Association*, 21, 355–362.
-
-### Indian Astronomical Ephemeris (Schoch, 1930)
-
-The crescent is visible if:
-
-ARCV > 10.3743 − 0.0137·|DAZ| − 0.0097·DAZ²
-
-| DAZ | 0° | 5° | 10° | 15° | 20° |
-|---|---|---|---|---|---|
-| ARCV threshold | 10.4° | 10.0° | 9.3° | 8.0° | 6.2° |
-
-> **Source**: Schoch, C. (1930), *Ergänzungsheft zu den Astronomischen Nachrichten*, 8 (2); cited in Yallop (1997), §3.
-
-### Performance (Schaefer 1996 testing)
-
-The altitude/azimuth criteria can make a **confident prediction only about one-quarter of the time**. The zone of uncertainty covers ~94° of longitude (~3/4 of the world). The main failure is that they do not account for atmospheric haze, which varies drastically by season, latitude, elevation, and humidity.
-
-> **Source**: Schaefer (1996), "Altitude/azimuth" section and Table II.
+> **Source**: Odeh, M.Sh. (2004), "New Criterion for Lunar Crescent Visibility," *Experimental Astronomy*, 18, 39–64. PDF: [`docs/New_Criterion_for_Lunar_Crescent_Visibility.pdf`](New_Criterion_for_Lunar_Crescent_Visibility.pdf).
 
 ---
 
-## 7. Bruin Physical Model (1977)
+## 7. SAAO Criterion (Caldwell & Laney 2001)
 
 ### What it is
 
-Bruin proposed expressing the visibility criterion as ARCV vs. the **crescent width** W (arcminutes), rather than ARCV vs. DAZ. This is a more physically meaningful parameterisation because W directly relates to the crescent's intrinsic brightness. He also provides a method for calculating the **best time** for observation and curves for different values of W.
+A criterion from the South African Astronomical Observatory (SAAO), based on Schaefer's observation database plus additional records. It uses DALT (apparent altitude of the lower edge of the Moon at sunset) vs. DAZ.
 
-### Criterion
+### Thresholds
 
-The crescent is visible if:
+| DAZ | 0° | 5° | 10° | 15° | 20° |
+|---|---|---|---|---|---|
+| DALT₁ (impossible below) | 6.3° | 5.9° | 4.9° | 3.8° | 2.6° |
+| DALT₂ (improbable below) | 8.2° | 7.8° | 6.8° | 5.7° | 4.5° |
 
-ARCV > 12.4023 − 9.4878·W + 3.9512·W² − 0.5632·W³
+- Below DALT₁: visibility **impossible** even with optical aid.
+- Between DALT₁ and DALT₂: naked-eye visibility **improbable**; optical aid may succeed.
+- Above DALT₂: **probable** naked-eye visibility.
 
-where W = width of the crescent in arcminutes:
-
-W = 15·(1 − cos ARCL)
-
-(Bruin assumed a constant semi-diameter of 15'.)
-
-| W | 0.3' | 0.5' | 0.7' | 1' | 2' | 3' |
-|---|---|---|---|---|---|---|
-| ARCV threshold | 10.0° | 8.4° | 7.5° | 6.4° | 4.7° | 4.3° |
-
-### Limitations
-
-Bruin applied a "Gestalt" factor to his curves. Doggett & Schaefer (1994) criticized some of his atmospheric assumptions as being "orders of magnitude out." Nevertheless, Yallop (1997) considered Bruin's approach foundational because it addresses the physics of the problem.
-
-> **Sources**: Bruin, F. (1977), "The first visibility of the lunar crescent," *Vistas in Astronomy*, 21, 331–358; Yallop (1997), §3; Odeh (2004), Table III.
+> **Source**: Caldwell, J. & Laney, C. (2001), "First visibility of the Lunar crescent," SAAO, *African Skies*, 5. Cited in Odeh (2004), Table IV.
 
 ---
 
@@ -398,77 +428,7 @@ The q-test was calibrated against **295 historical observations** spanning 1859�
 
 ---
 
-## 9. Odeh Criterion (2004)
-
-### What it is
-
-An updated criterion by Mohammad Sh. Odeh (Arab Union for Astronomy and Space Sciences), calibrated against a much larger database of **737 observations** — nearly half from the Islamic Crescent Observation Project (ICOP, established 1998).
-
-### Key Advance
-
-- Uses **topocentric** values (not geocentric) for both ARCV and W.
-- Predicts visibility for **both naked eye and optical aid**.
-- Found a **Danjon limit of 6.4°** (from observation #697).
-
-### Variables
-
-| Symbol | Definition |
-|---|---|
-| ARCV | **Airless topocentric** arc of vision (degrees) |
-| W | **Topocentric** crescent width (arcminutes) |
-| V | Visibility prediction value |
-
-The calculations are performed at **best time** (Yallop's formula: Tb = Ts + (4/9) × Lag).
-
-### The V Formula
-
-V = ARCV − (−0.1018·W³ + 0.7319·W² − 6.3226·W + 7.1651)
-
-### Visibility Zones
-
-| Zone | V range | Meaning |
-|---|---|---|
-| **A** | V ≥ 5.65 | Visible by **naked eye** |
-| **B** | 2 ≤ V < 5.65 | Visible by **optical aid**, may be seen by naked eye |
-| **C** | −0.96 ≤ V < 2 | Visible by **optical aid only** |
-| **D** | V < −0.96 | **Not visible** even with optical aid |
-
-### Tabular Form
-
-| W | 0.1' | 0.2' | 0.3' | 0.4' | 0.5' | 0.6' | 0.7' | 0.8' | 0.9' |
-|---|---|---|---|---|---|---|---|---|---|
-| ARCV₁ (Zone C lower) | 5.6° | 5.0° | 4.4° | 3.8° | 3.2° | 2.7° | 2.1° | 1.6° | 1.0° |
-| ARCV₂ (Zone B lower) | 8.5° | 7.9° | 7.3° | 6.7° | 6.2° | 5.6° | 5.1° | 4.5° | 4.0° |
-| ARCV₃ (Zone A lower) | 12.2° | 11.6° | 11.0° | 10.4° | 9.8° | 9.3° | 8.7° | 8.2° | 7.6° |
-
-### Pseudocode
-
-```
-function odehCriterion(ARCV_topo, W_topo):
-    // ARCV and W must be airless, topocentric, at best time
-    V = ARCV_topo - (-0.1018 * W_topo^3 + 0.7319 * W_topo^2
-                      - 6.3226 * W_topo + 7.1651)
-
-    if V >= 5.65:   return "A — Naked-eye visible"
-    if V >= 2.0:    return "B — Optical aid, possibly naked-eye"
-    if V >= -0.96:  return "C — Optical aid only"
-    return                   "D — Not visible"
-```
-
-### Youngest Crescent Records (from 737 observations)
-
-| Record | Age | Observer |
-|---|---|---|
-| Youngest by optical aid | 13 h 14 min (topocentric) | Jim Stamm, 21 Jan 1996 |
-| Youngest by naked eye | 15 h 33 min (topocentric) | John Pierce, 25 Feb 1990 |
-| Minimum elongation (optical) | 6.4° | Stamm #697 |
-| Minimum elongation (naked eye) | 7.7° | Pierce #274 |
-
-> **Source**: Odeh, M.Sh. (2004), "New Criterion for Lunar Crescent Visibility," *Experimental Astronomy*, 18, 39–64. PDF: [`docs/New_Criterion_for_Lunar_Crescent_Visibility.pdf`](New_Criterion_for_Lunar_Crescent_Visibility.pdf).
-
----
-
-## 10. Schaefer Modern Theoretical Algorithm
+## 9. Schaefer Modern Theoretical Algorithm (1988 / 1996)
 
 ### What it is
 
@@ -551,60 +511,37 @@ Schaefer implemented this as [LunarCal](http://www.cfa.harvard.edu/~bschaefer/) 
 
 ---
 
-## 11. SAAO Criterion (Caldwell & Laney 2001)
+## 10. Bruin Physical Model (1977)
 
 ### What it is
 
-A criterion from the South African Astronomical Observatory (SAAO), based on Schaefer's observation database plus additional records. It uses DALT (apparent altitude of the lower edge of the Moon at sunset) vs. DAZ.
+Bruin proposed expressing the visibility criterion as ARCV vs. the **crescent width** W (arcminutes), rather than ARCV vs. DAZ. This is a more physically meaningful parameterisation because W directly relates to the crescent's intrinsic brightness. He also provides a method for calculating the **best time** for observation and curves for different values of W.
 
-### Thresholds
+### Criterion
 
-| DAZ | 0° | 5° | 10° | 15° | 20° |
-|---|---|---|---|---|---|
-| DALT₁ (impossible below) | 6.3° | 5.9° | 4.9° | 3.8° | 2.6° |
-| DALT₂ (improbable below) | 8.2° | 7.8° | 6.8° | 5.7° | 4.5° |
+The crescent is visible if:
 
-- Below DALT₁: visibility **impossible** even with optical aid.
-- Between DALT₁ and DALT₂: naked-eye visibility **improbable**; optical aid may succeed.
-- Above DALT₂: **probable** naked-eye visibility.
+ARCV > 12.4023 − 9.4878·W + 3.9512·W² − 0.5632·W³
 
-> **Source**: Caldwell, J. & Laney, C. (2001), "First visibility of the Lunar crescent," SAAO, *African Skies*, 5. Cited in Odeh (2004), Table IV.
+where W = width of the crescent in arcminutes:
 
----
+W = 15·(1 − cos ARCL)
 
-## 12. Segura Illuminance Model (2021)
+(Bruin assumed a constant semi-diameter of 15'.)
 
-### What it is
+| W | 0.3' | 0.5' | 0.7' | 1' | 2' | 3' |
+|---|---|---|---|---|---|---|
+| ARCV threshold | 10.0° | 8.4° | 7.5° | 6.4° | 4.7° | 4.3° |
 
-Wenceslao Segura proposes a **probabilistic** physical method. Rather than producing a binary visible/invisible answer, the model outputs a **probability of seeing the crescent Moon**.
+### Limitations
 
-### Key Insight
+Bruin applied a "Gestalt" factor to his curves. Doggett & Schaefer (1994) criticized some of his atmospheric assumptions as being "orders of magnitude out." Nevertheless, Yallop (1997) considered Bruin's approach foundational because it addresses the physics of the problem.
 
-Blackwell (1946) showed that threshold vision is a probabilistic process with three zones:
-1. **100% visibility**: contrast is very high → always seen.
-2. **0% visibility**: contrast is too low → never seen.
-3. **Critical zone**: intermediate contrast → probability depends on C / C_th.
-
-### Approach
-
-1. Find the **topocentric altitude, azimuth difference (DZ), Sun depression (d)**, Earth-Moon distance, and phase angle.
-2. Compute the **luminance** of the Moon (without atmospheric absorption) using the phase angle.
-3. Apply the **atmospheric extinction coefficient** for the observation site to get B_m (Moon luminance at Earth's surface).
-4. Compute the **twilight sky luminance** B_s as f(d, DZ).
-5. Compute contrast C = B_m / B_s and threshold illuminance E_th from Blackwell data.
-6. Use E / E_th and Blackwell's probability distribution to find the **probability of seeing the crescent**.
-
-### Important observations
-
-- When the crescent width is **smaller than the eye's optical resolution** (~1 arcminute), we must use **illuminance** (flux reaching the pupil) rather than **luminance**, since the retina responds to photon count per unit area.
-- Danjon (1932, 1936) showed that lunar horns shorten with increasing phase angle, so only the **central part** of the crescent needs analysis.
-- The extinction coefficient is impossible to predict even one day in advance, and even small variations significantly affect visibility prediction.
-
-> **Source**: Segura, W. (2021), "Predicting the First Visibility of the Lunar Crescent," *Academia Letters*, Article 2878. PDF: [`docs/Predicting_the_First_Visibility_of_the_L.pdf`](Predicting_the_First_Visibility_of_the_L.pdf).
+> **Sources**: Bruin, F. (1977), "The first visibility of the lunar crescent," *Vistas in Astronomy*, 21, 331–358; Yallop (1997), §3; Odeh (2004), Table III.
 
 ---
 
-## 13. Danjon Limit
+## 11. Danjon Limit (1936)
 
 ### What it is
 
@@ -624,6 +561,69 @@ The **minimum elongation** (angular separation between Moon and Sun) below which
 The Danjon limit corresponds to ARCL ≈ 7°. Allowing 1° for horizontal parallax and ignoring refraction, ARCL = 8°. With DAZ = 0, this gives q ≈ −0.293 (the boundary between zones E and F).
 
 > **Sources**: Danjon (1936); Odeh (2004), §8; Yallop (1997), §6.
+
+---
+
+## 12. Altitude / Azimuth Criteria (Maunder 1911, Indian/Schoch 1930)
+
+### Maunder (1911)
+
+The crescent is visible if:
+
+ARCV > 11 − |DAZ|/20 − DAZ²/100
+
+| DAZ | 0° | 5° | 10° | 15° | 20° |
+|---|---|---|---|---|---|
+| ARCV threshold | 11.0° | 10.5° | 9.5° | 8.0° | 6.0° |
+
+> **Source**: Maunder, E.W. (1911), "On the smallest visible phase of the Moon," *Journal of the British Astronomical Association*, 21, 355–362.
+
+### Indian Astronomical Ephemeris (Schoch, 1930)
+
+The crescent is visible if:
+
+ARCV > 10.3743 − 0.0137·|DAZ| − 0.0097·DAZ²
+
+| DAZ | 0° | 5° | 10° | 15° | 20° |
+|---|---|---|---|---|---|
+| ARCV threshold | 10.4° | 10.0° | 9.3° | 8.0° | 6.2° |
+
+> **Source**: Schoch, C. (1930), *Ergänzungsheft zu den Astronomischen Nachrichten*, 8 (2); cited in Yallop (1997), §3.
+
+### Performance (Schaefer 1996 testing)
+
+The altitude/azimuth criteria can make a **confident prediction only about one-quarter of the time**. The zone of uncertainty covers ~94° of longitude (~3/4 of the world). The main failure is that they do not account for atmospheric haze, which varies drastically by season, latitude, elevation, and humidity.
+
+> **Source**: Schaefer (1996), "Altitude/azimuth" section and Table II.
+
+---
+
+## 13. Babylonian Criterion (Age + Lag)
+
+### What it is
+
+The oldest known crescent visibility criterion, dating back to the Babylonian era. Two simple checks:
+
+1. **Moon's age** (hours since conjunction) > 24 hours.
+2. **Lag time** (moonset − sunset) > 48 minutes.
+
+### Pseudocode
+
+```
+function babylonianCriterion(sunset, moonset, conjunctionTime):
+    age = (sunset - conjunctionTime) in hours
+    lag = (moonset - sunset) in minutes
+    return age > 24 AND lag > 48
+```
+
+### Performance
+
+Schaefer (1996) tested this criterion against 294 individual observations and the five Moonwatches (1490 reports) and concluded:
+
+- **Age criterion**: Zone of uncertainty spans the **entire world** (~238° of longitude). A 15.0-hour crescent has been sighted; a 51.3-hour crescent has been missed. Age is a "bad predictor of lunar visibility."
+- **Moonset lag criterion**: Zone of uncertainty covers the entire world (~240° of longitude). Crescents with lags as short as 35 min have been seen; crescents with lags of 75 min have been missed.
+
+> **Sources**: Odeh (2004), §2.1; Schaefer (1996), "Age" and "Moonset Lag" sections.
 
 ---
 
