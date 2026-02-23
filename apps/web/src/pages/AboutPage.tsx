@@ -180,13 +180,13 @@ export default function AboutPage() {
               <span>{t('methods.references')}:</span>
               <a href="https://en.wikipedia.org/wiki/New_moon" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wikipedia: New moon</a>
               <span>•</span>
-              <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop (1997)</a>
-              <span>•</span>
               <a href="https://www.researchgate.net/publication/225099773_New_Criterion_for_Lunar_Crescent_Visibility" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Odeh (2004)</a>
               <span>•</span>
-              <a href="https://adsabs.harvard.edu/full/1988QJRAS..29..511S" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer (1988)</a>
+              <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop (1997)</a>
               <span>•</span>
               <a href="https://astronomycenter.net/pdf/schaefer_1996.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer (1996)</a>
+              <span>•</span>
+              <a href="https://adsabs.harvard.edu/full/1988QJRAS..29..511S" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer (1988)</a>
               <span>•</span>
               <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">astronomy-engine</a>
             </div>
@@ -251,22 +251,6 @@ export default function AboutPage() {
 
               <li className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">Academic &amp; Scientific</li>
               <li>
-                <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop, B. D. (1997). <em>A Method for Predicting the First Sighting of the New Crescent Moon.</em></a>
-                <span className="text-slate-500"> — NAO Technical Note No. 69, HM Nautical Almanac Office</span>
-              </li>
-              <li>
-                <a href="https://www.researchgate.net/publication/225099773_New_Criterion_for_Lunar_Crescent_Visibility" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Odeh, M. (2004). <em>New Criterion for Lunar Crescent Visibility.</em></a>
-                <span className="text-slate-500"> — Experimental Astronomy, Vol. 18, pp. 39–64</span>
-              </li>
-              <li>
-                <a href="https://adsabs.harvard.edu/full/1988QJRAS..29..511S" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer, B. E. (1988). <em>Visibility of the Lunar Crescent.</em></a>
-                <span className="text-slate-500"> — Quarterly Journal of the Royal Astronomical Society, Vol. 29, pp. 511–523</span>
-              </li>
-              <li>
-                <a href="https://astronomycenter.net/pdf/schaefer_1996.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer, B. E. (1996). <em>Lunar Crescent Visibility.</em></a>
-                <span className="text-slate-500"> — Quarterly Journal of the Royal Astronomical Society, Vol. 37, pp. 759–768</span>
-              </li>
-              <li>
                 <a href="https://www.researchgate.net/publication/354067468_Predicting_the_First_Visibility_of_the_Lunar_Crescent" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Segura, W. (2021). <em>Predicting the First Visibility of the Lunar Crescent.</em></a>
               </li>
               <li>
@@ -274,8 +258,24 @@ export default function AboutPage() {
                 <span className="text-slate-500"> — Cambridge University Press</span>
               </li>
               <li>
+                <a href="https://www.researchgate.net/publication/225099773_New_Criterion_for_Lunar_Crescent_Visibility" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Odeh, M. (2004). <em>New Criterion for Lunar Crescent Visibility.</em></a>
+                <span className="text-slate-500"> — Experimental Astronomy, Vol. 18, pp. 39–64</span>
+              </li>
+              <li>
+                <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop, B. D. (1997). <em>A Method for Predicting the First Sighting of the New Crescent Moon.</em></a>
+                <span className="text-slate-500"> — NAO Technical Note No. 69, HM Nautical Almanac Office</span>
+              </li>
+              <li>
+                <a href="https://astronomycenter.net/pdf/schaefer_1996.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer, B. E. (1996). <em>Lunar Crescent Visibility.</em></a>
+                <span className="text-slate-500"> — Quarterly Journal of the Royal Astronomical Society, Vol. 37, pp. 759–768</span>
+              </li>
+              <li>
                 <a href="https://www.cs.tau.ac.il/~nachumd/papers/CalendricalCalculationsII.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Reingold, E. M., Dershowitz, N. &amp; Clamen, S. M. (1993). <em>Calendrical Calculations, II: Three Historical Calendars.</em></a>
                 <span className="text-slate-500"> — Software—Practice and Experience, Vol. 23(4), pp. 383–404</span>
+              </li>
+              <li>
+                <a href="https://adsabs.harvard.edu/full/1988QJRAS..29..511S" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Schaefer, B. E. (1988). <em>Visibility of the Lunar Crescent.</em></a>
+                <span className="text-slate-500"> — Quarterly Journal of the Royal Astronomical Society, Vol. 29, pp. 511–523</span>
               </li>
 
               <li className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">Software</li>

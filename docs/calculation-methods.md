@@ -747,27 +747,27 @@ The `astronomy-engine` library already provides everything needed (moon parallax
 
 | Citation | File |
 |---|---|
-| Yallop, B.D. (1997). "A Method for Predicting the First Sighting of the New Crescent Moon." NAO Technical Note No. 69, Royal Greenwich Observatory. | [`yallop_1997.pdf`](yallop_1997.pdf) |
-| Odeh, M.Sh. (2004). "New Criterion for Lunar Crescent Visibility." *Experimental Astronomy*, 18, 39–64. | [`New_Criterion_for_Lunar_Crescent_Visibility.pdf`](New_Criterion_for_Lunar_Crescent_Visibility.pdf) |
-| Schaefer, B.E. (1988). "Visibility of the Lunar Crescent." *QJRAS*, 29, 511–523. | [`1988QJRAS__29__511S.pdf`](1988QJRAS__29__511S.pdf) |
-| Schaefer, B.E. (1996). "Lunar Crescent Visibility." *QJRAS*, 37, 759–768. | [`schaefer_1996.pdf`](schaefer_1996.pdf) |
 | Segura, W. (2021). "Predicting the First Visibility of the Lunar Crescent." *Academia Letters*, Article 2878. | [`Predicting_the_First_Visibility_of_the_L.pdf`](Predicting_the_First_Visibility_of_the_L.pdf) |
+| Odeh, M.Sh. (2004). "New Criterion for Lunar Crescent Visibility." *Experimental Astronomy*, 18, 39–64. | [`New_Criterion_for_Lunar_Crescent_Visibility.pdf`](New_Criterion_for_Lunar_Crescent_Visibility.pdf) |
+| Yallop, B.D. (1997). "A Method for Predicting the First Sighting of the New Crescent Moon." NAO Technical Note No. 69, Royal Greenwich Observatory. | [`yallop_1997.pdf`](yallop_1997.pdf) |
+| Schaefer, B.E. (1996). "Lunar Crescent Visibility." *QJRAS*, 37, 759–768. | [`schaefer_1996.pdf`](schaefer_1996.pdf) |
 | Reingold, E.M., Dershowitz, N. & Clamen, S.M. (1993). "Calendrical Calculations, II." *Software—Practice and Experience*, 23(4), 383–404. | [`CalendricalCalculationsII.pdf`](CalendricalCalculationsII.pdf) |
+| Schaefer, B.E. (1988). "Visibility of the Lunar Crescent." *QJRAS*, 29, 511–523. | [`1988QJRAS__29__511S.pdf`](1988QJRAS__29__511S.pdf) |
 
 ### Additional references cited in the papers
 
-- Bruin, F. (1977). "The first visibility of the lunar crescent." *Vistas in Astronomy*, 21, 331–358.
-- Maunder, E.W. (1911). "On the smallest visible phase of the Moon." *J. British Astronomical Association*, 21, 355–362.
-- Schoch, C. (1930). *Ergänzungsheft zu den Astronomischen Nachrichten*, 8 (2).
-- Danjon, A. (1936). "Le croissant lunaire." *L'Astronomie*, 50, 57–65.
-- McNally, D. (1983). *QJRAS*, 24, 417.
+- Reingold, E.M. & Dershowitz, N. (2018). *Calendrical Calculations: The Ultimate Edition*. Cambridge University Press.
 - Caldwell, J. & Laney, C. (2001). "First visibility of the Lunar crescent." SAAO, *African Skies*, 5.
-- Doggett, L.E. & Schaefer, B.E. (1994). *Icarus*, 107, 388.
 - Fatoohi, L.J., Stephenson, F.R. & Al-Dargazelli, S.S. (1998). "The Danjon limit of first visibility of the lunar crescent." *Observatory*, 118, 65–72.
 - Ilyas, M. (1994). *QJRAS*, 35, 425.
-- Blackwell, H. (1946). "Contrast Thresholds of the Human Eye." *J. Optical Society of America*, 36(1), 624–643.
+- Doggett, L.E. & Schaefer, B.E. (1994). *Icarus*, 107, 388.
+- McNally, D. (1983). *QJRAS*, 24, 417.
+- Bruin, F. (1977). "The first visibility of the lunar crescent." *Vistas in Astronomy*, 21, 331–358.
 - Allen, C.W. (1973). *Astrophysical Quantities*. University of London.
-- Reingold, E.M. & Dershowitz, N. (2018). *Calendrical Calculations: The Ultimate Edition*. Cambridge University Press.
+- Blackwell, H. (1946). "Contrast Thresholds of the Human Eye." *J. Optical Society of America*, 36(1), 624–643.
+- Danjon, A. (1936). "Le croissant lunaire." *L'Astronomie*, 50, 57–65.
+- Schoch, C. (1930). *Ergänzungsheft zu den Astronomischen Nachrichten*, 8 (2).
+- Maunder, E.W. (1911). "On the smallest visible phase of the Moon." *J. British Astronomical Association*, 21, 355–362.
 
 ### Wikipedia articles (HTML in `docs/`)
 
