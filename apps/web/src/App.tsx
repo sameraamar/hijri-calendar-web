@@ -39,10 +39,10 @@ export default function App() {
             </NavLink>
             <nav className="hidden items-center gap-1 md:flex">
               {[
+                { to: '/holidays', label: t('app.nav.holidays') },
                 { to: '/calendar', label: t('app.nav.calendar') },
                 { to: '/convert', label: t('app.nav.convert') },
                 { to: '/details', label: t('app.nav.details') },
-                { to: '/holidays', label: t('app.nav.holidays') },
                 { to: '/methods', label: t('app.nav.methods') },
               ].map((item) => (
                 <NavLink
@@ -92,10 +92,10 @@ export default function App() {
 
         <nav className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 pb-2 md:hidden">
           {[
+            { to: '/holidays', label: t('app.nav.holidays') },
             { to: '/calendar', label: t('app.nav.calendar') },
             { to: '/convert', label: t('app.nav.convert') },
             { to: '/details', label: t('app.nav.details') },
-            { to: '/holidays', label: t('app.nav.holidays') },
             { to: '/methods', label: t('app.nav.methods') },
           ].map((item) => (
             <NavLink
@@ -118,7 +118,7 @@ export default function App() {
       <main className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-8">
         <Suspense fallback={<div className="py-12 text-center text-sm text-slate-400">Loading…</div>}>
           <Routes>
-            <Route path="/" element={<Navigate to="/calendar" replace />} />
+            <Route path="/" element={<Navigate to="/holidays" replace />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/convert" element={<ConvertPage />} />
             <Route path="/details" element={<DetailsPage />} />
