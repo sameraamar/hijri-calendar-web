@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -31,28 +31,34 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-          <div className="flex items-center gap-3">
-            <Link to="/calendar" className="text-lg font-semibold tracking-tight hover:opacity-90">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <div className="flex items-center gap-4">
+            <NavLink to="/calendar" className="text-lg font-bold tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
               {t('app.title')}
-            </Link>
-            <nav className="hidden gap-3 text-sm md:flex">
-              <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/calendar">
-                {t('app.nav.calendar')}
-              </Link>
-              <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/convert">
-                {t('app.nav.convert')}
-              </Link>
-              <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/details">
-                {t('app.nav.details')}
-              </Link>
-              <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/holidays">
-                {t('app.nav.holidays')}
-              </Link>
-              <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/methods">
-                {t('app.nav.methods')}
-              </Link>
+            </NavLink>
+            <nav className="hidden items-center gap-1 md:flex">
+              {[
+                { to: '/calendar', label: t('app.nav.calendar') },
+                { to: '/convert', label: t('app.nav.convert') },
+                { to: '/details', label: t('app.nav.details') },
+                { to: '/holidays', label: t('app.nav.holidays') },
+                { to: '/methods', label: t('app.nav.methods') },
+              ].map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
             </nav>
           </div>
 
@@ -84,22 +90,28 @@ export default function App() {
           </div>
         </div>
 
-        <nav className="mx-auto flex max-w-6xl flex-wrap gap-1 px-4 pb-3 text-sm md:hidden">
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/calendar">
-            {t('app.nav.calendar')}
-          </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/convert">
-            {t('app.nav.convert')}
-          </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/details">
-            {t('app.nav.details')}
-          </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/holidays">
-            {t('app.nav.holidays')}
-          </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/methods">
-            {t('app.nav.methods')}
-          </Link>
+        <nav className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 pb-2 md:hidden">
+          {[
+            { to: '/calendar', label: t('app.nav.calendar') },
+            { to: '/convert', label: t('app.nav.convert') },
+            { to: '/details', label: t('app.nav.details') },
+            { to: '/holidays', label: t('app.nav.holidays') },
+            { to: '/methods', label: t('app.nav.methods') },
+          ].map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `flex-shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200'
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
       </header>
 
