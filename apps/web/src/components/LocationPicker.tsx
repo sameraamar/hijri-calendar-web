@@ -51,6 +51,7 @@ export default function LocationPicker() {
   const { t } = useTranslation();
   const { location, setLocation } = useAppLocation();
   const [isLocating, setIsLocating] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
 
   const center = useMemo<[number, number]>(() => [location.latitude, location.longitude], [location]);
   const timeZone = useMemo(
@@ -71,19 +72,37 @@ export default function LocationPicker() {
   );
 
   const useMyLocation = useCallback(() => {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      setGeoError(t('location.geoErrorNotSupported'));
+      return;
+    }
     setIsLocating(true);
+    setGeoError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setIsLocating(false);
+        setGeoError(null);
         pick(pos.coords.latitude, pos.coords.longitude);
       },
-      () => {
+      (err) => {
         setIsLocating(false);
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            setGeoError(t('location.geoErrorDenied'));
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setGeoError(t('location.geoErrorUnavailable'));
+            break;
+          case err.TIMEOUT:
+            setGeoError(t('location.geoErrorTimeout'));
+            break;
+          default:
+            setGeoError(t('location.geoErrorUnknown'));
+        }
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 60_000 }
     );
-  }, [pick]);
+  }, [pick, t]);
 
   return (
     <section className="card">
@@ -117,6 +136,16 @@ export default function LocationPicker() {
           </button>
         </div>
       </div>
+
+      {geoError && (
+        <div className="mx-3 mb-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 w-5 h-5 flex-shrink-0 text-amber-500"><path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
+          <span>{geoError}</span>
+          <button type="button" onClick={() => setGeoError(null)} className="ml-auto text-amber-600 hover:text-amber-800">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-2">
         <div className="text-sm">

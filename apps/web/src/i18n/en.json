@@ -60,7 +60,12 @@
     "timezone": "Timezone",
     "latitude": "Latitude",
     "longitude": "Longitude",
-    "pickOnMap": "Pick on map"
+    "pickOnMap": "Pick on map",
+    "geoErrorDenied": "Location permission denied. Please enable location access in your browser/device settings.",
+    "geoErrorUnavailable": "Location unavailable. Please check that location services are enabled on your device.",
+    "geoErrorTimeout": "Location request timed out. Please try again.",
+    "geoErrorNotSupported": "Geolocation is not supported by your browser.",
+    "geoErrorUnknown": "Unable to determine your location. Please try again or pick on the map."
   },
   "convert": {
     "title": "Convert",
