@@ -77,25 +77,25 @@ function visibilityStatusFromEstimate(
   return status === 'unknown' ? 'unknown' : status;
 }
 
-function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: string } {
+function likelihoodStyle(likelihood: string): { badgeClass: string; dotClass: string; scoreClass: string } {
   // Keep this compact and consistent across calendar + details.
   // Uses Tailwind's built-in semantic colors (no custom hex).
   if (likelihood === 'noChance') {
-    return { badgeClass: 'bg-slate-100 text-slate-800 ring-1 ring-slate-200', dotClass: 'bg-slate-500' };
+    return { badgeClass: 'bg-slate-100 text-slate-800 ring-1 ring-slate-200', dotClass: 'bg-slate-500', scoreClass: 'bg-slate-200/80 text-slate-700' };
   }
   if (likelihood === 'veryLow') {
-    return { badgeClass: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100', dotClass: 'bg-rose-400' };
+    return { badgeClass: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100', dotClass: 'bg-rose-400', scoreClass: 'bg-rose-100/80 text-rose-700' };
   }
   if (likelihood === 'high') {
-    return { badgeClass: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200', dotClass: 'bg-emerald-500' };
+    return { badgeClass: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200', dotClass: 'bg-emerald-500', scoreClass: 'bg-emerald-100/80 text-emerald-800' };
   }
   if (likelihood === 'medium') {
-    return { badgeClass: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200', dotClass: 'bg-amber-500' };
+    return { badgeClass: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200', dotClass: 'bg-amber-500', scoreClass: 'bg-amber-100/80 text-amber-800' };
   }
   if (likelihood === 'low') {
-    return { badgeClass: 'bg-rose-50 text-rose-800 ring-1 ring-rose-200', dotClass: 'bg-rose-500' };
+    return { badgeClass: 'bg-rose-50 text-rose-800 ring-1 ring-rose-200', dotClass: 'bg-rose-500', scoreClass: 'bg-rose-100/80 text-rose-800' };
   }
-  return { badgeClass: 'bg-slate-50 text-slate-700 ring-1 ring-slate-200', dotClass: 'bg-slate-400' };
+  return { badgeClass: 'bg-slate-50 text-slate-700 ring-1 ring-slate-200', dotClass: 'bg-slate-400', scoreClass: 'bg-slate-200/80 text-slate-700' };
 }
 
 type CalendarTab = 'calendar' | 'details';
@@ -536,10 +536,9 @@ export default function CalendarPage() {
               const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
               const eveEst = monthData.estimateByIso.get(prevIso);
 
-              // Day chip should reflect this specific day's evening estimate.
+              // Day metrics for this specific date.
               const thisIso = isoDate(year, month, d.day);
               const thisEst = monthData.estimateByIso.get(thisIso);
-              const dayPercent = clamp0to100(thisEst?.metrics.visibilityPercent ?? 0);
               const dayLagMinutes = typeof thisEst?.metrics.lagMinutes === 'number' ? Math.round(thisEst.metrics.lagMinutes) : null;
               const dayIllumPercent =
                 typeof thisEst?.metrics.moonIlluminationFraction === 'number'
@@ -565,38 +564,45 @@ export default function CalendarPage() {
                     </div>
 
                     {d.showIndicator ? (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span
-                          className={
-                            `inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${eveStyle.badgeClass}`
-                          }
-                          title={`${t('probability.monthStartSignalFor')}: ${thisIso} (${t('holidays.eveOf')} ${prevIso}) — ${t(`probability.${eveStatusKey}`)} (${t('probability.crescentScore')}: ${evePercent}%)`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
-                          {t(`probability.${eveStatusKey}`)}
-                        </span>
-
-                        {typeof thisEst?.metrics.visibilityPercent === 'number' ? (
-                          <span className="text-[11px] text-slate-600">{dayPercent}%</span>
-                        ) : null}
-
-                        {dayLagMinutes !== null ? (
+                      <div className="flex flex-col gap-1">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span
-                            className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
-                            title={t('probability.lagMinutes')}
+                            className="inline-flex items-center overflow-hidden rounded-full ring-1 ring-black/10"
+                            title={`${t('probability.monthStartSignalFor')}: ${thisIso} (${t('holidays.eveOf')} ${prevIso}) — ${t(`probability.${eveStatusKey}`)} (${t('probability.crescentScore')}: ${evePercent}%)`}
                           >
-                            {dayLagMinutes}m
+                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium ${eveStyle.badgeClass} ring-0`}>
+                              <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                              {t(`probability.${eveStatusKey}`)}
+                            </span>
+                            {typeof eveEst?.metrics.visibilityPercent === 'number' ? (
+                              <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold ${eveStyle.scoreClass}`}>
+                                {evePercent}%
+                              </span>
+                            ) : null}
                           </span>
-                        ) : null}
+                        </div>
 
-                        {dayIllumPercent !== null ? (
-                          <span
-                            className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
-                            title={t('holidays.moonIllumination')}
-                          >
-                            {dayIllumPercent}%
-                          </span>
-                        ) : null}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {dayLagMinutes !== null ? (
+                            <span
+                              className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
+                              title={t('probability.lagMinutes')}
+                            >
+                              <span className="text-[10px] leading-none text-slate-500" aria-hidden="true">⏱</span>
+                              {dayLagMinutes}m
+                            </span>
+                          ) : null}
+
+                          {dayIllumPercent !== null ? (
+                            <span
+                              className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
+                              title={t('holidays.moonIllumination')}
+                            >
+                              <span className="text-[10px] leading-none text-slate-500" aria-hidden="true">☾</span>
+                              {dayIllumPercent}%
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
                     ) : null}
                   </div>
@@ -615,7 +621,6 @@ export default function CalendarPage() {
 
                             {thisEst ? (
                               <div className="mt-2 space-y-1">
-                                <MetricRow label={t('probability.label')} value={t(`probability.${visibilityStatusFromEstimate(thisEst)}`)} />
                                 <MetricRow
                                   label={t('probability.crescentScore')}
                                   value={
@@ -683,7 +688,6 @@ export default function CalendarPage() {
                                 <span className="font-mono">{prevIso}</span>
                               </div>
                               <div className="mt-1 space-y-1">
-                                <MetricRow label={t('probability.label')} value={t(`probability.${eveStatusKey}`)} />
                                 <MetricRow label={t('probability.crescentScore')} value={`${evePercent}%`} />
                                 <MetricRow
                                   label={t('probability.lagMinutes')}
