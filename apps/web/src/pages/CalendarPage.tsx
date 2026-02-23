@@ -485,33 +485,6 @@ export default function CalendarPage() {
           <div className="text-2xl font-semibold tracking-tight sm:text-3xl">{t('app.nav.calendar')}</div>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button type="button" className="btn-sm" onClick={goPrevMonth} aria-label={t('calendar.prevMonth')}>
-            {t('calendar.prevMonthShort')}
-          </button>
-          <select
-            className="control-sm w-28 sm:w-40"
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            aria-label={t('calendar.month')}
-          >
-            {monthOptions.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-          <input
-            className="control-sm w-20 sm:w-28"
-            type="number"
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            aria-label={t('calendar.year')}
-          />
-          <button type="button" className="btn-sm" onClick={goNextMonth} aria-label={t('calendar.nextMonth')}>
-            {t('calendar.nextMonthShort')}
-          </button>
-        </div>
       </div>
 
       {(() => {
@@ -532,10 +505,53 @@ export default function CalendarPage() {
         })();
         return (
         <section ref={calendarRef} className="card overflow-visible relative z-10">
-          <div className="card-header flex-col items-start gap-0 sm:flex-row sm:items-center sm:gap-3">
-            <span>{new Date(year, monthData.month - 1, 1).toLocaleString(i18n.language, { month: 'long', year: 'numeric' })}</span>
+          <div className="card-header flex flex-col items-center gap-1">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={goPrevMonth}
+                aria-label={t('calendar.prevMonth')}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 rtl:rotate-180"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd"/></svg>
+              </button>
+              <select
+                className="control-sm w-24 sm:w-36 text-center"
+                value={month}
+                onChange={(e) => setMonth(Number(e.target.value))}
+                aria-label={t('calendar.month')}
+              >
+                {monthOptions.map((m) => (
+                  <option key={m.value} value={m.value}>{m.label}</option>
+                ))}
+              </select>
+              <input
+                className="control-sm w-16 sm:w-20 text-center"
+                type="number"
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value))}
+                aria-label={t('calendar.year')}
+              />
+              <button
+                type="button"
+                onClick={goNextMonth}
+                aria-label={t('calendar.nextMonth')}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 rtl:rotate-180"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd"/></svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => { const now = new Date(); setYear(now.getFullYear()); setMonth(now.getMonth() + 1); }}
+                aria-label={t('calendar.today')}
+                title={t('calendar.today')}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+              </button>
+            </div>
             {hijriRangeLabel ? (
-              <span className="text-sm font-normal text-slate-500">({hijriRangeLabel})</span>
+              <span className="text-xs text-slate-500">({hijriRangeLabel})</span>
             ) : null}
           </div>
           <div className="grid grid-cols-7 gap-px bg-slate-200 p-px">

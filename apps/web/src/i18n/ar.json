@@ -36,7 +36,8 @@
     "prevMonthShort": "السابق",
     "nextMonthShort": "التالي",
     "tabCalendar": "التقويم",
-    "tabDetails": "تفاصيل"
+    "tabDetails": "تفاصيل",
+    "today": "اليوم"
   },
   "hijriMonths": {
     "1": "محرّم",

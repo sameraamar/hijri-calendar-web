@@ -36,7 +36,8 @@
     "prevMonthShort": "Prev",
     "nextMonthShort": "Next",
     "tabCalendar": "Calendar",
-    "tabDetails": "Details"
+    "tabDetails": "Details",
+    "today": "Today"
   },
   "hijriMonths": {
     "1": "Muharram",
