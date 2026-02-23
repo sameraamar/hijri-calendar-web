@@ -530,23 +530,24 @@ export default function CalendarPage() {
             {monthData.days.map((d) => {
               const bg = d.isHijriMonthStart ? 'bg-slate-50' : 'bg-white';
 
-              // The evening estimate on date D-1 affects the day D after sunset.
+              // Previous evening context for this Gregorian day.
               const prev = new Date(Date.UTC(year, month - 1, d.day, 0, 0, 0));
               prev.setUTCDate(prev.getUTCDate() - 1);
               const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
               const eveEst = monthData.estimateByIso.get(prevIso);
 
-              // The evening estimate on date D affects the *next* day (D+1).
+              // Day chip should reflect this specific day's evening estimate.
               const thisIso = isoDate(year, month, d.day);
               const thisEst = monthData.estimateByIso.get(thisIso);
+              const dayPercent = clamp0to100(thisEst?.metrics.visibilityPercent ?? 0);
+              const dayLagMinutes = typeof thisEst?.metrics.lagMinutes === 'number' ? Math.round(thisEst.metrics.lagMinutes) : null;
+              const dayIllumPercent =
+                typeof thisEst?.metrics.moonIlluminationFraction === 'number'
+                  ? Math.round(thisEst.metrics.moonIlluminationFraction * 100)
+                  : null;
               const evePercent = clamp0to100(eveEst?.metrics.visibilityPercent ?? 0);
-              const eveLagMinutes = typeof eveEst?.metrics.lagMinutes === 'number' ? Math.round(eveEst.metrics.lagMinutes) : null;
               const eveStatusKey = visibilityStatusFromEstimate(eveEst);
               const eveStyle = likelihoodStyle(eveStatusKey);
-              const eveIllumPercent =
-                typeof eveEst?.metrics.moonIlluminationFraction === 'number'
-                  ? Math.round(eveEst.metrics.moonIlluminationFraction * 100)
-                  : null;
 
               return (
                 <div
@@ -575,25 +576,25 @@ export default function CalendarPage() {
                           {t(`probability.${eveStatusKey}`)}
                         </span>
 
-                        {typeof eveEst?.metrics.visibilityPercent === 'number' ? (
-                          <span className="text-[11px] text-slate-600">{evePercent}%</span>
+                        {typeof thisEst?.metrics.visibilityPercent === 'number' ? (
+                          <span className="text-[11px] text-slate-600">{dayPercent}%</span>
                         ) : null}
 
-                        {eveLagMinutes !== null ? (
+                        {dayLagMinutes !== null ? (
                           <span
                             className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
                             title={t('probability.lagMinutes')}
                           >
-                            {eveLagMinutes}m
+                            {dayLagMinutes}m
                           </span>
                         ) : null}
 
-                        {eveIllumPercent !== null ? (
+                        {dayIllumPercent !== null ? (
                           <span
                             className="inline-flex items-center rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
                             title={t('holidays.moonIllumination')}
                           >
-                            {eveIllumPercent}%
+                            {dayIllumPercent}%
                           </span>
                         ) : null}
                       </div>
@@ -606,35 +607,7 @@ export default function CalendarPage() {
                         <div className="space-y-3">
                           <div className="text-[11px] leading-relaxed text-slate-600">{t('holidays.monthStartRuleNote')}</div>
 
-                          {eveEst ? (
-                            <div>
-                              <div className="text-[11px] font-semibold text-slate-900">
-                                {t('probability.monthStartSignalFor')}{' '}
-                                <span className="font-mono font-normal">{thisIso}</span>
-                              </div>
-                              <div className="mt-0.5 text-[11px] text-slate-600">
-                                {t('probability.basedOn')}: {t('holidays.eveOf')}{' '}
-                                <span className="font-mono">{prevIso}</span>
-                              </div>
-                              <div className="mt-2 space-y-1">
-                                <MetricRow label={t('probability.label')} value={t(`probability.${eveStatusKey}`)} />
-                                <MetricRow label={t('probability.crescentScore')} value={`${evePercent}%`} />
-                                <MetricRow
-                                  label={t('probability.lagMinutes')}
-                                  value={
-                                    typeof eveEst.metrics.lagMinutes === 'number'
-                                      ? String(Math.round(eveEst.metrics.lagMinutes))
-                                      : '—'
-                                  }
-                                />
-                                {eveStatusKey === 'noChance' ? (
-                                  <div className="text-[11px] text-slate-600">{t('probability.noChanceHint')}</div>
-                                ) : null}
-                              </div>
-                            </div>
-                          ) : null}
-
-                          <div className="border-t border-slate-100 pt-3">
+                          <div>
                             <div className="text-[11px] font-semibold text-slate-900">
                               {t('probability.eveningEstimate')}: {t('holidays.eveOf')}{' '}
                               <span className="font-mono font-normal">{thisIso}</span>
@@ -698,6 +671,34 @@ export default function CalendarPage() {
                               <div className="mt-2 text-[11px] text-slate-600">—</div>
                             )}
                           </div>
+
+                          {eveEst ? (
+                            <div className="border-t border-slate-100 pt-3">
+                              <div className="text-[11px] font-semibold text-slate-900">
+                                {t('probability.monthStartSignalFor')}{' '}
+                                <span className="font-mono font-normal">{thisIso}</span>
+                              </div>
+                              <div className="mt-0.5 text-[11px] text-slate-600">
+                                {t('probability.basedOn')}: {t('holidays.eveOf')}{' '}
+                                <span className="font-mono">{prevIso}</span>
+                              </div>
+                              <div className="mt-1 space-y-1">
+                                <MetricRow label={t('probability.label')} value={t(`probability.${eveStatusKey}`)} />
+                                <MetricRow label={t('probability.crescentScore')} value={`${evePercent}%`} />
+                                <MetricRow
+                                  label={t('probability.lagMinutes')}
+                                  value={
+                                    typeof eveEst.metrics.lagMinutes === 'number'
+                                      ? String(Math.round(eveEst.metrics.lagMinutes))
+                                      : '—'
+                                  }
+                                />
+                                {eveStatusKey === 'noChance' ? (
+                                  <div className="text-[11px] text-slate-600">{t('probability.noChanceHint')}</div>
+                                ) : null}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     </div>
