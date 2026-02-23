@@ -4,21 +4,48 @@
 
 ---
 
+## How Visibility Methods Are Categorised
+
+The crescent-visibility methods in the literature fall into **three families**, distinguished by how much physics they model. Understanding these families helps explain why some methods agree with each other and why newer methods tend to outperform older ones.
+
+| Family | What it does | Strengths | Weaknesses |
+|---|---|---|---|
+| **A — Simple Empirical** | Uses easily measured quantities (moon age, lag, altitude, azimuth) with fixed thresholds. No atmospheric or brightness modelling. | Easy to compute; no special data needed | Cannot account for atmospheric haze, elevation, or season; large zones of uncertainty |
+| **B — Semi-Empirical** | Introduces physics-based parameters (crescent width W, topocentric corrections) but calibrates zone boundaries empirically against observation databases. | Single formula; well-calibrated; widely adopted | Assumes "average" atmosphere; no site-specific adjustment |
+| **C — Physical / Photometric** | Models the full chain: lunar luminance → atmospheric extinction → twilight sky brightness → human eye detection threshold. | Site-specific; captures the actual physics of detection | Complex; requires local atmospheric data; harder to validate globally |
+
+A method earns its own entry when it introduces **(1)** a new formula or algorithm that can be implemented independently, **(2)** its own visibility zones or thresholds, and **(3)** adoption or distinct citation in the literature. Contributions that refine an existing method's parameters (e.g., revising the Danjon limit) are documented within the parent method's section.
+
+The **Danjon limit** — the minimum Sun-Moon elongation below which visibility is impossible — is a cross-cutting concept used by all three families. It appears as its own section (§13) because every method references it.
+
+---
+
 ## Table of Contents
 
+**Calendar Systems (non-visibility)**
 1. [Tabular / Islamic Civil Calendar](#1-tabular--islamic-civil-calendar)
 2. [Umm al-Qura Calendar](#2-umm-al-qura-calendar)
 3. [Global Conjunction ("Moon Birth on Earth")](#3-global-conjunction-moon-birth-on-earth)
 4. [New Moon at Makkah](#4-new-moon-at-makkah)
+
+**Category C — Physical / Photometric Models** *(model the full detection chain)*
 5. [Segura Illuminance Model (2021)](#5-segura-illuminance-model-2021)
-6. [Odeh Criterion (2004)](#6-odeh-criterion-2004)
-7. [SAAO Criterion (Caldwell & Laney 2001)](#7-saao-criterion-caldwell--laney-2001)
-8. [Yallop q-Test (1997)](#8-yallop-q-test-1997)
-9. [Schaefer Modern Theoretical Algorithm (1988 / 1996)](#9-schaefer-modern-theoretical-algorithm)
-10. [Bruin Physical Model (1977)](#10-bruin-physical-model-1977)
-11. [Danjon Limit (1936)](#11-danjon-limit-1936)
-12. [Altitude / Azimuth Criteria (Maunder 1911, Indian/Schoch 1930)](#12-altitude--azimuth-criteria)
-13. [Babylonian Criterion (Age + Lag)](#13-babylonian-criterion-age--lag)
+6. [Schaefer & Sultan Photometric Models (1988–2007)](#6-schaefer--sultan-photometric-models-19882007)
+7. [Bruin Physical Model (1977)](#7-bruin-physical-model-1977)
+
+**Category B — Semi-Empirical Criteria** *(physics-informed parameters, empirically calibrated)*
+8. [Odeh Criterion (2004)](#8-odeh-criterion-2004)
+9. [SAAO Criterion (Caldwell & Laney 2001)](#9-saao-criterion-caldwell--laney-2001)
+10. [Yallop q-Test (1997)](#10-yallop-q-test-1997)
+
+**Category A — Simple Empirical Criteria** *(fixed thresholds on raw observables)*
+11. [Altitude / Azimuth Criteria (Maunder 1911, Indian/Schoch 1930)](#11-altitude--azimuth-criteria)
+12. [Babylonian Criterion (Age + Lag)](#12-babylonian-criterion-age--lag)
+
+**Cross-Cutting Concept**
+13. [The Danjon Limit](#13-the-danjon-limit)
+
+**Practical & Implementation**
 14. [Country-Specific Rules](#14-country-specific-rules)
 15. [Our Implementation — Weighted Heuristic (MVP)](#15-our-implementation--weighted-heuristic-mvp)
 16. [References & Credits](#16-references--credits)
@@ -222,6 +249,12 @@ Umm al-Qura adds a second condition: moonset must also be after sunset at Makkah
 
 ---
 
+# Category C — Physical / Photometric Models
+
+> These methods model the **full detection chain**: lunar luminance → atmospheric extinction → twilight sky brightness → human visual threshold. They can produce site-specific predictions but require atmospheric data and are more complex to implement.
+
+---
+
 ## 5. Segura Illuminance Model (2021)
 
 ### What it is
@@ -254,7 +287,157 @@ Blackwell (1946) showed that threshold vision is a probabilistic process with th
 
 ---
 
-## 6. Odeh Criterion (2004)
+## 6. Schaefer & Sultan Photometric Models (1988–2007)
+
+### 6.1 Schaefer Modern Theoretical Algorithm (1988 / 1996)
+
+#### What it is
+
+Bradley E. Schaefer developed a **physics-based model** that calculates whether the crescent Moon can actually be detected by the human eye given specific atmospheric and sky conditions. Rather than using empirical altitude/azimuth thresholds, it models the underlying physical and physiological processes.
+
+#### Approach
+
+The algorithm computes an **R-parameter**:
+
+R = log₁₀(B_moon_actual / B_moon_threshold)
+
+where:
+- B_moon_actual = actual surface brightness of the crescent moon as seen through the atmosphere
+- B_moon_threshold = minimum brightness detectable by the human eye against the twilight sky
+
+The algorithm also calculates ΔR (estimated 1σ uncertainty). The ratio R / ΔR measures **confidence** in the visibility prediction:
+- Large positive → easily visible
+- Near zero → on the boundary (zone of uncertainty)
+- Large negative → invisible
+
+#### Components modelled
+
+1. **Orbital mechanics**: Sun/Moon positions (ARCL, ARCV, DAZ)
+2. **Lunar scattering**: crescent brightness as a function of phase angle (using Allen 1963)
+3. **Atmospheric extinction**: Rayleigh scattering, aerosol scattering, ozone absorption — each handled separately due to distinct vertical structure
+4. **Twilight sky brightness**: as a function of Sun depression and azimuth
+5. **Visual physiology**: human detection threshold for a thin crescent shape
+
+#### Key advantage
+
+The atmospheric haziness is calculated on a **site-by-site, month-by-month** basis using seasonal, latitudinal, and elevation correlations corrected for average evening relative humidity. This accounts for the large visibility differences between (e.g.) a clear Arizona desert sky and turbid Louisiana summer air — something altitude/azimuth criteria cannot do.
+
+#### Performance (tested on 294 observations + 1490 Moonwatch reports)
+
+| Algorithm | Avg. error (longitude) | Max error (longitude) | Zone of uncertainty |
+|---|---|---|---|
+| Age (24 h) | — | — | 238° (entire world) |
+| Moonset lag (48 min) | 66° | 144° | 240° (entire world) |
+| Altitude/azimuth | ~40° | ~70° | 94° (~3/4 of world) |
+| **Schaefer theoretical** | **11°** | **23°** | **59°** |
+
+#### Pseudocode (conceptual — the actual model is complex)
+
+```
+function schaeferVisibility(observer, date):
+    // 1. Compute Sun/Moon ephemeris at best time
+    (ARCL, ARCV, DAZ, moonAlt, sunDepression) = computeEphemeris(observer, date)
+
+    // 2. Compute crescent brightness
+    phaseMag = allenLunarMagnitude(ARCL)
+    crescentBrightness = mag_to_luminance(phaseMag)
+
+    // 3. Apply atmospheric extinction
+    k_rayleigh = rayleighCoefficient(observer.elevation, observer.latitude, month)
+    k_aerosol  = aerosolCoefficient(observer.elevation, observer.latitude, month, humidity)
+    k_ozone    = ozoneCoefficient(observer.latitude, month)
+    k_total    = k_rayleigh + k_aerosol + k_ozone
+    airmass    = 1 / cos(zenithAngle)  // simplified; Schaefer uses Rozenberg formula
+    B_moon     = crescentBrightness * 10^(-0.4 * k_total * airmass)
+
+    // 4. Compute twilight sky brightness
+    B_sky = twilightModel(sunDepression, azimuthFromSun, k_total)
+
+    // 5. Human eye detection threshold
+    B_threshold = contrastThreshold(B_sky, crescentAngularSize)
+
+    // 6. Calculate R
+    R = log10(B_moon / B_threshold)
+    DR = estimateUncertainty(...)
+
+    if R > 0:  return "Visible (confidence: R/DR)"
+    else:      return "Not visible"
+```
+
+#### Software
+
+Schaefer implemented this as [LunarCal](http://www.cfa.harvard.edu/~bschaefer/) (Westwind Computing, 1990).
+
+> **Sources**: Schaefer, B.E. (1988), "Visibility of the Lunar Crescent," *Quarterly Journal of the Royal Astronomical Society*, 29, 511–523. PDF: [`docs/1988QJRAS__29__511S.pdf`](1988QJRAS__29__511S.pdf); Schaefer, B.E. (1996), "Lunar Crescent Visibility," *QJRAS*, 37, 759–768. PDF: [`docs/schaefer_1996.pdf`](schaefer_1996.pdf).
+
+### 6.2 Sultan Photometric Refinement (2004–2007)
+
+#### What it is
+
+A.H. Sultan (Sana'a University, Yemen) extended the Schaefer-style photometric approach in a series of papers (2004, 2005, 2006, 2007), using Blackwell's (1946) contrast-threshold data with **site-specific** twilight-sky measurements from a 2000 m elevation site and incorporating recent research on human eye perception.
+
+#### Key findings
+
+| Topic | Result |
+|---|---|
+| **Naked-eye Danjon limit** | **7.5° ±0.25°** — revises Danjon's 7° and Fatoohi's 7.5° upward with photometric justification |
+| **Optical-aid limit** | With 200× magnification under ideal conditions, the Danjon limit effectively **vanishes** — the crescent could theoretically be seen even at new Moon when the Moon is at its greatest inclination |
+| **Youngest naked-eye crescent** | At 7.5° elongation: ~15 h 11 min (apogee) or ~14 h (perigee) after conjunction |
+| **Crescent arc at new Moon** | Only ~7.1° (4% of a normal crescent's 180° arc) would be detectable telescopically |
+
+#### Approach
+
+Sultan uses the same physical framework as Schaefer — visibility occurs when the **contrast** C = (L − L_B) / L_B exceeds the Blackwell threshold C_th — but with three refinements:
+
+1. **Site-specific sky luminance**: measured twilight brightness L_B at the observer's site, rather than modelled from latitude/season.
+2. **Optimal altitude**: calculated the best lunar altitude for first visibility (Sultan 2006), reducing the problem to elongation as the single remaining variable when DAZ = 0°.
+3. **Eye perception research**: incorporated newer neurophysiology data (DeVries & Baylor 1997; Ying et al. 2005; Vassilev et al. 2005) for the visual detection threshold.
+
+#### Why it is a contribution, not a separate method
+
+Sultan does not introduce a new formula or new visibility zones. He applies Schaefer's C > C_th framework with better input data (measured sky brightness, updated perceptual research) to answer a specific question: *what is the true Danjon limit?* His results refine the Danjon limit values used by Yallop, Odeh, and others, but a calendar implementer would still use Schaefer's algorithm (or Yallop's, or Odeh's) with Sultan's revised limit as a parameter.
+
+> **Sources**: Sultan, A.H. (2007), "First Visibility of the Lunar Crescent: Beyond Danjon's Limit," *The Observatory*, 127(1), 53–59. PDF: [`docs/sultan_2007.pdf`](sultan_2007.pdf); Sultan, A.H. (2006), *The Observatory*, 126, 115; Sultan, A.H. (2005), *The Observatory*, 125, 227; Sultan, A.H. (2004), *The Observatory*, 124, 390.
+
+---
+
+## 7. Bruin Physical Model (1977)
+
+### What it is
+
+Bruin proposed expressing the visibility criterion as ARCV vs. the **crescent width** W (arcminutes), rather than ARCV vs. DAZ. This is a more physically meaningful parameterisation because W directly relates to the crescent's intrinsic brightness. He also provides a method for calculating the **best time** for observation and curves for different values of W.
+
+### Criterion
+
+The crescent is visible if:
+
+ARCV > 12.4023 − 9.4878·W + 3.9512·W² − 0.5632·W³
+
+where W = width of the crescent in arcminutes:
+
+W = 15·(1 − cos ARCL)
+
+(Bruin assumed a constant semi-diameter of 15'.)
+
+| W | 0.3' | 0.5' | 0.7' | 1' | 2' | 3' |
+|---|---|---|---|---|---|---|
+| ARCV threshold | 10.0° | 8.4° | 7.5° | 6.4° | 4.7° | 4.3° |
+
+### Limitations
+
+Bruin applied a "Gestalt" factor to his curves. Doggett & Schaefer (1994) criticized some of his atmospheric assumptions as being "orders of magnitude out." Nevertheless, Yallop (1997) considered Bruin's approach foundational because it addresses the physics of the problem.
+
+> **Sources**: Bruin, F. (1977), "The first visibility of the lunar crescent," *Vistas in Astronomy*, 21, 331–358; Yallop (1997), §3; Odeh (2004), Table III.
+
+---
+
+# Category B — Semi-Empirical Criteria
+
+> These methods use **physics-informed parameters** (crescent width, topocentric corrections) but calibrate their zone boundaries **empirically** against databases of historical observations. They produce simple, implementable formulae.
+
+---
+
+## 8. Odeh Criterion (2004)
 
 ### What it is
 
@@ -324,7 +507,7 @@ function odehCriterion(ARCV_topo, W_topo):
 
 ---
 
-## 7. SAAO Criterion (Caldwell & Laney 2001)
+## 9. SAAO Criterion (Caldwell & Laney 2001)
 
 ### What it is
 
@@ -345,7 +528,7 @@ A criterion from the South African Astronomical Observatory (SAAO), based on Sch
 
 ---
 
-## 8. Yallop q-Test (1997)
+## 10. Yallop q-Test (1997)
 
 ### What it is
 
@@ -428,143 +611,13 @@ The q-test was calibrated against **295 historical observations** spanning 1859�
 
 ---
 
-## 9. Schaefer Modern Theoretical Algorithm (1988 / 1996)
+# Category A — Simple Empirical Criteria
 
-### What it is
-
-Bradley E. Schaefer developed a **physics-based model** that calculates whether the crescent Moon can actually be detected by the human eye given specific atmospheric and sky conditions. Rather than using empirical altitude/azimuth thresholds, it models the underlying physical and physiological processes.
-
-### Approach
-
-The algorithm computes an **R-parameter**:
-
-R = log₁₀(B_moon_actual / B_moon_threshold)
-
-where:
-- B_moon_actual = actual surface brightness of the crescent moon as seen through the atmosphere
-- B_moon_threshold = minimum brightness detectable by the human eye against the twilight sky
-
-The algorithm also calculates ΔR (estimated 1σ uncertainty). The ratio R / ΔR measures **confidence** in the visibility prediction:
-- Large positive → easily visible
-- Near zero → on the boundary (zone of uncertainty)
-- Large negative → invisible
-
-### Components modelled
-
-1. **Orbital mechanics**: Sun/Moon positions (ARCL, ARCV, DAZ)
-2. **Lunar scattering**: crescent brightness as a function of phase angle (using Allen 1963)
-3. **Atmospheric extinction**: Rayleigh scattering, aerosol scattering, ozone absorption — each handled separately due to distinct vertical structure
-4. **Twilight sky brightness**: as a function of Sun depression and azimuth
-5. **Visual physiology**: human detection threshold for a thin crescent shape
-
-### Key advantage
-
-The atmospheric haziness is calculated on a **site-by-site, month-by-month** basis using seasonal, latitudinal, and elevation correlations corrected for average evening relative humidity. This accounts for the large visibility differences between (e.g.) a clear Arizona desert sky and turbid Louisiana summer air — something altitude/azimuth criteria cannot do.
-
-### Performance (tested on 294 observations + 1490 Moonwatch reports)
-
-| Algorithm | Avg. error (longitude) | Max error (longitude) | Zone of uncertainty |
-|---|---|---|---|
-| Age (24 h) | — | — | 238° (entire world) |
-| Moonset lag (48 min) | 66° | 144° | 240° (entire world) |
-| Altitude/azimuth | ~40° | ~70° | 94° (~3/4 of world) |
-| **Schaefer theoretical** | **11°** | **23°** | **59°** |
-
-### Pseudocode (conceptual — the actual model is complex)
-
-```
-function schaeferVisibility(observer, date):
-    // 1. Compute Sun/Moon ephemeris at best time
-    (ARCL, ARCV, DAZ, moonAlt, sunDepression) = computeEphemeris(observer, date)
-
-    // 2. Compute crescent brightness
-    phaseMag = allenLunarMagnitude(ARCL)
-    crescentBrightness = mag_to_luminance(phaseMag)
-
-    // 3. Apply atmospheric extinction
-    k_rayleigh = rayleighCoefficient(observer.elevation, observer.latitude, month)
-    k_aerosol  = aerosolCoefficient(observer.elevation, observer.latitude, month, humidity)
-    k_ozone    = ozoneCoefficient(observer.latitude, month)
-    k_total    = k_rayleigh + k_aerosol + k_ozone
-    airmass    = 1 / cos(zenithAngle)  // simplified; Schaefer uses Rozenberg formula
-    B_moon     = crescentBrightness * 10^(-0.4 * k_total * airmass)
-
-    // 4. Compute twilight sky brightness
-    B_sky = twilightModel(sunDepression, azimuthFromSun, k_total)
-
-    // 5. Human eye detection threshold
-    B_threshold = contrastThreshold(B_sky, crescentAngularSize)
-
-    // 6. Calculate R
-    R = log10(B_moon / B_threshold)
-    DR = estimateUncertainty(...)
-
-    if R > 0:  return "Visible (confidence: R/DR)"
-    else:      return "Not visible"
-```
-
-### Software
-
-Schaefer implemented this as [LunarCal](http://www.cfa.harvard.edu/~bschaefer/) (Westwind Computing, 1990).
-
-> **Sources**: Schaefer, B.E. (1988), "Visibility of the Lunar Crescent," *Quarterly Journal of the Royal Astronomical Society*, 29, 511–523. PDF: [`docs/1988QJRAS__29__511S.pdf`](1988QJRAS__29__511S.pdf); Schaefer, B.E. (1996), "Lunar Crescent Visibility," *QJRAS*, 37, 759–768. PDF: [`docs/schaefer_1996.pdf`](schaefer_1996.pdf).
+> These methods use **fixed thresholds** on easily measured quantities (altitude, azimuth, moon age, lag time). They require no physics modelling but have large zones of uncertainty because they cannot account for atmospheric conditions.
 
 ---
 
-## 10. Bruin Physical Model (1977)
-
-### What it is
-
-Bruin proposed expressing the visibility criterion as ARCV vs. the **crescent width** W (arcminutes), rather than ARCV vs. DAZ. This is a more physically meaningful parameterisation because W directly relates to the crescent's intrinsic brightness. He also provides a method for calculating the **best time** for observation and curves for different values of W.
-
-### Criterion
-
-The crescent is visible if:
-
-ARCV > 12.4023 − 9.4878·W + 3.9512·W² − 0.5632·W³
-
-where W = width of the crescent in arcminutes:
-
-W = 15·(1 − cos ARCL)
-
-(Bruin assumed a constant semi-diameter of 15'.)
-
-| W | 0.3' | 0.5' | 0.7' | 1' | 2' | 3' |
-|---|---|---|---|---|---|---|
-| ARCV threshold | 10.0° | 8.4° | 7.5° | 6.4° | 4.7° | 4.3° |
-
-### Limitations
-
-Bruin applied a "Gestalt" factor to his curves. Doggett & Schaefer (1994) criticized some of his atmospheric assumptions as being "orders of magnitude out." Nevertheless, Yallop (1997) considered Bruin's approach foundational because it addresses the physics of the problem.
-
-> **Sources**: Bruin, F. (1977), "The first visibility of the lunar crescent," *Vistas in Astronomy*, 21, 331–358; Yallop (1997), §3; Odeh (2004), Table III.
-
----
-
-## 11. Danjon Limit (1936)
-
-### What it is
-
-The **minimum elongation** (angular separation between Moon and Sun) below which the crescent cannot be seen, regardless of observing conditions.
-
-### Values in the literature
-
-| Author | Year | Danjon limit | Basis |
-|---|---|---|---|
-| Danjon | 1936 | **7°** | Attributed to shadow of lunar mountains |
-| McNally | 1983 | **5°** | Attributed to atmospheric seeing effects |
-| Schaefer | 1991 | **7°** | Crescent brightness below detection threshold |
-| Odeh | 2004 | **6.4°** | Observation #697 from 737-record database |
-
-### In Yallop's formulation
-
-The Danjon limit corresponds to ARCL ≈ 7°. Allowing 1° for horizontal parallax and ignoring refraction, ARCL = 8°. With DAZ = 0, this gives q ≈ −0.293 (the boundary between zones E and F).
-
-> **Sources**: Danjon (1936); Odeh (2004), §8; Yallop (1997), §6.
-
----
-
-## 12. Altitude / Azimuth Criteria (Maunder 1911, Indian/Schoch 1930)
+## 11. Altitude / Azimuth Criteria (Maunder 1911, Indian/Schoch 1930)
 
 ### Maunder (1911)
 
@@ -598,7 +651,7 @@ The altitude/azimuth criteria can make a **confident prediction only about one-q
 
 ---
 
-## 13. Babylonian Criterion (Age + Lag)
+## 12. Babylonian Criterion (Age + Lag)
 
 ### What it is
 
@@ -624,6 +677,50 @@ Schaefer (1996) tested this criterion against 294 individual observations and th
 - **Moonset lag criterion**: Zone of uncertainty covers the entire world (~240° of longitude). Crescents with lags as short as 35 min have been seen; crescents with lags of 75 min have been missed.
 
 > **Sources**: Odeh (2004), §2.1; Schaefer (1996), "Age" and "Moonset Lag" sections.
+
+---
+
+# Cross-Cutting Concept
+
+---
+
+## 13. The Danjon Limit
+
+### What it is
+
+The **minimum elongation** (angular separation between Moon and Sun) below which the crescent cannot be seen, regardless of observing conditions. This is not a method but a **parameter** used by virtually every visibility criterion.
+
+### Values in the literature
+
+| Author | Year | Danjon limit | Basis |
+|---|---|---|---|
+| Danjon | 1936 | **7°** | Attributed to shadow of lunar mountains |
+| McNally | 1983 | **5°** | Attributed to atmospheric seeing effects |
+| Schaefer | 1991 | **7°** | Crescent brightness below detection threshold |
+| Fatoohi et al. | 1998 | **7.5°** | 52 observations extracted from 503 ancient and modern records |
+| Odeh | 2004 | **6.4°** | Observation #697 (optical aid) from 737-record database |
+| Sultan | 2007 | **7.5° ±0.25°** (naked eye); **~0°** (200× telescope) | Photometric model with site-specific sky measurements |
+
+### In Yallop's formulation
+
+The Danjon limit corresponds to ARCL ≈ 7°. Allowing 1° for horizontal parallax and ignoring refraction, ARCL = 8°. With DAZ = 0, this gives q ≈ −0.293 (the boundary between zones E and F).
+
+### Naked eye vs. optical aid
+
+The Danjon limit differs significantly depending on whether the observation is naked-eye or telescope-aided:
+- **Naked eye**: the consensus from Fatoohi (1998) and Sultan (2007) converges on **~7.5°**.
+- **Optical aid**: Odeh's database shows sightings down to **6.4°**; Sultan's photometric model predicts that with sufficient magnification (200×) and ideal conditions, the limit approaches **0°** — though such conditions rarely coincide in practice.
+
+### How each method uses it
+
+| Method | Danjon limit role |
+|---|---|
+| Yallop q-test | Zone F boundary (q ≤ −0.293) corresponds to ARCL ≈ 7° |
+| Odeh criterion | Zone D (V < −0.96) implicitly encodes a limit near 6.4° |
+| Schaefer model | Emerges naturally when R < 0 at small elongations |
+| Our heuristic | Hard-coded cutoff at 6° elongation |
+
+> **Sources**: Danjon, A. (1936); Fatoohi, L.J. et al. (1998), *Observatory*, 118, 65–72; Odeh (2004), §8; Yallop (1997), §6; Sultan, A.H. (2007), *The Observatory*, 127(1), 53–59.
 
 ---
 
@@ -702,6 +799,10 @@ The score is clamped to [0, 1] and mapped to a percentage (0–100%).
 
 If day X is "medium" or "high," day X+1 is forced to "noChance" — a month can only start once.
 
+### Category placement
+
+Our heuristic is a **hybrid of Category A and B** — it uses raw observables (age, lag) like Category A methods, but also uses elongation (related to crescent width) like Category B methods. It does not model atmospheric or physiological factors (Category C).
+
 ### Relationship to the literature
 
 | Our parameter | Comparable to |
@@ -716,7 +817,7 @@ We do **not** compute crescent width W, topocentric corrections to W, atmospheri
 
 ### Closest established method: Yallop q-test
 
-The Yallop q-test (§8) is the most comparable published criterion. Both produce a single scalar mapped to discrete visibility zones and both apply a Danjon-inspired cutoff around 6–7°. The key differences are:
+The Yallop q-test (§10) is the most comparable published criterion. Both produce a single scalar mapped to discrete visibility zones and both apply a Danjon-inspired cutoff around 6–7°. The key differences are:
 
 | Aspect | Yallop q-test | Our heuristic |
 |---|---|---|
@@ -748,6 +849,7 @@ The `astronomy-engine` library already provides everything needed (moon parallax
 | Citation | File |
 |---|---|
 | Segura, W. (2021). "Predicting the First Visibility of the Lunar Crescent." *Academia Letters*, Article 2878. | [`Predicting_the_First_Visibility_of_the_L.pdf`](Predicting_the_First_Visibility_of_the_L.pdf) |
+| Sultan, A.H. (2007). "First Visibility of the Lunar Crescent: Beyond Danjon's Limit." *The Observatory*, 127(1), 53–59. | [`sultan_2007.pdf`](sultan_2007.pdf) |
 | Odeh, M.Sh. (2004). "New Criterion for Lunar Crescent Visibility." *Experimental Astronomy*, 18, 39–64. | [`New_Criterion_for_Lunar_Crescent_Visibility.pdf`](New_Criterion_for_Lunar_Crescent_Visibility.pdf) |
 | Yallop, B.D. (1997). "A Method for Predicting the First Sighting of the New Crescent Moon." NAO Technical Note No. 69, Royal Greenwich Observatory. | [`yallop_1997.pdf`](yallop_1997.pdf) |
 | Schaefer, B.E. (1996). "Lunar Crescent Visibility." *QJRAS*, 37, 759–768. | [`schaefer_1996.pdf`](schaefer_1996.pdf) |
@@ -757,8 +859,12 @@ The `astronomy-engine` library already provides everything needed (moon parallax
 ### Additional references cited in the papers
 
 - Reingold, E.M. & Dershowitz, N. (2018). *Calendrical Calculations: The Ultimate Edition*. Cambridge University Press.
+- Sultan, A.H. (2006). "Optimum Lunar Altitude for First Visibility." *The Observatory*, 126, 115.
+- Sultan, A.H. (2005). "Visible Crescent Length." *The Observatory*, 125, 227.
+- Sultan, A.H. (2004). "Visibility Criteria." *The Observatory*, 124, 390.
 - Caldwell, J. & Laney, C. (2001). "First visibility of the Lunar crescent." SAAO, *African Skies*, 5.
 - Fatoohi, L.J., Stephenson, F.R. & Al-Dargazelli, S.S. (1998). "The Danjon limit of first visibility of the lunar crescent." *Observatory*, 118, 65–72.
+- DeVries, S.H. & Baylor, D.A. (1997). "Mosaic arrangement of ganglion cell receptive fields." *J. Neurophysiol.*, 78, 2048.
 - Ilyas, M. (1994). *QJRAS*, 35, 425.
 - Doggett, L.E. & Schaefer, B.E. (1994). *Icarus*, 107, 388.
 - McNally, D. (1983). *QJRAS*, 24, 417.
