@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next';
 
-import { METHODS } from '../method/types';
-
 type SignalLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high';
 
 function likelihoodStyle(level: SignalLevel): { badgeClass: string; dotClass: string } {

@@ -88,8 +88,8 @@ export default function ConvertPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
           <div className="text-2xl font-semibold tracking-tight">{t('app.nav.convert')}</div>
+          <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
       </div>
 

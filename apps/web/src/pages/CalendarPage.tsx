@@ -478,8 +478,8 @@ export default function CalendarPage() {
     <div className="page">
       <div className="page-header">
         <div>
+          <div className="text-2xl font-semibold tracking-tight sm:text-3xl">{t('app.nav.calendar')}</div>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
-          <div className="text-2xl font-semibold tracking-tight sm:text-3xl">{year}</div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className="btn-sm" onClick={goPrevMonth} aria-label={t('calendar.prevMonth')}>
