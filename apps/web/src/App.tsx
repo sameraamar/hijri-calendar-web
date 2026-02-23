@@ -121,7 +121,7 @@ export default function App() {
                 <div>
                   {t('app.footer.openSource')}{' '}
                   <a
-                    href="https://github.com/sameraamar/hijri-calendar-web"
+                    href="https://github.com/sameraamar/hijri"
                     target="_blank"
                     rel="noreferrer"
                     className="underline decoration-slate-300 underline-offset-2 hover:text-slate-700"

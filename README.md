@@ -6,7 +6,7 @@ A bilingual (English/Arabic) web app to:
 - Show key Islamic holidays/events
 
 This site is free and open source:
-- https://github.com/sameraamar/hijri-calendar-web
+- https://github.com/sameraamar/hijri
 
 Direct contact / suggestions:
 - samer.aamar@gmail.com
