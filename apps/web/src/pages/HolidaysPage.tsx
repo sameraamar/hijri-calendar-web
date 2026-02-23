@@ -69,7 +69,7 @@ export default function HolidaysPage() {
   const [year, setYear] = useState<number>(currentYear);
 
   const holidays = useMemo(() => {
-    if (methodId === 'civil' || methodId === 'estimate') {
+    if (methodId === 'civil' || methodId === 'estimate' || methodId === 'yallop') {
       return getCivilHolidaysForGregorianYearWithEstimate(year, {
         latitude: location.latitude,
         longitude: location.longitude
@@ -255,7 +255,7 @@ export default function HolidaysPage() {
             >
               <div className="text-sm font-medium">{t(h.nameKey)}</div>
 
-              {methodId === 'estimate' ? (
+              {(methodId === 'estimate' || methodId === 'yallop') ? (
                 <>
                   {renderCandidateDates(h.gregorian, h.hijri, h.estimatedGregorian ?? undefined)}
                 </>
@@ -271,7 +271,7 @@ export default function HolidaysPage() {
         </div>
       </div>
 
-      {methodId === 'estimate' ? <LocationPicker /> : null}
+      {(methodId === 'estimate' || methodId === 'yallop') ? <LocationPicker /> : null}
 
       <div className="text-xs text-slate-600">
         {t('app.method.label')}: {t(`app.method.${methodId}`)}

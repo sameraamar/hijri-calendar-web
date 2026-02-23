@@ -14,7 +14,7 @@ const HolidaysPage = lazy(() => import('./pages/HolidaysPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 function isCalculationMethodId(value: string): value is CalculationMethodId {
-  return value === 'civil' || value === 'estimate' || value === 'ummalqura';
+  return value === 'civil' || value === 'estimate' || value === 'yallop' || value === 'ummalqura';
 }
 
 function setDocumentLanguage(lang: SupportedLanguage) {

@@ -193,6 +193,64 @@ export default function AboutPage() {
           </div>
         </section>
 
+        <section className="card">
+          <div className="card-header">
+            <div className="card-title">{t('methods.yallop.title')}</div>
+          </div>
+          <div className="space-y-3 p-4 text-sm text-slate-700">
+            <div>{t('methods.yallop.summary')}</div>
+
+            <div>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.characteristics')}</div>
+              <ul className="mt-2 list-disc space-y-1 ps-5">
+                <li>{t('methods.yallop.ch1')}</li>
+                <li>{t('methods.yallop.ch2')}</li>
+                <li>{t('methods.yallop.ch3')}</li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.yallop.zonesTitle')}</div>
+              <div className="mt-2 space-y-2">
+                {(
+                  [
+                    { level: 'high', textKey: 'methods.yallop.zoneA' },
+                    { level: 'high', textKey: 'methods.yallop.zoneB' },
+                    { level: 'medium', textKey: 'methods.yallop.zoneC' },
+                    { level: 'medium', textKey: 'methods.yallop.zoneD' },
+                    { level: 'veryLow', textKey: 'methods.yallop.zoneE' },
+                    { level: 'noChance', textKey: 'methods.yallop.zoneF' }
+                  ] as { level: SignalLevel; textKey: string }[]
+                ).map((item, idx) => {
+                  const style = likelihoodStyle(item.level);
+                  return (
+                    <div key={idx} className="flex flex-wrap items-start gap-2 text-sm">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${style.dotClass}`} />
+                        {t(`probability.${item.level}`)}
+                      </span>
+                      <span>{t(item.textKey)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+              {t('methods.yallop.note')}
+            </div>
+
+            <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
+              <span>{t('methods.references')}:</span>
+              <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop (1997)</a>
+              <span>•</span>
+              <a href="https://en.wikipedia.org/wiki/New_moon" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Wikipedia: New moon</a>
+              <span>•</span>
+              <a href="https://github.com/cosinekitty/astronomy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">astronomy-engine</a>
+            </div>
+          </div>
+        </section>
+
         <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t('about.privacyTitle')}</h2>
         <section className="card">
           <div className="space-y-3 p-4 text-sm leading-relaxed text-slate-700">

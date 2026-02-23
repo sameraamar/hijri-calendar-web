@@ -2,7 +2,8 @@ import {
   estimateMonthStartLikelihoodAtSunset,
   getMonthStartSignalLevel,
   gregorianToHijriCivil,
-  buildEstimatedHijriCalendarRange
+  buildEstimatedHijriCalendarRange,
+  yallopMonthStartEstimate
 } from '@hijri/calendar-engine';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,6 +52,13 @@ type DetailRow = {
     moonAltitudeDeg?: number;
     moonElongationDeg?: number;
     moonAgeHours?: number;
+    // Yallop-specific
+    yallopQ?: number;
+    yallopZone?: string;
+    yallopZoneDescription?: string;
+    yallopArcvDeg?: number;
+    yallopWidthArcmin?: number;
+    yallopBestTimeUtcIso?: string;
   };
   isIndicatorDay: boolean;
 };
@@ -118,7 +126,7 @@ export default function DetailsPage() {
 
     // Build estimated Hijri mapping
     const estimatedByIso = new Map<string, { year: number; month: number; day: number }>();
-    if (methodId === 'estimate') {
+    if (methodId === 'estimate' || methodId === 'yallop') {
       const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
       startDate.setUTCDate(startDate.getUTCDate() - 90);
       const endDate = new Date(Date.UTC(year, month - 1, dim, 0, 0, 0));
@@ -128,7 +136,7 @@ export default function DetailsPage() {
       const calendar = buildEstimatedHijriCalendarRange(
         start, end,
         { latitude: location.latitude, longitude: location.longitude },
-        { monthStartRule: 'geometric' }
+        { monthStartRule: methodId === 'yallop' ? 'yallop' : 'geometric' }
       );
       for (const item of calendar) {
         estimatedByIso.set(isoDate(item.gregorian.year, item.gregorian.month, item.gregorian.day), item.hijri);
@@ -136,6 +144,7 @@ export default function DetailsPage() {
     }
 
     // Evening estimates
+    const estimateFn = methodId === 'yallop' ? yallopMonthStartEstimate : estimateMonthStartLikelihoodAtSunset;
     const estimateByIso = new Map<string, ReturnType<typeof estimateMonthStartLikelihoodAtSunset>>();
     const estimateStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0));
     estimateStart.setUTCDate(estimateStart.getUTCDate() - 40);
@@ -143,7 +152,7 @@ export default function DetailsPage() {
     for (let dt = new Date(estimateStart); dt.getTime() <= estimateEnd.getTime(); ) {
       const y = dt.getUTCFullYear(); const m = dt.getUTCMonth() + 1; const d = dt.getUTCDate();
       const key = isoDate(y, m, d);
-      estimateByIso.set(key, estimateMonthStartLikelihoodAtSunset(
+      estimateByIso.set(key, estimateFn(
         { year: y, month: m, day: d },
         { latitude: location.latitude, longitude: location.longitude }
       ));
@@ -153,7 +162,7 @@ export default function DetailsPage() {
     const getHijriForDay = (d: number) => {
       const iso = isoDate(year, month, d);
       if (methodId === 'civil') return gregorianToHijriCivil({ year, month, day: d });
-      if (methodId === 'estimate') return estimatedByIso.get(iso) ?? null;
+      if (methodId === 'estimate' || methodId === 'yallop') return estimatedByIso.get(iso) ?? null;
       return null;
     };
 
@@ -166,7 +175,7 @@ export default function DetailsPage() {
       nextDate.setDate(nextDate.getDate() + 1);
       const nextHijri = methodId === 'civil'
         ? gregorianToHijriCivil({ year: nextDate.getFullYear(), month: nextDate.getMonth() + 1, day: nextDate.getDate() })
-        : methodId === 'estimate'
+        : (methodId === 'estimate' || methodId === 'yallop')
           ? (estimatedByIso.get(isoDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate())) ?? null)
           : null;
       if (nextHijri?.day === 1) monthStartCandidatesIso.add(isoDate(nextDate.getFullYear(), nextDate.getMonth() + 1, nextDate.getDate()));
@@ -253,7 +262,14 @@ export default function DetailsPage() {
           moonIlluminationPercent: typeof est?.metrics.moonIlluminationFraction === 'number' ? Math.round(est.metrics.moonIlluminationFraction * 100) : undefined,
           moonAltitudeDeg: est?.metrics.moonAltitudeDeg,
           moonElongationDeg: est?.metrics.moonElongationDeg,
-          moonAgeHours: est?.metrics.moonAgeHours
+          moonAgeHours: est?.metrics.moonAgeHours,
+          // Yallop-specific
+          yallopQ: est?.metrics.yallopQ,
+          yallopZone: est?.metrics.yallopZone,
+          yallopZoneDescription: est?.metrics.yallopZoneDescription,
+          yallopArcvDeg: est?.metrics.yallopArcvDeg,
+          yallopWidthArcmin: est?.metrics.yallopWidthArcmin,
+          yallopBestTimeUtcIso: est?.metrics.yallopBestTimeUtcIso
         },
         isIndicatorDay: indicatorDays.has(d)
       });
@@ -313,7 +329,14 @@ export default function DetailsPage() {
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.gregorianDate')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.hijriDate')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.label')}</th>
-                <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.crescentScore')}</th>
+                {methodId === 'yallop' ? (
+                  <>
+                    <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.yallopQ')}</th>
+                    <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.yallopZone')}</th>
+                  </>
+                ) : (
+                  <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.crescentScore')}</th>
+                )}
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonIllumination')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonAltitude')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('holidays.moonElongation')}</th>
@@ -346,7 +369,14 @@ export default function DetailsPage() {
                         <span className="text-slate-600">{t(`probability.${statusKey}`)}</span>
                       )}
                     </td>
-                    <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.crescentScorePercent === 'number' ? `${Math.round(row.estimate.crescentScorePercent)}%` : '—'}</td>
+                    {methodId === 'yallop' ? (
+                      <>
+                        <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.yallopQ === 'number' ? row.estimate.yallopQ.toFixed(3) : '—'}</td>
+                        <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.estimate.yallopZone ? `${row.estimate.yallopZone} — ${row.estimate.yallopZoneDescription ?? ''}` : '—'}</td>
+                      </>
+                    ) : (
+                      <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.crescentScorePercent === 'number' ? `${Math.round(row.estimate.crescentScorePercent)}%` : '—'}</td>
+                    )}
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.moonIlluminationPercent === 'number' ? `${row.estimate.moonIlluminationPercent}%` : '—'}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.moonAltitudeDeg === 'number' ? `${row.estimate.moonAltitudeDeg.toFixed(1)}°` : '—'}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.moonElongationDeg === 'number' ? `${row.estimate.moonElongationDeg.toFixed(1)}°` : '—'}</td>
@@ -399,7 +429,18 @@ export default function DetailsPage() {
               {/* Expanded detail */}
               {isExpanded ? (
                 <div className="mt-2 border-t border-slate-100 pt-2 text-xs">
-                  <MetricRow label={t('probability.crescentScore')} value={typeof row.estimate.crescentScorePercent === 'number' ? `${Math.round(row.estimate.crescentScorePercent)}%` : '—'} />
+                  {methodId === 'yallop' && typeof row.estimate.yallopQ === 'number' ? (
+                    <>
+                      <MetricRow label={t('probability.yallopQ')} value={row.estimate.yallopQ.toFixed(3)} />
+                      <MetricRow label={t('probability.yallopZone')} value={row.estimate.yallopZone ? `${row.estimate.yallopZone} — ${row.estimate.yallopZoneDescription ?? ''}` : '—'} />
+                      {typeof row.estimate.yallopArcvDeg === 'number' ? <MetricRow label={t('probability.yallopArcv')} value={`${row.estimate.yallopArcvDeg.toFixed(2)}°`} /> : null}
+                      {typeof row.estimate.yallopWidthArcmin === 'number' ? <MetricRow label={t('probability.yallopWidth')} value={`${row.estimate.yallopWidthArcmin.toFixed(2)}'`} /> : null}
+                      {row.estimate.yallopBestTimeUtcIso ? <MetricRow label={t('probability.yallopBestTime')} value={fmtLocalTime(row.estimate.yallopBestTimeUtcIso) ?? '—'} /> : null}
+                      <div className="mt-1 border-t border-slate-50 pt-1" />
+                    </>
+                  ) : (
+                    <MetricRow label={t('probability.crescentScore')} value={typeof row.estimate.crescentScorePercent === 'number' ? `${Math.round(row.estimate.crescentScorePercent)}%` : '—'} />
+                  )}
                   <MetricRow label={t('probability.lagMinutes')} value={typeof row.estimate.lagMinutes === 'number' ? String(Math.round(row.estimate.lagMinutes)) : '—'} />
                   <MetricRow label={t('holidays.moonIllumination')} value={typeof row.estimate.moonIlluminationPercent === 'number' ? `${row.estimate.moonIlluminationPercent}%` : '—'} />
                   <MetricRow label={t('holidays.moonAltitude')} value={typeof row.estimate.moonAltitudeDeg === 'number' ? `${row.estimate.moonAltitudeDeg.toFixed(1)}°` : '—'} />

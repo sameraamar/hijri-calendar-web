@@ -27,6 +27,14 @@ export type MonthStartEstimate = {
     moonIlluminationFraction?: number;
     visibilityScore?: number; // 0..1
     visibilityPercent?: number; // 0..100
+    // Yallop-specific fields (only present when method is Yallop)
+    yallopQ?: number;
+    yallopZone?: string; // 'A'..'F'
+    yallopZoneDescription?: string;
+    yallopBestTimeUtcIso?: string;
+    yallopArclDeg?: number; // ARCL
+    yallopArcvDeg?: number; // ARCV
+    yallopWidthArcmin?: number; // W'
   };
 };
 
