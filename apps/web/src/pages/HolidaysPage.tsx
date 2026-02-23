@@ -205,7 +205,7 @@ export default function HolidaysPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="muted">{t('calendar.year')}</div>
+          <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
           <div className="text-2xl font-semibold tracking-tight">{t('holidays.title')}</div>
         </div>
         <input

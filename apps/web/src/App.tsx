@@ -29,7 +29,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <div className="flex items-center gap-3">
             <Link to="/calendar" className="text-lg font-semibold tracking-tight hover:opacity-90">
               {t('app.title')}
@@ -52,7 +52,7 @@ export default function App() {
 
           <div className="flex items-center gap-2">
             <select
-              className="control-sm w-56"
+              className="control-sm min-w-0 flex-1 sm:w-56 sm:flex-none"
               value={methodId}
               onChange={(e) => {
                 const v = e.target.value;
@@ -78,23 +78,23 @@ export default function App() {
           </div>
         </div>
 
-        <nav className="mx-auto flex max-w-6xl gap-2 px-4 pb-3 text-sm md:hidden">
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/calendar">
+        <nav className="mx-auto flex max-w-6xl flex-wrap gap-1 px-4 pb-3 text-sm md:hidden">
+          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/calendar">
             {t('app.nav.calendar')}
           </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/convert">
+          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/convert">
             {t('app.nav.convert')}
           </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/holidays">
+          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/holidays">
             {t('app.nav.holidays')}
           </Link>
-          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-50 hover:text-slate-900" to="/methods">
+          <Link className="rounded-md px-2 py-1 text-slate-700 hover:bg-slate-100 active:bg-slate-200" to="/methods">
             {t('app.nav.methods')}
           </Link>
         </nav>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-8">
         <Routes>
           <Route path="/" element={<Navigate to="/calendar" replace />} />
           <Route path="/calendar" element={<CalendarPage />} />

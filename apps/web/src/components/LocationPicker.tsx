@@ -87,11 +87,11 @@ export default function LocationPicker() {
 
   return (
     <section className="card">
-      <div className="card-header">
+      <div className="card-header flex-col items-stretch gap-2 sm:flex-row sm:items-center">
         <div className="card-title">{t('location.title')}</div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <select
-            className="control-sm w-56"
+            className="control-sm min-w-0 flex-1 sm:w-56 sm:flex-none"
             value={location.name}
             onChange={(e) => {
               const v = e.target.value;
@@ -109,7 +109,7 @@ export default function LocationPicker() {
 
           <button
             type="button"
-            className="btn-sm"
+            className="btn-sm whitespace-nowrap"
             onClick={useMyLocation}
             disabled={isLocating}
           >

@@ -39,7 +39,7 @@ body {
   }
 
   .card-header {
-    @apply flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3;
+    @apply flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3;
   }
 
   .card-title {
@@ -56,10 +56,13 @@ body {
 
   .btn {
     @apply inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60;
+    /* Ensure minimum 44px tap target on touch devices */
+    min-height: 44px;
   }
 
   .btn-sm {
     @apply inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-900 hover:bg-slate-50 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60;
+    min-height: 36px;
   }
 
   .muted {

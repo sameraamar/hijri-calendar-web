@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 
-import { useMethod } from '../method/MethodContext';
 import { METHODS } from '../method/types';
 
 type SignalLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high';
@@ -23,15 +22,11 @@ function likelihoodStyle(level: SignalLevel): { badgeClass: string; dotClass: st
 
 export default function MethodsPage() {
   const { t } = useTranslation();
-  const { methodId } = useMethod();
-
-  const selectedLabelKey = METHODS.find((m) => m.id === methodId)?.labelKey ?? 'app.method.estimate';
 
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="muted">{t('app.method.label')}: {t(selectedLabelKey)}</div>
           <div className="text-2xl font-semibold tracking-tight">{t('methods.title')}</div>
         </div>
       </div>

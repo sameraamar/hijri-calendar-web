@@ -5,7 +5,7 @@ import {
   gregorianToHijriCivil,
   meetsCrescentVisibilityCriteriaAtSunset
 } from '@hijri/calendar-engine';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import LocationPicker from '../components/LocationPicker';
@@ -116,8 +116,22 @@ export default function CalendarPage() {
   const [year, setYear] = useState<number>(currentYear);
   const [month, setMonth] = useState<number>(currentMonth);
   const [tab, setTab] = useState<CalendarTab>('calendar');
+  const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const { location } = useAppLocation();
   const { methodId } = useMethod();
+
+  // Close expanded popup when month/year changes
+  useEffect(() => { setExpandedDay(null); }, [month, year]);
+
+  // Close expanded popup on outside click
+  const calendarRef = useCallback((node: HTMLElement | null) => {
+    if (!node) return;
+    const handler = (e: MouseEvent) => {
+      if (!node.contains(e.target as Node)) setExpandedDay(null);
+    };
+    document.addEventListener('click', handler, true);
+    return () => document.removeEventListener('click', handler, true);
+  }, []);
 
   const today = new Date();
   const todayY = today.getFullYear();
@@ -464,15 +478,15 @@ export default function CalendarPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="muted">{t('calendar.year')}</div>
-          <div className="text-3xl font-semibold tracking-tight">{year}</div>
+          <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
+          <div className="text-2xl font-semibold tracking-tight sm:text-3xl">{year}</div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" className="btn-sm" onClick={goPrevMonth} aria-label={t('calendar.prevMonth')}>
             {t('calendar.prevMonthShort')}
           </button>
           <select
-            className="control-sm w-40"
+            className="control-sm w-28 sm:w-40"
             value={month}
             onChange={(e) => setMonth(Number(e.target.value))}
             aria-label={t('calendar.month')}
@@ -484,7 +498,7 @@ export default function CalendarPage() {
             ))}
           </select>
           <input
-            className="control-sm w-28"
+            className="control-sm w-20 sm:w-28"
             type="number"
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
@@ -514,13 +528,13 @@ export default function CalendarPage() {
       </div>
 
       {tab === 'calendar' ? (
-        <section className="card overflow-visible relative z-10">
+        <section ref={calendarRef} className="card overflow-visible relative z-10">
           <div className="card-header">
             {new Date(year, monthData.month - 1, 1).toLocaleString(i18n.language, { month: 'long', year: 'numeric' })}
           </div>
           <div className="grid grid-cols-7 gap-px bg-slate-200 p-px">
             {weekdayLabels.map((w) => (
-              <div key={w} className="bg-slate-50 px-2 py-2 text-center text-xs font-semibold text-slate-700">
+              <div key={w} className="bg-slate-50 px-1 py-1.5 text-center text-[10px] font-semibold text-slate-700 sm:px-2 sm:py-2 sm:text-xs">
                 {w}
               </div>
             ))}
@@ -552,15 +566,25 @@ export default function CalendarPage() {
                 <div
                   key={d.day}
                   className={
-                    `group relative ${bg} p-2.5 text-start transition-colors hover:bg-slate-50 ` +
-                    `${d.isToday ? 'ring-1 ring-slate-300' : ''}`
+                    `group relative ${bg} p-1.5 text-start transition-colors hover:bg-slate-50 sm:p-2.5 ` +
+                    `${d.isToday ? 'ring-1 ring-slate-300' : ''} ` +
+                    `${d.showIndicator ? 'cursor-pointer' : ''}`
                   }
                   tabIndex={d.showIndicator ? 0 : -1}
+                  onClick={() => {
+                    if (d.showIndicator) setExpandedDay(expandedDay === d.day ? null : d.day);
+                  }}
+                  onKeyDown={(e) => {
+                    if (d.showIndicator && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      setExpandedDay(expandedDay === d.day ? null : d.day);
+                    }
+                  }}
                 >
-                  <div className="flex min-h-16 flex-col gap-1">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <div className="text-base font-semibold leading-none text-slate-900">{d.day}</div>
-                      <div className="text-[11px] leading-none text-slate-700">{d.hijri}</div>
+                  <div className="flex min-h-10 flex-col gap-0.5 sm:min-h-16 sm:gap-1">
+                    <div className="flex items-baseline justify-between gap-1 sm:gap-2">
+                      <div className="text-sm font-semibold leading-none text-slate-900 sm:text-base">{d.day}</div>
+                      <div className="text-[9px] leading-none text-slate-700 sm:text-[11px]">{d.hijri}</div>
                     </div>
 
                     {d.showIndicator ? (
@@ -607,9 +631,9 @@ export default function CalendarPage() {
                     ) : null}
                   </div>
 
-                  {d.showIndicator ? (
-                    <div className="absolute left-2 top-full z-50 mt-2 hidden w-96 max-w-[calc(100vw-2rem)] group-hover:block group-focus-within:block">
-                      <div className="max-h-[70vh] overflow-auto select-text rounded-md border border-slate-200 bg-white p-3 text-xs shadow-lg">
+                  {d.showIndicator && expandedDay === d.day ? (
+                    <div className="absolute left-0 right-0 top-full z-50 mt-1 sm:left-2 sm:right-auto sm:w-96 sm:max-w-[calc(100vw-2rem)]">
+                      <div className="max-h-[60vh] overflow-auto select-text rounded-md border border-slate-200 bg-white p-2.5 text-xs shadow-lg sm:max-h-[70vh] sm:p-3">
                         <div className="space-y-3">
                           <div className="text-[11px] leading-relaxed text-slate-600">{t('holidays.monthStartRuleNote')}</div>
 
