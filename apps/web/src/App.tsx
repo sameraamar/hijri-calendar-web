@@ -54,7 +54,7 @@ export default function App() {
 
           <div className="flex items-center gap-2">
             <select
-              className="control-sm min-w-0 flex-1 sm:w-56 sm:flex-none"
+              className="control-sm flex-1 sm:w-56 sm:flex-none"
               value={methodId}
               onChange={(e) => {
                 const v = e.target.value;
@@ -69,13 +69,13 @@ export default function App() {
               ))}
             </select>
             <select
-              className="control-sm"
+              className="control-sm w-auto cursor-pointer text-sm"
               value={lang}
               onChange={(e) => i18n.changeLanguage(e.target.value)}
               aria-label="Language"
             >
-              <option value="en">{t('app.language.en')}</option>
-              <option value="ar">{t('app.language.ar')}</option>
+              <option value="en">English</option>
+              <option value="ar">عربي</option>
             </select>
           </div>
         </div>

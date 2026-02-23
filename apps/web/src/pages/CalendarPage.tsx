@@ -5,7 +5,7 @@ import {
   gregorianToHijriCivil,
   meetsCrescentVisibilityCriteriaAtSunset
 } from '@hijri/calendar-engine';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import LocationPicker from '../components/LocationPicker';
@@ -41,6 +41,8 @@ type CalendarDay = {
   day: number;
   hijri: string;
   hijriDay?: number;
+  hijriMonth?: number;
+  hijriYear?: number;
   isToday: boolean;
   isHijriMonthStart: boolean;
   isPotentialMonthStartEve: boolean;
@@ -124,10 +126,12 @@ export default function CalendarPage() {
   useEffect(() => { setExpandedDay(null); }, [month, year]);
 
   // Close expanded popup on outside click
-  const calendarRef = useCallback((node: HTMLElement | null) => {
-    if (!node) return;
+  const calendarRef = useRef<HTMLElement>(null);
+  useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (!node.contains(e.target as Node)) setExpandedDay(null);
+      if (calendarRef.current && !calendarRef.current.contains(e.target as Node)) {
+        setExpandedDay(null);
+      }
     };
     document.addEventListener('click', handler, true);
     return () => document.removeEventListener('click', handler, true);
@@ -366,6 +370,8 @@ export default function CalendarPage() {
         day: d,
         hijri: hijriText,
         hijriDay: h?.day,
+        hijriMonth: h?.month,
+        hijriYear: h?.year,
         isToday,
         isHijriMonthStart,
         isPotentialMonthStartEve,
@@ -527,10 +533,29 @@ export default function CalendarPage() {
         </button>
       </div>
 
-      {tab === 'calendar' ? (
+      {tab === 'calendar' ? (() => {
+        // Compute Hijri month/year range from the first and last day of the Gregorian month.
+        const hijriRangeLabel = (() => {
+          const first = monthData.days[0];
+          const last = monthData.days[monthData.days.length - 1];
+          if (!first?.hijriMonth || !last?.hijriMonth) return null;
+          const fmName = t(`hijriMonths.${first.hijriMonth}`);
+          const lmName = t(`hijriMonths.${last.hijriMonth}`);
+          if (first.hijriMonth === last.hijriMonth && first.hijriYear === last.hijriYear) {
+            return `${fmName} ${first.hijriYear}`;
+          }
+          if (first.hijriYear === last.hijriYear) {
+            return `${fmName} – ${lmName} ${first.hijriYear}`;
+          }
+          return `${fmName} ${first.hijriYear} – ${lmName} ${last.hijriYear}`;
+        })();
+        return (
         <section ref={calendarRef} className="card overflow-visible relative z-10">
-          <div className="card-header">
-            {new Date(year, monthData.month - 1, 1).toLocaleString(i18n.language, { month: 'long', year: 'numeric' })}
+          <div className="card-header flex-col items-start gap-0 sm:flex-row sm:items-center sm:gap-3">
+            <span>{new Date(year, monthData.month - 1, 1).toLocaleString(i18n.language, { month: 'long', year: 'numeric' })}</span>
+            {hijriRangeLabel ? (
+              <span className="text-sm font-normal text-slate-500">({hijriRangeLabel})</span>
+            ) : null}
           </div>
           <div className="grid grid-cols-7 gap-px bg-slate-200 p-px">
             {weekdayLabels.map((w) => (
@@ -584,7 +609,10 @@ export default function CalendarPage() {
                   <div className="flex min-h-10 flex-col gap-0.5 sm:min-h-16 sm:gap-1">
                     <div className="flex items-baseline justify-between gap-1 sm:gap-2">
                       <div className="text-sm font-semibold leading-none text-slate-900 sm:text-base">{d.day}</div>
-                      <div className="text-[9px] leading-none text-slate-700 sm:text-[11px]">{d.hijri}</div>
+                      <div className="text-[9px] leading-none text-slate-700 sm:text-[11px]">
+                        <span className="sm:hidden">{d.hijriDay ?? '—'}</span>
+                        <span className="hidden sm:inline">{d.hijri}</span>
+                      </div>
                     </div>
 
                     {d.showIndicator ? (
@@ -736,7 +764,7 @@ export default function CalendarPage() {
             })}
           </div>
         </section>
-      ) : (
+      ); })() : (
         <section className="card">
           <div className="card-header">
             <div className="card-title">{t('probability.eveningEstimate')}</div>
