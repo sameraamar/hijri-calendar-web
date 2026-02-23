@@ -191,6 +191,9 @@
     "disclaimerBody": "This tool is for informational and educational purposes only. It is not an official religious authority and should not be used as a substitute for local moon-sighting committees or official Hijri calendar announcements in your country. Crescent-visibility estimates are based on astronomical models and may differ from actual observed conditions.",
     "openSourceTitle": "Open Source",
     "openSourceBody": "Hijri Calendar is free and open-source software. Contributions, bug reports, and suggestions are welcome.",
-    "furtherReadingTitle": "References & Credits"
+    "furtherReadingTitle": "References & Credits",
+    "ourResearch": "Our Research",
+    "ourResearchLink": "Hijri Calculation Methods — Scientific Summary",
+    "ourResearchDesc": "Our comprehensive survey of 15 Hijri month-start methods, with formulae, pseudocode, and citations from the academic literature"
   }
 }

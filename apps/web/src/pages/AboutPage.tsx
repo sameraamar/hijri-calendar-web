@@ -243,6 +243,12 @@ export default function AboutPage() {
                 <a href="https://en.wikipedia.org/wiki/Lunar_phase" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Lunar phase</a>
               </li>
 
+              <li className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">{t('about.ourResearch')}</li>
+              <li>
+                <a href="https://github.com/sameraamar/hijri/blob/main/docs/calculation-methods.md" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{t('about.ourResearchLink')}</a>
+                <span className="text-slate-500"> — {t('about.ourResearchDesc')}</span>
+              </li>
+
               <li className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">Academic &amp; Scientific</li>
               <li>
                 <a href="https://astronomycenter.net/pdf/yallop_1997.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Yallop, B. D. (1997). <em>A Method for Predicting the First Sighting of the New Crescent Moon.</em></a>
