@@ -14,6 +14,7 @@ import i18n from '../i18n/i18n';
 import LocationPicker from '../components/LocationPicker';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
+import { SAUDI_RAMADAN_HISTORY } from '../data/saudiRamadanHistory';
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -86,6 +87,12 @@ export default function HolidaysPage() {
     }
     return [];
   }, [year, methodId, location.latitude, location.longitude]);
+
+  // Look up official Saudi Ramadan 1 date for the selected Gregorian year
+  const saudiRamadanRecord = useMemo(
+    () => SAUDI_RAMADAN_HISTORY.find((r) => r.gregorian.startsWith(`${year}-`)),
+    [year]
+  );
 
   const renderCandidateDates = (
     eventDate: { year: number; month: number; day: number },
@@ -303,6 +310,23 @@ export default function HolidaysPage() {
                   {h.hijri.day}/{h.hijri.month}/{h.hijri.year}
                 </div>
               )}
+
+              {/* Official Saudi date inline for Ramadan 1 */}
+              {h.id === 'ramadan-1' && saudiRamadanRecord && (() => {
+                const [sy, sm, sd] = saudiRamadanRecord.gregorian.split('-').map(Number);
+                const fmtSaudi = new Date(sy, sm - 1, sd).toLocaleDateString(i18n.language, {
+                  weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
+                });
+                return (
+                  <div className="mt-1.5 flex items-center gap-2 text-xs">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-800 ring-1 ring-green-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm-.5 3a.5.5 0 0 1 1 0v3.25l2.1 1.26a.5.5 0 1 1-.52.86l-2.33-1.4A.5.5 0 0 1 7.5 7.5V4Z" clipRule="evenodd"/></svg>
+                      {t('saudiHistory.officialSaudi')}
+                    </span>
+                    <span className="font-semibold text-slate-900">{fmtSaudi}</span>
+                  </div>
+                );
+              })()}
             </div>
           ))}
         </div>
