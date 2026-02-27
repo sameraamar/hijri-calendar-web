@@ -8,6 +8,7 @@
       "holidays": "Holidays",
       "methods": "Methods",
       "history": "History",
+      "scholars": "Scholars",
       "about": "About"
     },
     "language": {
@@ -306,6 +307,52 @@
     "colRamadan": "1 Ramadan",
     "source": "Source: Saudi Supreme Court / Hilal Sighting Committee announcements. 2024–2025 entries corroborated by moonsighting.com (FCNA / Umm al-Qura).",
     "officialSaudi": "Official Saudi"
+  },
+  "scholars": {
+    "title": "Scholarly Views on the Hijri Calendar",
+    "subtitle": "Why Islamic scholars differ on when a new lunar month begins",
+    "intro": "The Islamic (Hijri) calendar is a purely lunar calendar. Each month begins with the sighting of the new crescent moon (hilal). However, Islamic scholars have held different views for centuries on exactly how to determine that beginning — leading to situations where Ramadan, Eid, and other occasions may start on different days in different countries, or even within the same country — especially in geographically large nations where the crescent may be visible in one region but not another. Historically, though, each country has had a single religious authority (such as a mufti, sighting committee, or ministry of religious affairs) that issues a binding declaration for the entire country.",
+    "coreQuestion": "The Core Question: How Is the New Moon Determined?",
+    "coreQuestionBody": "All scholars agree that the Islamic month begins with the crescent moon — but they differ on several key points: Must the crescent be physically sighted with the naked eye, or can astronomical calculations suffice? If sighted, must it be seen locally, or does a confirmed sighting anywhere in the world count? Should optical instruments (telescopes, binoculars) be used? These questions have produced distinct scholarly positions, each rooted in Quranic verses, Hadith, and centuries of jurisprudential reasoning (ijtihad).",
+    "scholarsLabel": "Key scholars",
+    "practiceLabel": "In practice",
+    "localSighting": {
+      "title": "Position 1: Local Sighting (Ikhtilaf al-Matali')",
+      "body": "This position holds that each region or country should rely on its own local crescent sighting. A sighting in Saudi Arabia, for example, does not obligate Muslims in Indonesia or Morocco to begin the month. The reasoning is that the moon's visibility varies by geographic location — the crescent may be visible in one part of the world but not yet in another.",
+      "scholars": "Imam al-Shafi'i, and the majority of the Shafi'i school. Also supported by many Hanbali scholars. Adopted by several Southeast Asian countries and by Egypt's Dar al-Ifta.",
+      "practice": "Countries like Malaysia, Indonesia, Brunei, and Egypt each conduct their own sighting and may start Ramadan on a different day than other countries. Egypt's Dar al-Ifta relies on local sighting confirmed by its own crescent observation committees across the country, and often announces dates that differ from Saudi Arabia by a day."
+    },
+    "globalSighting": {
+      "title": "Position 2: Global Sighting (Ittihad al-Matali')",
+      "body": "This position holds that if the crescent is reliably sighted anywhere in the world, all Muslims should begin the new month. The argument is based on the generality of the Prophet's hadith: 'Fast when you see it [the crescent] and break fast when you see it' — interpreting 'you' as the entire Muslim Ummah, not just a local community.",
+      "scholars": "Predominant view among Hanafi scholars. Supported by some Hanbali scholars. Also adopted by the Fiqh Council of the Muslim World League in some rulings.",
+      "practice": "Some Muslim communities in the West follow the earliest confirmed sighting globally (often from Saudi Arabia or the Middle East) to start their fast."
+    },
+    "calculation": {
+      "title": "Position 3: Astronomical Calculation",
+      "body": "A growing number of scholars and institutions argue that modern astronomical science can reliably predict when the crescent will be visible. They hold that calculations are at least as trustworthy as fallible human eyesight, and that the hadith about sighting was addressing a community without astronomical knowledge — not prohibiting the use of science. Some proponents distinguish between 'born moon' (conjunction) and 'visible crescent' calculations.",
+      "scholars": "Supported by Yusuf al-Qaradawi, the Fiqh Council of North America (FCNA), the European Council for Fatwa and Research (ECFR), and many contemporary scholars. The FCNA officially adopted astronomical calculation in 2006.",
+      "practice": "Turkey has used a purely calculated calendar (based on the Diyanet) for decades. The FCNA and ISNA in North America publish Ramadan and Eid dates years in advance based on calculations."
+    },
+    "followSaudi": {
+      "title": "Position 4: Follow Saudi Arabia",
+      "body": "Some communities choose to follow Saudi Arabia's announcement regardless of their own local sighting, arguing for unity with the land of the Two Holy Mosques (Haramain). This is not strictly a scholarly position on moon-sighting methodology, but rather a practical choice made by certain communities and organizations.",
+      "practice": "Common among some diaspora communities who prefer a single reference point. Several countries in the Middle East and South Asia have historically aligned with Saudi announcements."
+    },
+    "instruments": {
+      "title": "Naked Eye vs. Optical Instruments",
+      "body": "Another point of debate is whether the crescent must be seen with the unaided naked eye or can be confirmed using telescopes, binoculars, or CCD imaging. Classical scholars naturally assumed naked-eye observation. Today, most sighting committees accept optical aids, but some traditionalist scholars insist only a naked-eye sighting fulfills the hadith. This can cause a one-day difference: a crescent too thin for the naked eye may be visible through a telescope."
+    },
+    "whyDiffer": {
+      "title": "Why Do Countries Announce Different Dates?",
+      "body": "Even when two countries use the same general approach (e.g., both rely on sighting), they may still differ for several reasons:",
+      "reason1": "Geographic location — the crescent is visible in western longitudes before eastern ones on the same night.",
+      "reason2": "Weather and atmospheric conditions — clouds, dust, or haze can prevent sighting even when the moon is astronomically above the horizon.",
+      "reason3": "Criteria stringency — some committees accept a single witness testimony; others require multiple witnesses or corroborating evidence.",
+      "reason4": "Political considerations — some governments align with regional allies or make announcements based on diplomatic factors.",
+      "reason5": "Methodology mix — some countries use calculations to reject impossible sightings but still require a physical sighting for confirmation (a hybrid approach)."
+    },
+    "disclaimer": "This page is for educational purposes only. It presents a simplified overview of scholarly positions and does not constitute a religious ruling (fatwa). Muslims are advised to follow their local Islamic authority or trusted scholarly body for determining the start of Islamic months."
   },
   "about": {
     "title": "About",

@@ -13,6 +13,7 @@ const DetailsPage = lazy(() => import('./pages/DetailsPage'));
 const HolidaysPage = lazy(() => import('./pages/HolidaysPage'));
 const MethodsPage = lazy(() => import('./pages/MethodsPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const ScholarsPage = lazy(() => import('./pages/ScholarsPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 
 function isCalculationMethodId(value: string): value is CalculationMethodId {
@@ -47,6 +48,7 @@ export default function App() {
                 { to: '/details', label: t('app.nav.details') },
                 { to: '/history', label: t('app.nav.history') },
                 { to: '/methods', label: t('app.nav.methods') },
+                { to: '/scholars', label: t('app.nav.scholars') },
                 { to: '/about', label: t('app.nav.about') },
               ].map((item) => (
                 <NavLink
@@ -102,6 +104,7 @@ export default function App() {
             { to: '/details', label: t('app.nav.details') },
             { to: '/history', label: t('app.nav.history') },
             { to: '/methods', label: t('app.nav.methods') },
+            { to: '/scholars', label: t('app.nav.scholars') },
             { to: '/about', label: t('app.nav.about') },
           ].map((item) => (
             <NavLink
@@ -131,6 +134,7 @@ export default function App() {
             <Route path="/holidays" element={<HolidaysPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/methods" element={<MethodsPage />} />
+            <Route path="/scholars" element={<ScholarsPage />} />
             <Route path="/about" element={<AboutPage />} />
           </Routes>
         </Suspense>
