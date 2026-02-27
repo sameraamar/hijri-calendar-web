@@ -676,8 +676,8 @@ export default function CalendarPage() {
                               className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
                               title={t('holidays.moonIllumination')}
                             >
-                              {typeof d.estimate?.moonIlluminationFraction === 'number'
-                                ? <MoonPhaseIcon illumination={d.estimate.moonIlluminationFraction} size={14} />
+                              {typeof thisEst?.metrics.moonIlluminationFraction === 'number'
+                                ? <MoonPhaseIcon illumination={thisEst.metrics.moonIlluminationFraction} size={14} />
                                 : <span className="text-[10px] leading-none text-slate-500" aria-hidden="true">☾</span>}
                               {dayIllumPercent}%
                             </span>
