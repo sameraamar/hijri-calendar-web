@@ -913,6 +913,31 @@ export default function CalendarPage() {
                   <MetricRow label={t('probability.sunsetLocal')} value={fmtLocalTime(thisEst.metrics.sunsetUtcIso) ?? '—'} />
                   <MetricRow label={t('probability.moonsetLocal')} value={fmtLocalTime(thisEst.metrics.moonsetUtcIso) ?? '—'} />
                 </div>
+                {/* Visual: Horizon diagram + Moon phase */}
+                <div className="mt-3 flex items-center justify-center gap-4 border-t border-slate-100 pt-2">
+                  {typeof thisEst.metrics.moonAltitudeDeg === 'number' && (
+                    <HorizonDiagram
+                      moonAltitudeDeg={thisEst.metrics.moonAltitudeDeg}
+                      sunAltitudeDeg={thisEst.metrics.sunAltitudeDeg ?? -1}
+                      arcDeg={thisEst.metrics.moonElongationDeg}
+                      lagMinutes={thisEst.metrics.lagMinutes}
+                      width={180}
+                      height={100}
+                    />
+                  )}
+                  {typeof thisEst.metrics.moonIlluminationFraction === 'number' && (
+                    <div className="flex flex-col items-center gap-1">
+                      <MoonPhaseIcon illumination={thisEst.metrics.moonIlluminationFraction} size={40} />
+                      <span className="text-[10px] text-slate-500">{Math.round(thisEst.metrics.moonIlluminationFraction * 100)}%</span>
+                    </div>
+                  )}
+                </div>
+                {typeof thisEst.metrics.visibilityPercent === 'number' && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-[11px] text-slate-500">{t('probability.crescentScore')}:</span>
+                    <CrescentScoreBar percent={thisEst.metrics.visibilityPercent} width={100} />
+                  </div>
+                )}
               </div>
             ) : <div className="text-xs text-slate-500">—</div>}
           </div>

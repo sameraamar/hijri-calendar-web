@@ -1,10 +1,14 @@
 /**
  * Renders a moon phase SVG based on illumination fraction.
  *
- * @param illumination – 0 (new moon) to 1 (full moon).  Values represent the
- *   waxing crescent through full cycle.  For simplicity we always draw a
- *   waxing crescent/gibbous (right-lit) since the data tracks "how lit is the
- *   moon right now".
+ * Approach: start with a bright yellow disc (fully-lit moon surface), then
+ * draw a dark overlay for the UNLIT portion.  This ensures 100 % → full
+ * yellow, 0 % → full dark, and everything in between scales naturally.
+ *
+ * The lit crescent stays on the RIGHT (waxing crescent, Northern-Hemisphere
+ * convention).
+ *
+ * @param illumination – 0 (new moon) to 1 (full moon).
  * @param size – pixel width/height (default 24).
  */
 
@@ -24,52 +28,63 @@ export default function MoonPhaseIcon({ illumination, size = 24, className }: Mo
   // Clamp
   const ill = Math.max(0, Math.min(1, illumination));
 
-  // The terminator is drawn as two vertical arcs from top to bottom of the
-  // disc.  We vary the x-radius of an inner ellipse to produce the correct
-  // lit fraction.
-  //
-  // ill = 0   → new moon (all dark)
-  // ill = 0.5 → first quarter (half lit, terminator is a straight line)
-  // ill = 1   → full moon (all lit)
-  //
-  // The "sweep" of the inner arc flips at the halfway mark so the lit area
-  // grows correctly from crescent → gibbous → full.
+  // Dark (unlit) fraction
+  const dark = 1 - ill;
 
-  // How far across the disc the terminator sits, mapped to an ellipse rx.
-  // At ill=0 the terminator hugs the right edge (rx=r, sweep same as outer)
-  // At ill=0.5 terminator is a straight line (rx=0)
-  // At ill=1 terminator hugs the left edge (rx=r, sweep opposite outer)
-  const rx = Math.abs(2 * ill - 1) * r;
+  // Terminator ellipse x-radius:
+  //   dark=0   → no shadow path needed (full moon)
+  //   dark=0.5 → terminator is a straight vertical line (rx=0)
+  //   dark=1   → shadow covers entire disc (new moon)
+  const rx = Math.abs(2 * dark - 1) * r;
 
-  // For ill < 0.5 the dark side is larger – inner arc sweeps the same way.
-  // For ill >= 0.5 the lit side is larger – inner arc sweeps the opposite way.
-  const innerSweep = ill < 0.5 ? 1 : 0;
+  // Inner-arc sweep direction flips at the halfway mark so the shadow area
+  // expands correctly from a thin left crescent to full cover.
+  const innerSweep = dark < 0.5 ? 1 : 0;
 
-  // Path: outer right arc (always sweep=1) from top-centre to bottom-centre,
+  // Path: outer LEFT arc (sweep=0 = counter-clockwise) from top to bottom,
   // then inner arc (terminator) back from bottom to top.
+  // The dark overlay sits on the LEFT, keeping the lit crescent on the RIGHT.
   const d = [
     `M ${cx} ${cy - r}`,
-    // outer arc – right half of disc (always the lit edge for waxing)
-    `A ${r} ${r} 0 0 1 ${cx} ${cy + r}`,
+    // outer arc – left half of disc (sweep=0 = CCW)
+    `A ${r} ${r} 0 0 0 ${cx} ${cy + r}`,
     // inner arc – the terminator line
     `A ${rx} ${r} 0 0 ${innerSweep} ${cx} ${cy - r}`,
     'Z',
   ].join(' ');
+
+  const pct = Math.round(ill * 100);
 
   return (
     <svg
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      className={className}
-      aria-label={`Moon illumination ${Math.round(ill * 100)}%`}
+      className={`transition-transform duration-200 hover:scale-[2.5] hover:z-50 ${className ?? ''}`}
+      style={{ transformOrigin: 'center' }}
+      aria-label={`Moon illumination ${pct}%`}
     >
-      {/* Dark background disc */}
-      <circle cx={cx} cy={cy} r={r - 0.5} fill="#334155" stroke="#94a3b8" strokeWidth={0.5} />
-      {/* Lit portion */}
-      {ill > 0.005 && (
-        <path d={d} fill="#fef9c3" />
+      {/* Bright moon surface (fully-lit baseline) */}
+      <circle cx={cx} cy={cy} r={r - 0.5} fill="#fef9c3" stroke="#94a3b8" strokeWidth={0.5} />
+      {/* Dark shadow overlay for the unlit portion */}
+      {dark > 0.005 && (
+        <path d={d} fill="#334155" />
       )}
+      {/* Percentage label – outlined for readability on both dark & light */}
+      <text
+        x={cx}
+        y={cy + size * 0.13}
+        textAnchor="middle"
+        fill="#ffffff"
+        stroke="#1e293b"
+        strokeWidth={size * 0.04}
+        paintOrder="stroke"
+        fontSize={size * 0.38}
+        fontWeight="700"
+        fontFamily="system-ui, sans-serif"
+      >
+        {pct}%
+      </text>
     </svg>
   );
 }
