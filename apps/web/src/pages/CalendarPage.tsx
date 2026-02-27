@@ -13,6 +13,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import LocationPicker from '../components/LocationPicker';
+import MoonPhaseIcon from '../components/MoonPhaseIcon';
+import HorizonDiagram from '../components/HorizonDiagram';
+import CrescentScoreBar from '../components/CrescentScoreBar';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { getTimeZoneForLocation } from '../timezone';
@@ -31,7 +34,9 @@ type DayEstimate = {
   lagMinutes?: number;
   crescentScorePercent?: number;
   moonIlluminationPercent?: number;
+  moonIlluminationFraction?: number;
   moonAltitudeDeg?: number;
+  sunAltitudeDeg?: number;
   moonElongationDeg?: number;
   moonAgeHours?: number;
 };
@@ -338,7 +343,9 @@ export default function CalendarPage() {
           typeof est?.metrics.moonIlluminationFraction === 'number'
             ? Math.round(est.metrics.moonIlluminationFraction * 100)
             : undefined,
+        moonIlluminationFraction: est?.metrics.moonIlluminationFraction,
         moonAltitudeDeg: est?.metrics.moonAltitudeDeg,
+        sunAltitudeDeg: est?.metrics.sunAltitudeDeg,
         moonElongationDeg: est?.metrics.moonElongationDeg,
         moonAgeHours: est?.metrics.moonAgeHours
       };
@@ -666,10 +673,12 @@ export default function CalendarPage() {
 
                           {dayIllumPercent !== null ? (
                             <span
-                              className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
+                              className="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200"
                               title={t('holidays.moonIllumination')}
                             >
-                              <span className="text-[10px] leading-none text-slate-500" aria-hidden="true">☾</span>
+                              {typeof d.estimate?.moonIlluminationFraction === 'number'
+                                ? <MoonPhaseIcon illumination={d.estimate.moonIlluminationFraction} size={14} />
+                                : <span className="text-[10px] leading-none text-slate-500" aria-hidden="true">☾</span>}
                               {dayIllumPercent}%
                             </span>
                           ) : null}
@@ -765,6 +774,31 @@ export default function CalendarPage() {
                                       : '—'
                                   }
                                 />
+                                {/* Visual: Horizon diagram + Moon phase */}
+                                <div className="mt-3 flex items-center justify-center gap-4 border-t border-slate-100 pt-2">
+                                  {typeof thisEst.metrics.moonAltitudeDeg === 'number' && (
+                                    <HorizonDiagram
+                                      moonAltitudeDeg={thisEst.metrics.moonAltitudeDeg}
+                                      sunAltitudeDeg={thisEst.metrics.sunAltitudeDeg ?? -1}
+                                      arcDeg={thisEst.metrics.moonElongationDeg}
+                                      lagMinutes={thisEst.metrics.lagMinutes}
+                                      width={150}
+                                      height={90}
+                                    />
+                                  )}
+                                  {typeof thisEst.metrics.moonIlluminationFraction === 'number' && (
+                                    <div className="flex flex-col items-center gap-1">
+                                      <MoonPhaseIcon illumination={thisEst.metrics.moonIlluminationFraction} size={36} />
+                                      <span className="text-[10px] text-slate-500">{Math.round(thisEst.metrics.moonIlluminationFraction * 100)}%</span>
+                                    </div>
+                                  )}
+                                </div>
+                                {typeof thisEst.metrics.visibilityPercent === 'number' && (
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <span className="text-[11px] text-slate-500">{t('probability.crescentScore')}:</span>
+                                    <CrescentScoreBar percent={thisEst.metrics.visibilityPercent} width={80} />
+                                  </div>
+                                )}
                               </div>
                             ) : (
                               <div className="mt-2 text-[11px] text-slate-600">—</div>

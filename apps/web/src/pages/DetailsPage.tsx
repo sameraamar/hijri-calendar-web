@@ -10,6 +10,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import LocationPicker from '../components/LocationPicker';
+import MoonPhaseIcon from '../components/MoonPhaseIcon';
+import HorizonDiagram from '../components/HorizonDiagram';
+import CrescentScoreBar from '../components/CrescentScoreBar';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { getTimeZoneForLocation } from '../timezone';
@@ -51,7 +54,9 @@ type DetailRow = {
     lagMinutes?: number;
     crescentScorePercent?: number;
     moonIlluminationPercent?: number;
+    moonIlluminationFraction?: number;
     moonAltitudeDeg?: number;
+    sunAltitudeDeg?: number;
     moonElongationDeg?: number;
     moonAgeHours?: number;
     // Yallop-specific
@@ -271,7 +276,9 @@ export default function DetailsPage() {
           lagMinutes: est?.metrics.lagMinutes,
           crescentScorePercent: est?.metrics.visibilityPercent,
           moonIlluminationPercent: typeof est?.metrics.moonIlluminationFraction === 'number' ? Math.round(est.metrics.moonIlluminationFraction * 100) : undefined,
+          moonIlluminationFraction: est?.metrics.moonIlluminationFraction,
           moonAltitudeDeg: est?.metrics.moonAltitudeDeg,
+          sunAltitudeDeg: est?.metrics.sunAltitudeDeg,
           moonElongationDeg: est?.metrics.moonElongationDeg,
           moonAgeHours: est?.metrics.moonAgeHours,
           // Yallop-specific
@@ -347,6 +354,7 @@ export default function DetailsPage() {
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.gregorianDate')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('calendar.dayOfWeek')}</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('convert.hijriDate')}</th>
+                <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-2 py-2 text-center">🌙</th>
                 <th className="sticky top-0 bg-slate-50 border-b border-slate-200 px-3 py-2">{t('probability.label')}</th>
                 {methodId === 'yallop' ? (
                   <>
@@ -384,6 +392,11 @@ export default function DetailsPage() {
                     <td className="border-b border-slate-100 px-3 py-2 font-medium text-slate-900 whitespace-nowrap">{row.gregorianIso}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap text-slate-600">{row.dayOfWeek}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.hijriText}</td>
+                    <td className="border-b border-slate-100 px-2 py-2 text-center">
+                      {typeof row.estimate.moonIlluminationFraction === 'number'
+                        ? <MoonPhaseIcon illumination={row.estimate.moonIlluminationFraction} size={20} />
+                        : '—'}
+                    </td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">
                       {row.isIndicatorDay ? (
                         <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
@@ -405,7 +418,7 @@ export default function DetailsPage() {
                         <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{row.estimate.odehZone ? `${row.estimate.odehZone} — ${row.estimate.odehZoneDescription ?? ''}` : '—'}</td>
                       </>
                     ) : (
-                      <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.crescentScorePercent === 'number' ? `${Math.round(row.estimate.crescentScorePercent)}%` : '—'}</td>
+                      <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.crescentScorePercent === 'number' ? <CrescentScoreBar percent={row.estimate.crescentScorePercent} /> : '—'}</td>
                     )}
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.moonIlluminationPercent === 'number' ? `${row.estimate.moonIlluminationPercent}%` : '—'}</td>
                     <td className="border-b border-slate-100 px-3 py-2 whitespace-nowrap">{typeof row.estimate.moonAltitudeDeg === 'number' ? `${row.estimate.moonAltitudeDeg.toFixed(1)}°` : '—'}</td>
@@ -446,6 +459,9 @@ export default function DetailsPage() {
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-slate-900">{row.day}</span>
+                  {typeof row.estimate.moonIlluminationFraction === 'number' && (
+                    <MoonPhaseIcon illumination={row.estimate.moonIlluminationFraction} size={18} />
+                  )}
                   <span className="text-xs text-slate-500">{row.dayOfWeek}</span>
                   <span className="text-xs text-slate-500">{row.hijriText}</span>
                 </div>
@@ -460,6 +476,26 @@ export default function DetailsPage() {
               {/* Expanded detail */}
               {isExpanded ? (
                 <div className="mt-2 border-t border-slate-100 pt-2 text-xs">
+                  {/* Horizon diagram */}
+                  {typeof row.estimate.moonAltitudeDeg === 'number' && (
+                    <div className="flex justify-center mb-2">
+                      <HorizonDiagram
+                        moonAltitudeDeg={row.estimate.moonAltitudeDeg}
+                        sunAltitudeDeg={row.estimate.sunAltitudeDeg ?? -1}
+                        arcDeg={row.estimate.moonElongationDeg}
+                        lagMinutes={row.estimate.lagMinutes}
+                        width={200}
+                        height={110}
+                      />
+                    </div>
+                  )}
+                  {/* Crescent score bar */}
+                  {typeof row.estimate.crescentScorePercent === 'number' && (
+                    <div className="flex items-center justify-between gap-2 py-1">
+                      <span className="text-slate-600">{t('probability.crescentScore')}</span>
+                      <CrescentScoreBar percent={row.estimate.crescentScorePercent} width={80} />
+                    </div>
+                  )}
                   {methodId === 'yallop' && typeof row.estimate.yallopQ === 'number' ? (
                     <>
                       <MetricRow label={t('probability.yallopQ')} value={row.estimate.yallopQ.toFixed(3)} />
