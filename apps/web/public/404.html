@@ -9,7 +9,7 @@
       // See: https://github.com/rafgraph/spa-github-pages
       (function(l) {
         // Skip redirect for file-like paths (assets)
-        if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|map|json|webp|avif)$/i.test(l.pathname)) {
+        if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot|map|json|xml|webp|avif|txt|html)$/i.test(l.pathname)) {
           return;
         }
         var pathSegmentsToKeep = 1; // keep '/hijri' prefix
