@@ -3,12 +3,14 @@ import {
   buildEstimatedHijriCalendarRange,
   findEstimatedGregorianForHijriDate,
 } from '@hijri/calendar-engine';
-import { useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/i18n';
 import { COUNTRIES } from '../data/countries';
 import { getOfficialDeclaration, hasAnyOfficialData } from '../data/officialDeclarations';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useUrlNumber } from '../hooks/useUrlNumber';
+import { useUrlString } from '../hooks/useUrlString';
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
@@ -182,8 +184,8 @@ function PredictionCell({ pred }: { pred: MethodPrediction | null }) {
 export default function HistoryPage() {
   const { t } = useTranslation();
 
-  const [countryId, setCountryId] = useState('sa');
-  const [hijriYear, setHijriYear] = useState(1447);
+  const [countryId, setCountryId] = useUrlString('country', 'sa');
+  const [hijriYear, setHijriYear] = useUrlNumber('year', 1447);
 
   // Defer heavy computation so dropdowns stay responsive
   const deferredCountryId = useDeferredValue(countryId);
@@ -236,7 +238,7 @@ export default function HistoryPage() {
     };
   }, [rows]);
 
-  usePageMeta('seo.history.title', 'seo.history.description');
+  usePageMeta('seo.history.title', 'seo.history.description', String(hijriYear));
 
   return (
     <div className="page">

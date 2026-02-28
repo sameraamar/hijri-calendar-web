@@ -8,7 +8,7 @@ import {
   odehMonthStartEstimate,
   meetsOdehCriteriaAtSunset
 } from '@hijri/calendar-engine';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/i18n';
 import LocationPicker from '../components/LocationPicker';
@@ -16,6 +16,7 @@ import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { formatHijriDateDisplay, formatIsoDateDisplay } from '../utils/dateFormat';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useUrlNumber } from '../hooks/useUrlNumber';
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -77,7 +78,7 @@ export default function HolidaysPage() {
   const { methodId } = useMethod();
   const { location } = useAppLocation();
   const currentYear = new Date().getFullYear();
-  const [year, setYear] = useState<number>(currentYear);
+  const [year, setYear] = useUrlNumber('year', currentYear);
 
   const holidays = useMemo(() => {
     if (methodId === 'civil' || methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
@@ -266,7 +267,7 @@ export default function HolidaysPage() {
     );
   };
 
-  usePageMeta('seo.holidays.title', 'seo.holidays.description');
+  usePageMeta('seo.holidays.title', 'seo.holidays.description', year);
 
   return (
     <div className="page">

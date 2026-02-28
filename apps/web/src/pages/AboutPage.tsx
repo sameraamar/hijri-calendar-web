@@ -8,7 +8,13 @@ export default function AboutPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <div>
+        <div className="flex items-center gap-3">
+          <svg className="h-12 w-12 flex-shrink-0" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="32" height="32" rx="6" fill="#0f172a"/>
+            <circle cx="15" cy="16" r="10" fill="#fbbf24"/>
+            <circle cx="19" cy="14" r="8.5" fill="#0f172a"/>
+            <polygon points="24,8 25.2,11.2 28,11.2 25.8,13.2 26.6,16 24,14.2 21.4,16 22.2,13.2 20,11.2 22.8,11.2" fill="#fbbf24" opacity="0.9"/>
+          </svg>
           <h1 className="text-2xl font-semibold tracking-tight">{t('about.title')}</h1>
         </div>
       </div>
@@ -17,6 +23,22 @@ export default function AboutPage() {
         <section className="card">
           <div className="p-4 text-sm leading-relaxed text-slate-700">
             {t('methods.about')}
+          </div>
+        </section>
+
+        {/* Features — keyword-rich for SEO */}
+        <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t('about.featuresTitle')}</h2>
+        <section className="card">
+          <div className="space-y-3 p-4 text-sm leading-relaxed text-slate-700">
+            <ul className="list-disc space-y-1.5 ps-5">
+              <li>{t('about.featureCalendar')}</li>
+              <li>{t('about.featureHolidays')}</li>
+              <li>{t('about.featureConvert')}</li>
+              <li>{t('about.featureMethods')}</li>
+              <li>{t('about.featureHistory')}</li>
+              <li>{t('about.featureMonths')}</li>
+              <li>{t('about.featureBilingual')}</li>
+            </ul>
           </div>
         </section>
 

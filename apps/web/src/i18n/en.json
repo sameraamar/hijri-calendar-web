@@ -6,7 +6,7 @@
       "convert": "Convert",
       "details": "Details",
       "holidays": "Holidays",
-      "methods": "Methods",
+      "methods": "Theory & Methods",
       "history": "History",
       "scholars": "Scholars",
       "about": "About"
@@ -448,6 +448,14 @@
     "privacyLocation": "If you choose to share your location, it is used only for local sunset/moonset calculations and is never transmitted anywhere.",
     "disclaimerTitle": "Disclaimer",
     "disclaimerBody": "This tool is for informational and educational purposes only. It is not an official religious authority and should not be used as a substitute for local moon-sighting committees or official Hijri calendar announcements in your country. Crescent-visibility estimates are based on astronomical models and may differ from actual observed conditions.",
+    "featuresTitle": "Features",
+    "featureCalendar": "Monthly Hijri calendar view showing all 12 Islamic months — Muharram, Safar, Rabi' al-Awwal, Rabi' al-Thani, Jumada al-Ula, Jumada al-Thani, Rajab, Sha'ban, Ramadan, Shawwal, Dhul Qi'dah, and Dhul Hijjah — alongside the Gregorian months (January through December).",
+    "featureHolidays": "Estimated dates for key Islamic holidays: Ramadan start, Eid al-Fitr (1 Shawwal), Eid al-Adha (10 Dhul Hijjah), Islamic New Year (1 Muharram), Day of Arafah, and Ashura (10 Muharram).",
+    "featureConvert": "Instant Gregorian-to-Hijri and Hijri-to-Gregorian date converter supporting multiple calculation methods.",
+    "featureMethods": "Crescent moon (hilal) visibility estimation using the Yallop q-test criterion, Odeh visibility criterion, geometric sunset model, and the tabular Islamic civil calendar. Includes moon altitude, elongation, age, moonset lag, and illumination data.",
+    "featureHistory": "Historical comparison of officially declared Hijri month starts (Saudi Arabia and other countries) against astronomically calculated predictions.",
+    "featureMonths": "Scientific reference covering 15+ methods: Yallop, Odeh, Schaefer, SAAO, Danjon limit, Babylonian lag rule, Fotheringham, Maunder, Indian, Malaysian, and the Umm al-Qura calendar.",
+    "featureBilingual": "Fully bilingual interface in English and Arabic with right-to-left (RTL) support.",
     "openSourceTitle": "Open Source",
     "openSourceBody": "Hijri Calendar is free and open-source software. Contributions, bug reports, and suggestions are welcome.",
     "furtherReadingTitle": "References & Credits",
@@ -477,7 +485,7 @@
       "description": "Compare officially declared Hijri month starts with astronomically calculated dates for Saudi Arabia and other countries."
     },
     "methods": {
-      "title": "Hijri Calculation Methods — Yallop, Odeh, Civil & More",
+      "title": "Theory & Calculation Methods — Yallop, Odeh, Civil & More",
       "description": "Learn about Islamic calendar calculation methods: Yallop q-test, Odeh criterion, tabular civil calendar, Umm al-Qura, Schaefer, and more. Astronomical crescent visibility models explained."
     },
     "scholars": {

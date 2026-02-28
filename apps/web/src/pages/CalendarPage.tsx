@@ -19,6 +19,7 @@ import CrescentScoreBar from '../components/CrescentScoreBar';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useUrlNumber } from '../hooks/useUrlNumber';
 import { getTimeZoneForLocation } from '../timezone';
 import { formatHijriDateDisplay, formatLocalizedNumber } from '../utils/dateFormat';
 
@@ -125,8 +126,8 @@ export default function CalendarPage() {
   const { t, i18n } = useTranslation();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
-  const [year, setYear] = useState<number>(currentYear);
-  const [month, setMonth] = useState<number>(currentMonth);
+  const [year, setYear] = useUrlNumber('year', currentYear);
+  const [month, setMonth] = useUrlNumber('month', currentMonth);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const { location } = useAppLocation();
   const { methodId } = useMethod();
@@ -526,7 +527,7 @@ export default function CalendarPage() {
     return { iso: bestIso, hasMultiple: candidateCount > 1 };
   }, [monthData.days, monthData.estimateByIso, month, year]);
 
-  usePageMeta('seo.calendar.title', 'seo.calendar.description');
+  usePageMeta('seo.calendar.title', 'seo.calendar.description', year);
 
   return (
     <div className="page">

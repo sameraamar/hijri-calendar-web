@@ -18,6 +18,7 @@ import { useMethod } from '../method/MethodContext';
 import { getTimeZoneForLocation } from '../timezone';
 import { formatHijriDateDisplay, formatLocalizedNumber, formatIsoDateDisplay } from '../utils/dateFormat';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { useUrlNumber } from '../hooks/useUrlNumber';
 
 function daysInGregorianMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
@@ -97,8 +98,8 @@ export default function DetailsPage() {
   const { t, i18n } = useTranslation();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
-  const [year, setYear] = useState<number>(currentYear);
-  const [month, setMonth] = useState<number>(currentMonth);
+  const [year, setYear] = useUrlNumber('year', currentYear);
+  const [month, setMonth] = useUrlNumber('month', currentMonth);
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const { location } = useAppLocation();
   const { methodId } = useMethod();
@@ -347,7 +348,7 @@ export default function DetailsPage() {
     return `${fmName} ${firstYear} – ${lmName} ${lastYear}`;
   }, [data.rows, i18n.language, t]);
 
-  usePageMeta('seo.details.title', 'seo.details.description');
+  usePageMeta('seo.details.title', 'seo.details.description', year);
 
   return (
     <div className="page">
