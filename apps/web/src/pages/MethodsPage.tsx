@@ -5,6 +5,7 @@ import {
   MoonAgeDiagram,
   MoonsetLagDiagram,
 } from '../components/KeyConceptsDiagrams';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 type SignalLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high';
 
@@ -26,6 +27,7 @@ function likelihoodStyle(level: SignalLevel): { badgeClass: string; dotClass: st
 
 export default function MethodsPage() {
   const { t, i18n } = useTranslation();
+  usePageMeta('seo.methods.title', 'seo.methods.description');
 
   const tocImplemented = [
     { id: 'civil', label: t('methods.civil.title') },
@@ -46,7 +48,7 @@ export default function MethodsPage() {
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight">{t('methods.methodsHeading')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('methods.methodsHeading')}</h1>
         </div>
       </div>
 

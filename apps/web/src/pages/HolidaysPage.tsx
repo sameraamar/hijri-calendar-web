@@ -15,6 +15,7 @@ import LocationPicker from '../components/LocationPicker';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { formatHijriDateDisplay, formatIsoDateDisplay } from '../utils/dateFormat';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -265,11 +266,13 @@ export default function HolidaysPage() {
     );
   };
 
+  usePageMeta('seo.holidays.title', 'seo.holidays.description');
+
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight">{t('holidays.title')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('holidays.title')}</h1>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
       </div>

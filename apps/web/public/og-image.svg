@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Crescent moon -->
+  <g transform="translate(600,240)">
+    <circle cx="0" cy="0" r="90" fill="#fbbf24"/>
+    <circle cx="35" cy="-20" r="75" fill="#0f172a"/>
+  </g>
+  <!-- Star -->
+  <polygon points="660,130 667,150 688,150 671,162 678,182 660,170 642,182 649,162 632,150 653,150" fill="#fbbf24" opacity="0.9"/>
+  <!-- Title -->
+  <text x="600" y="400" text-anchor="middle" fill="#f8fafc" font-family="system-ui,-apple-system,sans-serif" font-size="52" font-weight="700" letter-spacing="-1">Hijri Calendar</text>
+  <!-- Subtitle -->
+  <text x="600" y="445" text-anchor="middle" fill="#94a3b8" font-family="system-ui,-apple-system,sans-serif" font-size="22">Islamic Calendar &amp; Date Converter</text>
+  <!-- Arabic -->
+  <text x="600" y="485" text-anchor="middle" fill="#64748b" font-family="system-ui,-apple-system,sans-serif" font-size="20">التقويم الهجري — تحويل التواريخ</text>
+  <!-- Keywords line -->
+  <text x="600" y="540" text-anchor="middle" fill="#475569" font-family="system-ui,-apple-system,sans-serif" font-size="16">Crescent Visibility · Yallop · Odeh · Moon Sighting</text>
+  <!-- Bottom border accent -->
+  <rect x="0" y="618" width="1200" height="12" fill="#fbbf24" opacity="0.8"/>
+</svg>

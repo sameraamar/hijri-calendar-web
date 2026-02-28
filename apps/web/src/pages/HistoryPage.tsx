@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/i18n';
 import { COUNTRIES } from '../data/countries';
 import { getOfficialDeclaration, hasAnyOfficialData } from '../data/officialDeclarations';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 // ---------------------------------------------------------------------------
 // Constants & helpers
@@ -235,12 +236,14 @@ export default function HistoryPage() {
     };
   }, [rows]);
 
+  usePageMeta('seo.history.title', 'seo.history.description');
+
   return (
     <div className="page">
       {/* Header */}
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight">{t('history.title')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('history.title')}</h1>
           <div className="muted">{t('history.subtitle')}</div>
         </div>
       </div>

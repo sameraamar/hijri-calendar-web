@@ -2,9 +2,99 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/hijri/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hijri Calendar</title>
+    <title>Hijri Calendar — Islamic Calendar & Gregorian↔Hijri Date Converter</title>
+    <meta
+      name="description"
+      content="Free Hijri (Islamic) calendar app — convert Gregorian to Hijri dates, browse Islamic holidays (Ramadan, Eid), and explore crescent moon visibility using Yallop, Odeh, and tabular (civil) methods. Bilingual English/Arabic. التقويم الهجري"
+    />
+    <meta
+      name="keywords"
+      content="hijri calendar, islamic calendar, hijri date converter, gregorian to hijri, hijri to gregorian, ramadan dates, eid al-fitr, eid al-adha, crescent moon visibility, moon sighting, hilal, yallop criterion, odeh criterion, islamic holidays, التقويم الهجري, تحويل التاريخ الهجري, رمضان, عيد الفطر, عيد الأضحى, رؤية الهلال"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="canonical" href="https://sameraamar.github.io/hijri/" />
+    <link rel="manifest" href="/hijri/manifest.webmanifest" />
+
+    <!-- Language alternates -->
+    <link rel="alternate" hreflang="en" href="https://sameraamar.github.io/hijri/" />
+    <link rel="alternate" hreflang="ar" href="https://sameraamar.github.io/hijri/" />
+    <link rel="alternate" hreflang="x-default" href="https://sameraamar.github.io/hijri/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Hijri Calendar" />
+    <meta property="og:title" content="Hijri Calendar — Islamic Calendar & Date Converter" />
+    <meta
+      property="og:description"
+      content="Convert Gregorian and Hijri dates, browse Islamic holidays, and compare crescent visibility methods (Yallop, Odeh). Bilingual English/Arabic."
+    />
+    <meta property="og:url" content="https://sameraamar.github.io/hijri/" />
+    <meta property="og:image" content="https://sameraamar.github.io/hijri/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Hijri Calendar — crescent moon with Islamic calendar app preview" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_SA" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hijri Calendar — Islamic Calendar & Date Converter" />
+    <meta
+      name="twitter:description"
+      content="Bilingual Hijri calendar app with Gregorian↔Hijri conversion, Islamic holiday dates, and crescent visibility estimates (Yallop & Odeh)."
+    />
+    <meta name="twitter:image" content="https://sameraamar.github.io/hijri/og-image.svg" />
+    <meta name="twitter:image:alt" content="Hijri Calendar — crescent moon with Islamic calendar app preview" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Hijri Calendar",
+        "alternateName": "التقويم الهجري",
+        "url": "https://sameraamar.github.io/hijri/",
+        "description": "Free Islamic (Hijri) calendar with Gregorian↔Hijri date converter, crescent moon visibility estimates using Yallop, Odeh, and tabular methods, and Islamic holiday dates.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any",
+        "inLanguage": ["en", "ar"],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "publisher": {
+          "@type": "Person",
+          "name": "Samer Aamar"
+        },
+        "featureList": [
+          "Gregorian to Hijri date conversion",
+          "Hijri to Gregorian date conversion",
+          "Islamic holiday dates (Ramadan, Eid al-Fitr, Eid al-Adha)",
+          "Crescent moon visibility estimates",
+          "Yallop q-test criterion",
+          "Odeh criterion",
+          "Tabular (Islamic Civil) calendar",
+          "Bilingual English and Arabic interface"
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Hijri Calendar", "item": "https://sameraamar.github.io/hijri/" },
+          { "@type": "ListItem", "position": 2, "name": "Holidays", "item": "https://sameraamar.github.io/hijri/holidays" },
+          { "@type": "ListItem", "position": 3, "name": "Calendar", "item": "https://sameraamar.github.io/hijri/calendar" },
+          { "@type": "ListItem", "position": 4, "name": "Convert", "item": "https://sameraamar.github.io/hijri/convert" },
+          { "@type": "ListItem", "position": 5, "name": "Methods", "item": "https://sameraamar.github.io/hijri/methods" }
+        ]
+      }
+    </script>
     <!-- GitHub Pages SPA redirect restore (works with 404.html) -->
     <script type="text/javascript">
       (function(l) {
@@ -21,6 +111,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:600px;margin:2rem auto;padding:1rem;font-family:system-ui,sans-serif;text-align:center">
+        <h1>Hijri Calendar — التقويم الهجري</h1>
+        <p>Free Islamic calendar app with Gregorian↔Hijri date conversion, Islamic holiday dates (Ramadan, Eid al-Fitr, Eid al-Adha), and crescent moon visibility estimates using Yallop and Odeh astronomical criteria.</p>
+        <p>تطبيق مجاني للتقويم الهجري مع تحويل التواريخ بين الميلادي والهجري ومواعيد المناسبات الإسلامية وتقديرات رؤية الهلال.</p>
+        <p style="margin-top:1rem;color:#666">Please enable JavaScript to use this application.</p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

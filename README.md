@@ -8,6 +8,9 @@ A bilingual (English/Arabic) web app to:
 This site is free and open source:
 - https://github.com/sameraamar/hijri
 
+Live site (GitHub Pages):
+- https://sameraamar.github.io/hijri/
+
 Direct contact / suggestions:
 - samer.aamar@gmail.com
 
@@ -86,3 +89,24 @@ When creating the Static Web App (GitHub-based deployment), use:
 SPA routing fallback is configured in `apps/web/staticwebapp.config.json`.
 
 See PLAN.md for full details.
+
+## GitHub Pages deployment
+
+Production URL:
+- https://sameraamar.github.io/hijri/
+
+Notes:
+- Vite base path is configured for GitHub Pages (`/hijri/`).
+- SPA refresh/deep-link fallback is handled by `apps/web/public/404.html`.
+
+## SEO / search indexing
+
+This repo includes baseline SEO for the live GitHub Pages site:
+- Canonical URL and metadata in `apps/web/index.html`
+- `robots.txt` in `apps/web/public/robots.txt`
+- Sitemap in `apps/web/public/sitemap.xml`
+
+After each production deployment, verify indexing:
+1. Open Google Search Console for property `https://sameraamar.github.io`.
+2. Submit sitemap: `https://sameraamar.github.io/hijri/sitemap.xml`.
+3. Use URL Inspection on `https://sameraamar.github.io/hijri/` and request indexing.

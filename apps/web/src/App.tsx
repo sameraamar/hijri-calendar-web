@@ -37,7 +37,13 @@ export default function App() {
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <div className="flex items-center gap-4">
-            <NavLink to="/calendar" className="text-lg font-bold tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
+            <NavLink to="/holidays" className="flex items-center gap-2 text-lg font-bold tracking-tight text-slate-900 hover:opacity-80 transition-opacity">
+              <svg className="h-6 w-6 flex-shrink-0" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect width="32" height="32" rx="6" fill="#0f172a"/>
+                <circle cx="15" cy="16" r="10" fill="#fbbf24"/>
+                <circle cx="19" cy="14" r="8.5" fill="#0f172a"/>
+                <polygon points="24,8 25.2,11.2 28,11.2 25.8,13.2 26.6,16 24,14.2 21.4,16 22.2,13.2 20,11.2 22.8,11.2" fill="#fbbf24" opacity="0.9"/>
+              </svg>
               {t('app.title')}
             </NavLink>
             <nav className="hidden items-center gap-1 md:flex">

@@ -28,8 +28,8 @@ export default function CrescentScoreBar({ percent, width = 60, showLabel = true
         style={{ width, height: 6 }}
       >
         <span
-          className={`absolute inset-y-0 left-0 rounded-full ${barColor(pct)}`}
-          style={{ width: `${pct}%` }}
+          className={`absolute inset-0 rounded-full origin-left ${barColor(pct)}`}
+          style={{ transform: `scaleX(${pct / 100})` }}
         />
       </span>
       {showLabel && (

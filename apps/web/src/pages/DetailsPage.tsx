@@ -17,6 +17,7 @@ import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { getTimeZoneForLocation } from '../timezone';
 import { formatHijriDateDisplay, formatLocalizedNumber, formatIsoDateDisplay } from '../utils/dateFormat';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 function daysInGregorianMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
@@ -346,11 +347,13 @@ export default function DetailsPage() {
     return `${fmName} ${firstYear} – ${lmName} ${lastYear}`;
   }, [data.rows, i18n.language, t]);
 
+  usePageMeta('seo.details.title', 'seo.details.description');
+
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight sm:text-3xl">{t('calendar.tabDetails')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t('calendar.tabDetails')}</h1>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
       </div>
@@ -471,7 +474,27 @@ export default function DetailsPage() {
                         <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">{row.estimate.odehZone ? `${row.estimate.odehZone} — ${row.estimate.odehZoneDescription ?? ''}` : '—'}</td>
                       </>
                     ) : (
-                      <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">{typeof row.estimate.crescentScorePercent === 'number' ? <CrescentScoreBar percent={row.estimate.crescentScorePercent} /> : '—'}</td>
+                      <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">
+                        {typeof row.estimate.crescentScorePercent === 'number' ? (
+                          (() => {
+                            const pct = Math.max(0, Math.min(100, Math.round(row.estimate.crescentScorePercent ?? 0)));
+                            const colorClass = pct >= 70
+                              ? 'bg-emerald-500'
+                              : pct >= 40
+                                ? 'bg-amber-400'
+                                : pct >= 15
+                                  ? 'bg-orange-400'
+                                  : 'bg-rose-400';
+                            return (
+                              <span
+                                className={`inline-block h-4 w-1.5 rounded-full ${colorClass}`}
+                                title={`${pct}%`}
+                                aria-label={`${pct}%`}
+                              />
+                            );
+                          })()
+                        ) : '—'}
+                      </td>
                     )}
                     <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">{typeof row.estimate.moonIlluminationPercent === 'number' ? `${row.estimate.moonIlluminationPercent}%` : '—'}</td>
                     <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">{typeof row.estimate.moonAltitudeDeg === 'number' ? `${row.estimate.moonAltitudeDeg.toFixed(1)}°` : '—'}</td>

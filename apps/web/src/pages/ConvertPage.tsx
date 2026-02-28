@@ -11,6 +11,7 @@ import LocationPicker from '../components/LocationPicker';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { formatGregorianDateDisplay, formatHijriDateDisplay, formatIsoDateDisplay } from '../utils/dateFormat';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 function isoToday(): string {
   const now = new Date();
@@ -90,11 +91,13 @@ export default function ConvertPage() {
     [gregIso, i18n.language]
   );
 
+  usePageMeta('seo.convert.title', 'seo.convert.description');
+
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight">{t('app.nav.convert')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('app.nav.convert')}</h1>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
       </div>

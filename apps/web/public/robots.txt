@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sameraamar.github.io/hijri/sitemap.xml

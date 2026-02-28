@@ -1,13 +1,15 @@
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function ScholarsPage() {
   const { t } = useTranslation();
+  usePageMeta('seo.scholars.title', 'seo.scholars.description');
 
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight">{t('scholars.title')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('scholars.title')}</h1>
           <p className="mt-1 text-sm text-slate-500">{t('scholars.subtitle')}</p>
         </div>
       </div>

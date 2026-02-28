@@ -1,13 +1,15 @@
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export default function AboutPage() {
   const { t } = useTranslation();
+  usePageMeta('seo.about.title', 'seo.about.description');
 
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight">{t('about.title')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('about.title')}</h1>
         </div>
       </div>
 

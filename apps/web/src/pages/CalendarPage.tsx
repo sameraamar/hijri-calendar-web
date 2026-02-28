@@ -18,6 +18,7 @@ import HorizonDiagram from '../components/HorizonDiagram';
 import CrescentScoreBar from '../components/CrescentScoreBar';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { getTimeZoneForLocation } from '../timezone';
 import { formatHijriDateDisplay, formatLocalizedNumber } from '../utils/dateFormat';
 
@@ -525,11 +526,13 @@ export default function CalendarPage() {
     return { iso: bestIso, hasMultiple: candidateCount > 1 };
   }, [monthData.days, monthData.estimateByIso, month, year]);
 
+  usePageMeta('seo.calendar.title', 'seo.calendar.description');
+
   return (
     <div className="page">
       <div className="page-header">
         <div>
-          <div className="text-2xl font-semibold tracking-tight sm:text-3xl">{t('app.nav.calendar')}</div>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t('app.nav.calendar')}</h1>
           <div className="muted">{t('app.method.label')}: {t(`app.method.${methodId}`)}</div>
         </div>
       </div>

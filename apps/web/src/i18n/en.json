@@ -454,5 +454,39 @@
     "ourResearch": "Our Research",
     "ourResearchLink": "Hijri Calculation Methods — Scientific Summary",
     "ourResearchDesc": "Our comprehensive survey of 15 Hijri month-start methods, with formulae, pseudocode, and citations from the academic literature"
+  },
+  "seo": {
+    "calendar": {
+      "title": "Hijri Calendar — Monthly Islamic Calendar View",
+      "description": "Browse the Islamic (Hijri) calendar month by month with crescent moon visibility estimates. Supports Yallop, Odeh, and tabular civil methods."
+    },
+    "convert": {
+      "title": "Hijri Date Converter — Gregorian to Hijri & Hijri to Gregorian",
+      "description": "Convert dates between the Gregorian (Miladi) and Hijri (Islamic) calendars instantly. Free bilingual converter with multiple calculation methods."
+    },
+    "details": {
+      "title": "Crescent Moon Details — Daily Visibility Data",
+      "description": "View detailed daily crescent moon visibility data including moon altitude, elongation, age, and illumination for any location. Hilal observation estimates."
+    },
+    "holidays": {
+      "title": "Islamic Holidays — Ramadan, Eid al-Fitr, Eid al-Adha Dates",
+      "description": "Find estimated dates for Islamic holidays including Ramadan, Eid al-Fitr, Eid al-Adha, Islamic New Year, and Ashura. Based on crescent visibility calculations."
+    },
+    "history": {
+      "title": "Hijri Month Start History — Observed vs Calculated",
+      "description": "Compare officially declared Hijri month starts with astronomically calculated dates for Saudi Arabia and other countries."
+    },
+    "methods": {
+      "title": "Hijri Calculation Methods — Yallop, Odeh, Civil & More",
+      "description": "Learn about Islamic calendar calculation methods: Yallop q-test, Odeh criterion, tabular civil calendar, Umm al-Qura, Schaefer, and more. Astronomical crescent visibility models explained."
+    },
+    "scholars": {
+      "title": "Islamic Scholars on Moon Sighting — Local vs Global",
+      "description": "Scholarly opinions on moon sighting for Hijri calendar: local sighting, global sighting, astronomical calculation, and Umm al-Qura approaches."
+    },
+    "about": {
+      "title": "About Hijri Calendar — Free Open-Source Islamic Calendar",
+      "description": "Hijri Calendar is a free, open-source Islamic calendar app. No tracking, no cookies, fully private. Built by Samer Aamar."
+    }
   }
 }

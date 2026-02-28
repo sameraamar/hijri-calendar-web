@@ -1,0 +1,21 @@
+{
+  "name": "Hijri Calendar",
+  "short_name": "Hijri",
+  "description": "Islamic (Hijri) calendar with Gregorian↔Hijri date converter, crescent visibility estimates (Yallop, Odeh), and Islamic holiday dates.",
+  "start_url": "/hijri/",
+  "scope": "/hijri/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
