@@ -16,6 +16,7 @@ import CrescentScoreBar from '../components/CrescentScoreBar';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { getTimeZoneForLocation } from '../timezone';
+import { formatHijriDateDisplay, formatLocalizedNumber, formatIsoDateDisplay } from '../utils/dateFormat';
 
 function daysInGregorianMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
@@ -45,6 +46,9 @@ type DetailRow = {
   day: number;
   dayOfWeek: string;
   hijriText: string;
+  hijriDay?: number;
+  hijriMonth?: number;
+  hijriYear?: number;
   estimate: {
     likelihoodKey: string;
     monthStartSignalKey: string;
@@ -273,6 +277,9 @@ export default function DetailsPage() {
         day: d,
         dayOfWeek,
         hijriText,
+        hijriDay: h?.day,
+        hijriMonth: h?.month,
+        hijriYear: h?.year,
         estimate: {
           likelihoodKey: `probability.${est?.likelihood ?? 'unknown'}`,
           monthStartSignalKey: `probability.${getMonthStartSignalLevel(prevSignalEst)}`,
@@ -321,34 +328,23 @@ export default function DetailsPage() {
   }, [data.rows]);
 
   const hijriRangeLabel = useMemo(() => {
-    const first = data.rows[0]?.hijriText;
-    const last = data.rows[data.rows.length - 1]?.hijriText;
-    if (!first || !last || first === '—' || last === '—') return null;
+    const first = data.rows[0];
+    const last = data.rows[data.rows.length - 1];
+    if (!first || !last || !first.hijriMonth || !first.hijriYear || !last.hijriMonth || !last.hijriYear) return null;
 
-    const parseHijri = (text: string): { month: number; year: number } | null => {
-      const parts = text.split('/');
-      if (parts.length !== 3) return null;
-      const monthNum = Number(parts[1]);
-      const yearNum = Number(parts[2]);
-      if (!Number.isFinite(monthNum) || !Number.isFinite(yearNum)) return null;
-      return { month: monthNum, year: yearNum };
-    };
+    const fmName = t(`hijriMonths.${first.hijriMonth}`);
+    const lmName = t(`hijriMonths.${last.hijriMonth}`);
+    const firstYear = formatLocalizedNumber(first.hijriYear, i18n.language);
+    const lastYear = formatLocalizedNumber(last.hijriYear, i18n.language);
 
-    const f = parseHijri(first);
-    const l = parseHijri(last);
-    if (!f || !l) return null;
-
-    const fmName = t(`hijriMonths.${f.month}`);
-    const lmName = t(`hijriMonths.${l.month}`);
-
-    if (f.month === l.month && f.year === l.year) {
-      return `${fmName} ${f.year}`;
+    if (first.hijriMonth === last.hijriMonth && first.hijriYear === last.hijriYear) {
+      return `${fmName} ${firstYear}`;
     }
-    if (f.year === l.year) {
-      return `${fmName} – ${lmName} ${f.year}`;
+    if (first.hijriYear === last.hijriYear) {
+      return `${fmName} – ${lmName} ${firstYear}`;
     }
-    return `${fmName} ${f.year} – ${lmName} ${l.year}`;
-  }, [data.rows, t]);
+    return `${fmName} ${firstYear} – ${lmName} ${lastYear}`;
+  }, [data.rows, i18n.language, t]);
 
   return (
     <div className="page">
@@ -436,11 +432,15 @@ export default function DetailsPage() {
                 const statusKey = row.estimate.monthStartSignalKey.replace('probability.', '') as VisibilityStatusKey;
                 const style = likelihoodStyle(statusKey);
                 const isMostLikely = mostLikelyIndicator.hasMultiple && mostLikelyIndicator.iso === row.gregorianIso;
+                const gregorianDisplay = formatIsoDateDisplay(row.gregorianIso, i18n.language);
+                const hijriDisplay = row.hijriDay && row.hijriMonth && row.hijriYear
+                  ? formatHijriDateDisplay({ day: row.hijriDay, month: row.hijriMonth, year: row.hijriYear }, i18n.language)
+                  : row.hijriText;
                 return (
                   <tr key={row.gregorianIso} className="text-xs text-slate-800">
-                    <td className="border-b border-slate-100 px-2 py-2 font-medium text-slate-900 whitespace-nowrap">{row.gregorianIso}</td>
+                    <td className="border-b border-slate-100 px-2 py-2 font-medium text-slate-900 whitespace-nowrap">{gregorianDisplay}</td>
                     <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap text-slate-600">{row.dayOfWeek}</td>
-                    <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">{row.hijriText}</td>
+                    <td className="border-b border-slate-100 px-2 py-2 whitespace-nowrap">{hijriDisplay}</td>
                     <td className="border-b border-slate-100 px-2 py-2 text-center">
                       {typeof row.estimate.moonIlluminationFraction === 'number'
                         ? <MoonPhaseIcon illumination={row.estimate.moonIlluminationFraction} size={20} />
@@ -516,7 +516,7 @@ export default function DetailsPage() {
                     <MoonPhaseIcon illumination={row.estimate.moonIlluminationFraction} size={18} />
                   )}
                   <span className="text-xs text-slate-500">{row.dayOfWeek}</span>
-                  <span className="text-xs text-slate-500">{row.hijriText}</span>
+                  <span className="text-xs text-slate-500">{row.hijriDay && row.hijriMonth && row.hijriYear ? formatHijriDateDisplay({ day: row.hijriDay, month: row.hijriMonth, year: row.hijriYear }, i18n.language) : row.hijriText}</span>
                 </div>
                 {row.isIndicatorDay ? (
                   <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>

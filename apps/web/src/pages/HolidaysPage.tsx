@@ -14,6 +14,7 @@ import i18n from '../i18n/i18n';
 import LocationPicker from '../components/LocationPicker';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
+import { formatHijriDateDisplay, formatIsoDateDisplay } from '../utils/dateFormat';
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -179,7 +180,7 @@ export default function HolidaysPage() {
       (c.percent ?? 0) > (candidates[best].percent ?? 0) ? i : best, 0);
 
     const isMonthStartEvent = hijri.day === 1;
-    const monthStartLabel = `${1}/${hijri.month}/${hijri.year}`;
+    const monthStartLabel = formatHijriDateDisplay({ year: hijri.year, month: hijri.month, day: 1 }, i18n.language);
 
     return (
       <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-[11px] text-slate-700">
@@ -193,15 +194,20 @@ export default function HolidaysPage() {
         ) : null}
 
         <div className="mt-1 space-y-2">
-          {candidates.map((c, idx) => (
+          {candidates.map((c, idx) => {
+            const monthStartDisplay = formatIsoDateDisplay(c.monthStartIso, i18n.language);
+            const eventDisplay = formatIsoDateDisplay(c.eventIso, i18n.language);
+            const eveDisplay = formatIsoDateDisplay(c.eveIso, i18n.language);
+
+            return (
             <div key={c.eventIso} className="space-y-0.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[13px] font-semibold text-slate-900">{isMonthStartEvent ? c.monthStartIso : c.eventIso}</span>
+                <span className="text-[13px] font-semibold text-slate-900">{isMonthStartEvent ? monthStartDisplay : eventDisplay}</span>
                 <span className="text-[11px] text-slate-500">{weekday(isMonthStartEvent ? c.monthStart : c.event)}</span>
 
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${c.style.badgeClass}`}
-                  title={`${t('probability.monthStartSignalFor')}: ${c.monthStartIso} (${t('holidays.eveOf')} ${c.eveIso}) — ${t(`probability.${c.statusKey}`)}${methodId === 'yallop' && c.yallopQ !== null ? ` (q=${c.yallopQ.toFixed(3)}, ${c.yallopZone})` : methodId === 'odeh' && c.odehV !== null ? ` (V=${c.odehV.toFixed(3)}, ${c.odehZone})` : typeof c.percent === 'number' ? ` (${t('probability.crescentScore')}: ${c.percent}%)` : ''}`}
+                  title={`${t('probability.monthStartSignalFor')}: ${monthStartDisplay} (${t('holidays.eveOf')} ${eveDisplay}) — ${t(`probability.${c.statusKey}`)}${methodId === 'yallop' && c.yallopQ !== null ? ` (q=${c.yallopQ.toFixed(3)}, ${c.yallopZone})` : methodId === 'odeh' && c.odehV !== null ? ` (V=${c.odehV.toFixed(3)}, ${c.odehZone})` : typeof c.percent === 'number' ? ` (${t('probability.crescentScore')}: ${c.percent}%)` : ''}`}
                 >
                   {candidates.length > 1 && idx === bestIdx ? (
                     <span className="text-[11px] leading-none" aria-hidden="true">★</span>
@@ -225,7 +231,7 @@ export default function HolidaysPage() {
 
               {(typeof c.lagMinutes === 'number' || typeof c.illumPercent === 'number' || typeof c.percent === 'number') && (
                 <div className="ps-4 text-[11px] text-slate-500">
-                  <span className="me-2">{t('holidays.observedEveningMetrics', { date: c.eveIso })}:</span>
+                  <span className="me-2">{t('holidays.observedEveningMetrics', { date: eveDisplay })}:</span>
                   {typeof c.lagMinutes === 'number' ? (
                     <span className="me-1 inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('probability.lagMinutes')}>
                       {c.lagMinutes}m
@@ -252,7 +258,8 @@ export default function HolidaysPage() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
@@ -318,10 +325,10 @@ export default function HolidaysPage() {
                 </>
               ) : (
                 <div className="mt-1 text-xs text-slate-600">
-                  <span className="text-slate-900 font-semibold">{fmtGregorianIso(h.gregorian)}</span>
+                  <span className="text-slate-900 font-semibold">{formatIsoDateDisplay(fmtGregorianIso(h.gregorian), i18n.language)}</span>
                   <span className="ms-1 text-slate-500">{weekday(h.gregorian)}</span>
                   {' — '}
-                  {h.hijri.day}/{h.hijri.month}/{h.hijri.year}
+                  {formatHijriDateDisplay(h.hijri, i18n.language)}
                 </div>
               )}
             </div>

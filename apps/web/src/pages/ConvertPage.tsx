@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import LocationPicker from '../components/LocationPicker';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
+import { formatGregorianDateDisplay, formatHijriDateDisplay, formatIsoDateDisplay } from '../utils/dateFormat';
 
 function isoToday(): string {
   const now = new Date();
@@ -20,7 +21,7 @@ function isoToday(): string {
 }
 
 export default function ConvertPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { methodId } = useMethod();
   const { location } = useAppLocation();
 
@@ -32,15 +33,15 @@ export default function ConvertPage() {
     if (!y || !m || !d) return null;
     if (methodId === 'civil') return gregorianToHijriCivil({ year: y, month: m, day: d });
     if (methodId === 'estimate' || methodId === 'yallop' || methodId === 'odeh') {
-      const center = new Date(Date.UTC(y, m - 1, d, 0, 0, 0));
-      const start = new Date(center);
-      start.setUTCDate(start.getUTCDate() - 60);
-      const end = new Date(center);
-      end.setUTCDate(end.getUTCDate() + 60);
+      const dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
+      const startDate = new Date(Date.UTC(y, m - 1, 1, 0, 0, 0));
+      startDate.setUTCDate(startDate.getUTCDate() - 90);
+      const endDate = new Date(Date.UTC(y, m - 1, dim, 0, 0, 0));
+      endDate.setUTCDate(endDate.getUTCDate() + 1);
 
       const calendar = buildEstimatedHijriCalendarRange(
-        { year: start.getUTCFullYear(), month: start.getUTCMonth() + 1, day: start.getUTCDate() },
-        { year: end.getUTCFullYear(), month: end.getUTCMonth() + 1, day: end.getUTCDate() },
+        { year: startDate.getUTCFullYear(), month: startDate.getUTCMonth() + 1, day: startDate.getUTCDate() },
+        { year: endDate.getUTCFullYear(), month: endDate.getUTCMonth() + 1, day: endDate.getUTCDate() },
         { latitude: location.latitude, longitude: location.longitude },
         { monthStartRule: methodId === 'yallop' ? 'yallop' : methodId === 'odeh' ? 'odeh' : 'geometric' }
       );
@@ -84,6 +85,11 @@ export default function ConvertPage() {
     }
   }, [hijri, methodId, location.latitude, location.longitude]);
 
+  const gregorianDisplay = useMemo(
+    () => formatIsoDateDisplay(gregIso, i18n.language),
+    [gregIso, i18n.language]
+  );
+
   return (
     <div className="page">
       <div className="page-header">
@@ -107,13 +113,13 @@ export default function ConvertPage() {
               value={gregIso}
               onChange={(e) => setGregIso(e.target.value)}
             />
+            <div className="mt-1 text-xs text-slate-500">{gregorianDisplay}</div>
           </label>
 
           <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm">
             {hijriFromGregorian ? (
               <div>
-                {t('convert.hijriDate')}: {hijriFromGregorian.day}/{hijriFromGregorian.month}/
-                {hijriFromGregorian.year}
+                {t('convert.hijriDate')}: {formatHijriDateDisplay(hijriFromGregorian, i18n.language)}
               </div>
             ) : (
               <div className="text-slate-600">—</div>
@@ -165,8 +171,7 @@ export default function ConvertPage() {
           <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm">
           {gregorianFromHijri ? (
             <div>
-              {t('convert.gregorianDate')}: {gregorianFromHijri.year}-{String(gregorianFromHijri.month).padStart(2, '0')}-
-              {String(gregorianFromHijri.day).padStart(2, '0')}
+              {t('convert.gregorianDate')}: {formatGregorianDateDisplay(gregorianFromHijri, i18n.language)}
             </div>
           ) : (
             <div className="text-slate-600">—</div>

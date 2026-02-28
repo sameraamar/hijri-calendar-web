@@ -19,6 +19,7 @@ import CrescentScoreBar from '../components/CrescentScoreBar';
 import { useAppLocation } from '../location/LocationContext';
 import { useMethod } from '../method/MethodContext';
 import { getTimeZoneForLocation } from '../timezone';
+import { formatHijriDateDisplay, formatLocalizedNumber } from '../utils/dateFormat';
 
 function daysInGregorianMonth(year: number, month: number): number {
   // month: 1-12
@@ -541,13 +542,16 @@ export default function CalendarPage() {
           if (!first?.hijriMonth || !last?.hijriMonth) return null;
           const fmName = t(`hijriMonths.${first.hijriMonth}`);
           const lmName = t(`hijriMonths.${last.hijriMonth}`);
+          const firstYear = first.hijriYear ? formatLocalizedNumber(first.hijriYear, i18n.language) : null;
+          const lastYear = last.hijriYear ? formatLocalizedNumber(last.hijriYear, i18n.language) : null;
+          if (!firstYear || !lastYear) return null;
           if (first.hijriMonth === last.hijriMonth && first.hijriYear === last.hijriYear) {
-            return `${fmName} ${first.hijriYear}`;
+            return `${fmName} ${firstYear}`;
           }
           if (first.hijriYear === last.hijriYear) {
-            return `${fmName} – ${lmName} ${first.hijriYear}`;
+            return `${fmName} – ${lmName} ${firstYear}`;
           }
-          return `${fmName} ${first.hijriYear} – ${lmName} ${last.hijriYear}`;
+          return `${fmName} ${firstYear} – ${lmName} ${lastYear}`;
         })();
         return (
         <section ref={calendarRef} className="card overflow-visible relative z-10">
@@ -611,6 +615,12 @@ export default function CalendarPage() {
             ))}
             {monthData.days.map((d) => {
               const bg = d.isHijriMonthStart ? 'bg-slate-50' : 'bg-white';
+              const hijriDisplay =
+                d.hijriDay && d.hijriMonth && d.hijriYear
+                  ? formatHijriDateDisplay({ day: d.hijriDay, month: d.hijriMonth, year: d.hijriYear }, i18n.language)
+                  : d.hijri;
+              const hijriDayDisplay =
+                typeof d.hijriDay === 'number' ? formatLocalizedNumber(d.hijriDay, i18n.language) : '';
 
               // Previous evening context for this Gregorian day.
               const prev = new Date(Date.UTC(year, month - 1, d.day, 0, 0, 0));
@@ -654,7 +664,7 @@ export default function CalendarPage() {
                   {/* ── Mobile cell: compact ── */}
                   <div className="flex flex-col items-center gap-0.5 sm:hidden" style={{ minHeight: '2.25rem' }}>
                     <div className="text-sm font-semibold leading-none text-slate-900">{d.day}</div>
-                    <div className="text-[8px] leading-none text-slate-500">{d.hijriDay ?? ''}</div>
+                    <div className="text-[8px] leading-none text-slate-500">{hijriDayDisplay}</div>
                     {d.showIndicator ? (
                       isMostLikely ? (
                         <span className="mt-auto text-[11px] leading-none" aria-hidden="true">★</span>
@@ -668,7 +678,7 @@ export default function CalendarPage() {
                   <div className="hidden sm:flex sm:min-h-16 sm:flex-col sm:gap-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="text-base font-semibold leading-none text-slate-900">{d.day}</div>
-                      <div className="text-[11px] leading-none text-slate-700">{d.hijri}</div>
+                      <div className="text-[11px] leading-none text-slate-700">{hijriDisplay}</div>
                     </div>
 
                     {d.showIndicator ? (
@@ -903,7 +913,7 @@ export default function CalendarPage() {
           <div className="sm:hidden card p-3 text-sm">
             <div className="flex items-center justify-between mb-2">
               <div className="font-semibold text-slate-900">
-                {d.day} — <span className="text-slate-600 font-normal">{d.hijri}</span>
+                {d.day} — <span className="text-slate-600 font-normal">{d.hijriDay && d.hijriMonth && d.hijriYear ? formatHijriDateDisplay({ day: d.hijriDay, month: d.hijriMonth, year: d.hijriYear }, i18n.language) : d.hijri}</span>
               </div>
               <button type="button" className="text-slate-400 hover:text-slate-600" onClick={() => setExpandedDay(null)} aria-label="Close">✕</button>
             </div>
