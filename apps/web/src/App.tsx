@@ -42,8 +42,8 @@ export default function App() {
             </NavLink>
             <nav className="hidden items-center gap-1 md:flex">
               {[
-                { to: '/holidays', label: t('app.nav.holidays') },
                 { to: '/calendar', label: t('app.nav.calendar') },
+                { to: '/holidays', label: t('app.nav.holidays') },
                 { to: '/convert', label: t('app.nav.convert') },
                 { to: '/details', label: t('app.nav.details') },
                 { to: '/history', label: t('app.nav.history') },
@@ -98,8 +98,8 @@ export default function App() {
 
         <nav className="mx-auto flex max-w-6xl items-center gap-1 overflow-x-auto px-4 pb-2 md:hidden">
           {[
-            { to: '/holidays', label: t('app.nav.holidays') },
             { to: '/calendar', label: t('app.nav.calendar') },
+            { to: '/holidays', label: t('app.nav.holidays') },
             { to: '/convert', label: t('app.nav.convert') },
             { to: '/details', label: t('app.nav.details') },
             { to: '/history', label: t('app.nav.history') },

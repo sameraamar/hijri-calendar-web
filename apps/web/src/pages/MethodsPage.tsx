@@ -1,4 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import {
+  AltitudeDiagram,
+  ElongationDiagram,
+  MoonAgeDiagram,
+  MoonsetLagDiagram,
+} from '../components/KeyConceptsDiagrams';
 
 type SignalLevel = 'noChance' | 'veryLow' | 'low' | 'medium' | 'high';
 
@@ -19,7 +25,7 @@ function likelihoodStyle(level: SignalLevel): { badgeClass: string; dotClass: st
 }
 
 export default function MethodsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const tocImplemented = [
     { id: 'civil', label: t('methods.civil.title') },
@@ -49,7 +55,10 @@ export default function MethodsPage() {
         <nav className="card p-4 text-sm">
           <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">{t('methods.toc')}</div>
           <div className="space-y-1">
-            <div className="font-medium text-slate-700">{t('methods.implementedSection')}</div>
+            <div className="mt-1">
+              <a href="#key-concepts" className="font-medium text-blue-600 hover:underline">{t('methods.keyConcepts.title')}</a>
+            </div>
+            <div className="font-medium text-slate-700 mt-2">{t('methods.implementedSection')}</div>
             <ul className="list-disc ps-5 space-y-0.5">
               {tocImplemented.map((item) => (
                 <li key={item.id}><a href={`#${item.id}`} className="text-blue-600 hover:underline">{item.label}</a></li>
@@ -66,6 +75,83 @@ export default function MethodsPage() {
             </div>
           </div>
         </nav>
+
+        {/* ── Key Astronomical Concepts ── */}
+        <section id="key-concepts" className="card scroll-mt-24">
+          <div className="card-header">
+            <div className="card-title">{t('methods.keyConcepts.title')}</div>
+          </div>
+          <div className="space-y-4 p-4 text-sm text-slate-700">
+            <div>{t('methods.keyConcepts.intro')}</div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Moon Altitude */}
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900 mb-2">{t('methods.keyConcepts.altitudeTitle')}</div>
+                <AltitudeDiagram className="w-full max-w-[260px] mx-auto rounded" />
+                <div className="mt-2 text-[12px] leading-relaxed text-slate-600">{t('methods.keyConcepts.altitude')}</div>
+                <a href={t('methods.keyConcepts.altitudeWiki')} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[11px] text-blue-600 hover:underline">
+                  {t('methods.keyConcepts.wikiLink')} →
+                </a>
+              </div>
+
+              {/* Elongation */}
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900 mb-2">{t('methods.keyConcepts.elongationTitle')}</div>
+                <ElongationDiagram className="w-full max-w-[260px] mx-auto rounded" />
+                <div className="mt-2 text-[12px] leading-relaxed text-slate-600">{t('methods.keyConcepts.elongation')}</div>
+                <a href={t('methods.keyConcepts.elongationWiki')} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[11px] text-blue-600 hover:underline">
+                  {t('methods.keyConcepts.wikiLink')} →
+                </a>
+              </div>
+
+              {/* Moon Age */}
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900 mb-2">{t('methods.keyConcepts.moonAgeTitle')}</div>
+                <MoonAgeDiagram className="w-full max-w-[260px] mx-auto rounded" />
+                <div className="mt-2 text-[12px] leading-relaxed text-slate-600">{t('methods.keyConcepts.moonAge')}</div>
+                <a href={t('methods.keyConcepts.moonAgeWiki')} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[11px] text-blue-600 hover:underline">
+                  {t('methods.keyConcepts.wikiLink')} →
+                </a>
+              </div>
+
+              {/* Moonset Lag */}
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="text-xs font-semibold text-slate-900 mb-2">{t('methods.keyConcepts.lagTitle')}</div>
+                <MoonsetLagDiagram className="w-full max-w-[260px] mx-auto rounded" />
+                <div className="mt-2 text-[12px] leading-relaxed text-slate-600">{t('methods.keyConcepts.lag')}</div>
+                <a href={t('methods.keyConcepts.lagWiki')} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[11px] text-blue-600 hover:underline">
+                  {t('methods.keyConcepts.wikiLink')} →
+                </a>
+              </div>
+            </div>
+
+            {/* ── Glossary of other terms ── */}
+            <div className="mt-2">
+              <div className="text-xs font-semibold text-slate-900 mb-3">{t('methods.keyConcepts.glossaryTitle')}</div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {([
+                  { titleKey: 'conjunctionTitle', descKey: 'conjunction', wikiKey: 'conjunctionWiki' },
+                  { titleKey: 'danjonTitle', descKey: 'danjon', wikiKey: 'danjonWiki' },
+                  { titleKey: 'arcvTitle', descKey: 'arcv', wikiKey: 'arcvWiki' },
+                  { titleKey: 'crescentWidthTitle', descKey: 'crescentWidth', wikiKey: undefined },
+                  { titleKey: 'illuminationTitle', descKey: 'illumination', wikiKey: 'illuminationWiki' },
+                  { titleKey: 'waxingWaningTitle', descKey: 'waxingWaning', wikiKey: 'waxingWaningWiki' },
+                ] as const).map((item) => (
+                  <div key={item.titleKey} className="rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="text-xs font-semibold text-slate-900 mb-1">{t(`methods.keyConcepts.${item.titleKey}`)}</div>
+                    <div className="text-[12px] leading-relaxed text-slate-600">{t(`methods.keyConcepts.${item.descKey}`)}</div>
+                    {item.wikiKey ? (
+                      <a href={t(`methods.keyConcepts.${item.wikiKey}`)} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-[11px] text-blue-600 hover:underline">
+                        {t('methods.keyConcepts.wikiLink')} →
+                      </a>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <h2 className="text-lg font-semibold tracking-tight text-slate-900">{t('methods.implementedSection')}</h2>
@@ -122,55 +208,137 @@ export default function MethodsPage() {
           <div className="card-header">
             <div className="card-title">{t('methods.estimate.title')}</div>
           </div>
-          <div className="space-y-3 p-4 text-sm text-slate-700">
+          <div className="space-y-4 p-4 text-sm text-slate-700">
             <div>{t('methods.estimate.summary')}</div>
 
+            {/* Input variables — moved to top */}
             <div>
-              <div className="text-xs font-semibold text-slate-900">{t('methods.characteristics')}</div>
-              <ul className="mt-2 list-disc space-y-1 ps-5">
-                <li>{t('methods.estimate.ch1')}</li>
-                <li>{t('methods.estimate.ch2')}</li>
-                <li>{t('methods.estimate.ch3')}</li>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.inputsTitle')}</div>
+              <ul className="mt-2 list-disc space-y-1 ps-5 text-slate-600">
+                <li>{t('methods.estimate.input1')}</li>
+                <li>{t('methods.estimate.input2')}</li>
+                <li>{t('methods.estimate.input3')}</li>
+                <li>{t('methods.estimate.input4')}</li>
               </ul>
             </div>
 
+            {/* How it works — step by step */}
             <div>
-              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.thresholdsTitle')}</div>
-              <div className="mt-2 space-y-2">
-                {(
-                  [
-                    { level: 'noChance', textKey: 'methods.estimate.threshold1' },
-                    { level: 'veryLow', textKey: 'methods.estimate.threshold2' },
-                    { level: 'low', textKey: 'methods.estimate.threshold3' },
-                    { level: 'medium', textKey: 'methods.estimate.threshold4' },
-                    { level: 'high', textKey: 'methods.estimate.threshold5' }
-                  ] as const
-                ).map((item) => {
-                  const style = likelihoodStyle(item.level);
-                  return (
-                    <div key={item.level} className="flex flex-wrap items-start gap-2 text-sm">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${style.badgeClass}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${style.dotClass}`} />
-                        {t(`probability.${item.level}`)}
-                      </span>
-                      <span>{t(item.textKey)}</span>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.howItWorksTitle')}</div>
+              <div className="mt-2 space-y-3">
+                {([1, 2, 3, 4, 5] as const).map((n) => (
+                  <div key={n}>
+                    <div className="font-medium text-slate-800">
+                      {t(`methods.estimate.step${n}title`)}
                     </div>
-                  );
-                })}
-
-                <div className="text-sm text-slate-700">• {t('methods.estimate.threshold6')}</div>
+                    <div className="mt-0.5 ps-3 text-slate-600">
+                      {n === 3 ? (
+                        <>
+                          <div>{t(`methods.estimate.step${n}`)}</div>
+                          <div className="mt-1 text-center font-mono text-slate-800">
+                            {i18n.language === 'ar' ? 'المؤشر' : 'Score'} = 0.35 × s<sub>h</sub> + 0.35 × s<sub>Δ</sub> + 0.20 × s<sub>A</sub> + 0.10 × s<sub>L</sub>
+                          </div>
+                        </>
+                      ) : (
+                        t(`methods.estimate.step${n}`)
+                      )}
+                    </div>
+                    {n === 2 && (
+                      <div className="mt-2 overflow-x-auto ps-3">
+                        <table className="min-w-full text-xs border border-slate-200 rounded">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-700">
+                              <th className="px-2 py-1 text-start font-semibold">{t('methods.estimate.step2colVar')}</th>
+                              <th className="px-2 py-1 text-center font-semibold">{t('methods.estimate.step2colMin')}</th>
+                              <th className="px-2 py-1 text-center font-semibold">{t('methods.estimate.step2colMax')}</th>
+                              <th className="px-2 py-1 text-start font-semibold">{t('methods.estimate.step2colFormula')}</th>
+                              <th className="px-2 py-1 text-center font-semibold">{t('methods.estimate.step2colWeight')}</th>
+                              <th className="px-2 py-1 text-start font-semibold">{t('methods.estimate.step2colDesc')}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {([
+                              { v: 'h', desc: 'step2hDesc', min: '0°', max: '10°', low: '0', high: '10', w: '35%' },
+                              { v: 'Δ', desc: 'step2elongDesc', min: '6°', max: '15°', low: '6', high: '15', w: '35%' },
+                              { v: 'A', desc: 'step2ageDesc', min: '12 h', max: '24 h', low: '12', high: '24', w: '20%' },
+                              { v: 'L', desc: 'step2lagDesc', min: '0 min', max: '60 min', low: '0', high: '60', w: '10%' },
+                            ] as const).map((r) => (
+                              <tr key={r.v} className="hover:bg-slate-50 align-top">
+                                <td className="px-2 py-1 font-mono font-bold text-indigo-700">{r.v}</td>
+                                <td className="px-2 py-1 text-center font-mono">{r.min}</td>
+                                <td className="px-2 py-1 text-center font-mono">{r.max}</td>
+                                <td className="px-2 py-1 font-mono text-slate-800 whitespace-nowrap">s<sub>{r.v}</sub> = ({r.v} − {r.low}) / ({r.high} − {r.low})</td>
+                                <td className="px-2 py-1 text-center font-semibold">{r.w}</td>
+                                <td className="px-2 py-1 text-slate-500">{t(`methods.estimate.${r.desc}`)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {n === 4 && (
+                      <ul className="mt-1 list-disc space-y-1 ps-8 text-slate-600">
+                        <li>{t('methods.estimate.step4a')}</li>
+                        <li>{t('methods.estimate.step4b')}</li>
+                        <li>{t('methods.estimate.step4c')}</li>
+                      </ul>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
+            {/* Exclusivity rule */}
             <div>
-              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.formulaTitle')}</div>
-              <ul className="mt-2 list-disc space-y-1 ps-5">
-                <li>{t('methods.estimate.formula1')}</li>
-                <li>{t('methods.estimate.formula2')}</li>
-                <li>{t('methods.estimate.formula3')}</li>
-                <li>{t('methods.estimate.formula4')}</li>
-              </ul>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.exclusivityTitle')}</div>
+              <div className="mt-1 ps-3 text-slate-600">{t('methods.estimate.exclusivity')}</div>
             </div>
+
+            {/* Worked examples */}
+            <div>
+              <div className="text-xs font-semibold text-slate-900">{t('methods.estimate.examplesTitle')}</div>
+              {([1, 2] as const).map((ex) => (
+                <div key={ex} className="mt-3 rounded border border-slate-200 bg-slate-50 p-3">
+                  <div className="text-xs font-semibold text-slate-800 mb-2">{t(`methods.estimate.ex${ex}title`)}</div>
+                  <table className="text-xs font-mono w-full">
+                    <tbody>
+                      {/* Raw values */}
+                      <tr><td colSpan={5} className="pb-1 text-slate-500 font-sans font-semibold">{t('methods.estimate.exRawValues')}</td></tr>
+                      {(['h', 'Δ', 'A', 'L'] as const).map((v) => (
+                        <tr key={v} className="text-slate-700">
+                          <td className="pe-2 py-0.5 font-bold text-indigo-700">{v}</td>
+                          <td className="px-1 py-0.5">=</td>
+                          <td className="px-2 py-0.5">{t(`methods.estimate.ex${ex}${v}`)}</td>
+                        </tr>
+                      ))}
+                      {/* Normalized scores */}
+                      <tr><td colSpan={5} className="pt-2 pb-1 text-slate-500 font-sans font-semibold">{t('methods.estimate.exNormalized')}</td></tr>
+                      {(['h', 'Δ', 'A', 'L'] as const).map((v) => (
+                        <tr key={v} className="text-emerald-700">
+                          <td className="pe-2 py-0.5">s<sub>{v}</sub></td>
+                          <td className="px-1 py-0.5">=</td>
+                          <td className="px-2 py-0.5">{t(`methods.estimate.ex${ex}s${v}`)}</td>
+                        </tr>
+                      ))}
+                      {/* Final score */}
+                      <tr><td colSpan={5} className="pt-2 pb-1 text-slate-500 font-sans font-semibold">{t('methods.estimate.exFinalScore')}</td></tr>
+                      <tr className="text-slate-800 font-semibold">
+                        <td className="pe-2 py-0.5">{i18n.language === 'ar' ? 'المؤشر' : 'Score'}</td>
+                        <td className="px-1 py-0.5">=</td>
+                        <td className="px-2 py-0.5">{t(`methods.estimate.ex${ex}score`)}</td>
+                      </tr>
+                      <tr className="text-slate-800 font-semibold">
+                        <td className="pe-2 py-0.5">{i18n.language === 'ar' ? 'التصنيف' : 'Label'}</td>
+                        <td className="px-1 py-0.5">=</td>
+                        <td className="px-2 py-0.5">{t(`methods.estimate.ex${ex}label`)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-xs italic text-slate-500">{t('methods.estimate.impl')}</div>
 
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
               {t('methods.estimate.note')}

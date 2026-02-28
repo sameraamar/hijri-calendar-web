@@ -174,6 +174,10 @@ export default function HolidaysPage() {
 
     if (candidates.length === 0) return null;
 
+    // Determine the best candidate (highest score)
+    const bestIdx = candidates.reduce((best, c, i) =>
+      (c.percent ?? 0) > (candidates[best].percent ?? 0) ? i : best, 0);
+
     const isMonthStartEvent = hijri.day === 1;
     const monthStartLabel = `${1}/${hijri.month}/${hijri.year}`;
 
@@ -188,51 +192,68 @@ export default function HolidaysPage() {
           </div>
         ) : null}
 
-        <div className="mt-1 space-y-1">
-          {candidates.map((c) => (
-            <div key={c.eventIso} className="flex flex-wrap items-center gap-2">
-              <span className="text-[13px] font-semibold text-slate-900">{isMonthStartEvent ? c.monthStartIso : c.eventIso}</span>
-              <span className="text-[11px] text-slate-500">{weekday(isMonthStartEvent ? c.monthStart : c.event)}</span>
+        <div className="mt-1 space-y-2">
+          {candidates.map((c, idx) => (
+            <div key={c.eventIso} className="space-y-0.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[13px] font-semibold text-slate-900">{isMonthStartEvent ? c.monthStartIso : c.eventIso}</span>
+                <span className="text-[11px] text-slate-500">{weekday(isMonthStartEvent ? c.monthStart : c.event)}</span>
 
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${c.style.badgeClass}`}
-                title={`${t('probability.monthStartSignalFor')}: ${c.monthStartIso} (${t('holidays.eveOf')} ${c.eveIso}) — ${t(`probability.${c.statusKey}`)}${methodId === 'yallop' && c.yallopQ !== null ? ` (q=${c.yallopQ.toFixed(3)}, ${c.yallopZone})` : methodId === 'odeh' && c.odehV !== null ? ` (V=${c.odehV.toFixed(3)}, ${c.odehZone})` : typeof c.percent === 'number' ? ` (${t('probability.crescentScore')}: ${c.percent}%)` : ''}`}
-              >
-                <span className={`h-1.5 w-1.5 rounded-full ${c.style.dotClass}`} />
-                {t(`probability.${c.statusKey}`)}
-              </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${c.style.badgeClass}`}
+                  title={`${t('probability.monthStartSignalFor')}: ${c.monthStartIso} (${t('holidays.eveOf')} ${c.eveIso}) — ${t(`probability.${c.statusKey}`)}${methodId === 'yallop' && c.yallopQ !== null ? ` (q=${c.yallopQ.toFixed(3)}, ${c.yallopZone})` : methodId === 'odeh' && c.odehV !== null ? ` (V=${c.odehV.toFixed(3)}, ${c.odehZone})` : typeof c.percent === 'number' ? ` (${t('probability.crescentScore')}: ${c.percent}%)` : ''}`}
+                >
+                  {candidates.length > 1 && idx === bestIdx ? (
+                    <span className="text-[11px] leading-none" aria-hidden="true">★</span>
+                  ) : (
+                    <span className={`h-1.5 w-1.5 rounded-full ${c.style.dotClass}`} />
+                  )}
+                  {t(`probability.${c.statusKey}`)}
+                </span>
 
-              {methodId === 'yallop' && c.yallopQ !== null ? (
-                <span className="text-[11px] text-slate-600" title={t('probability.yallopQ')}>
-                  q={c.yallopQ.toFixed(3)}{c.yallopZone ? ` (${c.yallopZone})` : ''}
-                </span>
-              ) : methodId === 'odeh' && c.odehV !== null ? (
-                <span className="text-[11px] text-slate-600" title={t('probability.odehV')}>
-                  V={c.odehV.toFixed(3)}{c.odehZone ? ` (${c.odehZone})` : ''}
-                </span>
-              ) : typeof c.percent === 'number' ? <span className="text-[11px] text-slate-600">{c.percent}%</span> : null}
-              {typeof c.lagMinutes === 'number' ? (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('probability.lagMinutes')}>
-                  {c.lagMinutes}m
-                </span>
-              ) : null}
-              {typeof c.illumPercent === 'number' ? (
-                <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('holidays.moonIllumination')}>
-                  {c.illumPercent}%
-                </span>
-              ) : null}
+                {methodId === 'yallop' && c.yallopQ !== null ? (
+                  <span className="text-[11px] text-slate-600" title={t('probability.yallopQ')}>
+                    q={c.yallopQ.toFixed(3)}{c.yallopZone ? ` (${c.yallopZone})` : ''}
+                  </span>
+                ) : methodId === 'odeh' && c.odehV !== null ? (
+                  <span className="text-[11px] text-slate-600" title={t('probability.odehV')}>
+                    V={c.odehV.toFixed(3)}{c.odehZone ? ` (${c.odehZone})` : ''}
+                  </span>
+                ) : null}
 
-              <span className="text-[11px] text-slate-500">
-                ({t('probability.basedOn')}: {t('holidays.eveOf')} {c.eveIso}
-                {!isMonthStartEvent ? `; ${t('holidays.monthStart')}: ${c.monthStartIso}` : ''})
-              </span>
+              </div>
+
+              {(typeof c.lagMinutes === 'number' || typeof c.illumPercent === 'number' || typeof c.percent === 'number') && (
+                <div className="ps-4 text-[11px] text-slate-500">
+                  <span className="me-2">{t('holidays.observedEveningMetrics', { date: c.eveIso })}:</span>
+                  {typeof c.lagMinutes === 'number' ? (
+                    <span className="me-1 inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('probability.lagMinutes')}>
+                      {c.lagMinutes}m
+                    </span>
+                  ) : null}
+                  {typeof c.illumPercent === 'number' ? (
+                    <span className="me-1 inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('holidays.moonIllumination')}>
+                      {c.illumPercent}%
+                    </span>
+                  ) : null}
+                  {typeof c.percent === 'number' ? (
+                    <span className="inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200" title={t('probability.crescentScore')}>
+                      {c.percent}%
+                    </span>
+                  ) : null}
+                </div>
+              )}
+
+              {c.showMonthStartRuleNote && (
+                <div className="ps-4 text-[11px] text-slate-500 italic">
+                  {t('holidays.monthStartCandidateNote', {
+                    level: t(`probability.${c.statusKey}`),
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </div>
-
-        {candidates.some((c) => c.showMonthStartRuleNote) ? (
-          <div className="mt-1 text-slate-600">{t('holidays.monthStartRuleNote')}</div>
-        ) : null}
       </div>
     );
   };

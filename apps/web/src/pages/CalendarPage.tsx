@@ -499,6 +499,31 @@ export default function CalendarPage() {
     return { month, days, offset, heatByDay, details, estimateByIso, indicatorDays };
   }, [location.latitude, location.longitude, methodId, month, year, todayD, todayM, todayY]);
 
+  const mostLikelyIndicator = useMemo(() => {
+    let bestIso: string | null = null;
+    let bestPercent = -1;
+    let candidateCount = 0;
+
+    for (const d of monthData.days) {
+      if (!d.showIndicator) continue;
+      const thisIso = isoDate(year, month, d.day);
+      const prev = new Date(Date.UTC(year, month - 1, d.day, 0, 0, 0));
+      prev.setUTCDate(prev.getUTCDate() - 1);
+      const prevIso = isoDate(prev.getUTCFullYear(), prev.getUTCMonth() + 1, prev.getUTCDate());
+      const est = monthData.estimateByIso.get(prevIso);
+      if (typeof est?.metrics.visibilityPercent !== 'number') continue;
+
+      candidateCount += 1;
+      const percent = clamp0to100(est.metrics.visibilityPercent);
+      if (percent > bestPercent) {
+        bestPercent = percent;
+        bestIso = thisIso;
+      }
+    }
+
+    return { iso: bestIso, hasMultiple: candidateCount > 1 };
+  }, [monthData.days, monthData.estimateByIso, month, year]);
+
   return (
     <div className="page">
       <div className="page-header">
@@ -604,6 +629,7 @@ export default function CalendarPage() {
               const evePercent = clamp0to100(eveEst?.metrics.visibilityPercent ?? 0);
               const eveStatusKey = visibilityStatusFromEstimate(eveEst);
               const eveStyle = likelihoodStyle(eveStatusKey);
+              const isMostLikely = mostLikelyIndicator.hasMultiple && mostLikelyIndicator.iso === thisIso;
 
               return (
                 <div
@@ -630,7 +656,11 @@ export default function CalendarPage() {
                     <div className="text-sm font-semibold leading-none text-slate-900">{d.day}</div>
                     <div className="text-[8px] leading-none text-slate-500">{d.hijriDay ?? ''}</div>
                     {d.showIndicator ? (
-                      <span className={`mt-auto h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                      isMostLikely ? (
+                        <span className="mt-auto text-[11px] leading-none" aria-hidden="true">★</span>
+                      ) : (
+                        <span className={`mt-auto h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                      )
                     ) : null}
                   </div>
 
@@ -649,7 +679,11 @@ export default function CalendarPage() {
                             title={`${t('probability.monthStartSignalFor')}: ${thisIso} (${t('holidays.eveOf')} ${prevIso}) — ${t(`probability.${eveStatusKey}`)} (${t('probability.crescentScore')}: ${evePercent}%)`}
                           >
                             <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium ${eveStyle.badgeClass} ring-0`}>
-                              <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                              {isMostLikely ? (
+                                <span className="text-[11px] leading-none" aria-hidden="true">★</span>
+                              ) : (
+                                <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                              )}
                               {t(`probability.${eveStatusKey}`)}
                             </span>
                             {typeof eveEst?.metrics.visibilityPercent === 'number' ? (
@@ -863,6 +897,7 @@ export default function CalendarPage() {
         const eveStatusKey = visibilityStatusFromEstimate(eveEst);
         const eveStyle = likelihoodStyle(eveStatusKey);
         const evePercent = clamp0to100(eveEst?.metrics.visibilityPercent ?? 0);
+        const isMostLikely = mostLikelyIndicator.hasMultiple && mostLikelyIndicator.iso === thisIso;
 
         return (
           <div className="sm:hidden card p-3 text-sm">
@@ -874,10 +909,16 @@ export default function CalendarPage() {
             </div>
 
             <div className="mb-2">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${eveStyle.badgeClass}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
-                {t(`probability.${eveStatusKey}`)} {evePercent}%
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${eveStyle.badgeClass}`}>
+                  {isMostLikely ? (
+                    <span className="text-[11px] leading-none" aria-hidden="true">★</span>
+                  ) : (
+                    <span className={`h-1.5 w-1.5 rounded-full ${eveStyle.dotClass}`} />
+                  )}
+                  {t(`probability.${eveStatusKey}`)} {evePercent}%
+                </span>
+              </div>
             </div>
 
             {thisEst ? (
