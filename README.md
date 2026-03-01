@@ -1,112 +1,89 @@
-# Hijri Date Calculator
+# Hijri Calendar
 
-A bilingual (English/Arabic) web app to:
+Open-source web app for exploring the Hijri calendar with location-aware astronomical insights.
+
+- Live: https://sameraamar.github.io/hijri/
+- Source: https://github.com/sameraamar/hijri
+
+## Screenshots
+
+![Hijri Calendar — Calendar page](docs/images/hijri-calendar-calendar-page.png)
+![Hijri Calendar — Holidays page](docs/images/hijri-calendar-holidays-page.png)
+![Hijri Calendar — Theory and Methods page](docs/images/hijri-calendar-methods-page.png)
+![Hijri Calendar — Visibility details popup](docs/images/hijri-calendar-visibility-popup.png)
+
+## Features
+
 - Convert Gregorian ↔ Hijri dates
-- Generate a full-year calendar
-- Show key Islamic holidays/events
+- Browse calendar and holiday/event dates by year
+- Estimate crescent visibility with multiple methods
+- View astronomical indicators (for selected location/date)
+- English + Arabic (RTL), and translation-driven structure for adding more languages
 
-This site is free and open source:
-- https://github.com/sameraamar/hijri
+## Implemented methods
 
-Live site (GitHub Pages):
-- https://sameraamar.github.io/hijri/
+Current selectable methods in the app:
 
-Direct contact / suggestions:
-- samer.aamar@gmail.com
+- `estimate` (astronomical estimation)
+- `yallop`
+- `odeh`
+- `civil` (tabular/islamic civil)
 
-Disclaimer:
-- The estimate mode is astronomy-based guidance and not an official religious announcement.
+The project also contains research-oriented content discussing additional published criteria; those should not be interpreted as implemented unless listed above.
 
-## Method (default)
-Default method is **Tabular / Islamic Civil calendar (algorithmic)**.
+## Repository layout
 
-This is deterministic and does not depend on moon sighting. Some countries and authorities may use different official calendars.
-
-## Estimate model (how tags are calculated)
-
-In estimate mode, the app separates two questions:
-- Moon visibility question: is the crescent likely visible on this evening?
-- Month-start question: how likely is the next Gregorian day to be Hijri day 1?
-
-### Score components
-For the evening estimate, each component is normalized to [0..1]:
-- Moon altitude: 0°..10°
-- Moon elongation: 6°..15°
-- Moon age: 12h..24h
-- Lag (moonset - sunset): 0..60 minutes
-
-Visibility score:
-- score = 0.35*altitude + 0.35*elongation + 0.20*age + 0.10*lag
-
-Visibility percent:
-- percent = round(100 * score)
-
-Additional near-new-moon constraints are applied before final tagging.
-
-### Tag thresholds used in code
-- No chance: lag <= 0 minutes OR moon altitude <= 0°
-- Very low: percent in (0..10]
-- Low: percent in (10..35]
-- Medium: percent in (35..65]
-- High: percent > 65
-
-### Exclusivity normalization
-- If day X month-start signal is Medium or High, day X+1 is forced to No chance (0%).
-- This keeps one clear primary day and avoids contradictory “strong” adjacent days.
+- `apps/web` — React + TypeScript frontend
+- `packages/calendar-engine` — shared calculation logic
+- `docs` — references and research notes
+- `scripts` — data and utility scripts
 
 ## Development
 
-### Prereqs
-- Node.js 18+ recommended
+Prerequisite:
 
-### Install
-From the repo root:
-- `npm install`
+- Node.js 18+
 
-### Run
-- `npm run dev`
+From repo root:
 
-### Build
-- `npm run build`
+```bash
+npm install
+npm run dev
+```
 
-### Test
-- `npm run test`
+Other useful commands:
 
-## Azure deployment (MVP)
-Target deployment: **Azure Static Web Apps**.
+```bash
+npm run build
+npm run test
+npm run generate:data
+```
 
-Planned approach:
-- Build output from `apps/web` (Vite)
-- No backend for MVP
-- Later: add Azure Functions for an API without restructuring
+## Deployment
 
-### Azure Static Web Apps settings
-When creating the Static Web App (GitHub-based deployment), use:
-- **App location**: `apps/web`
-- **Api location**: *(leave empty for MVP)*
-- **Output location**: `dist`
+Production deployment is via GitHub Pages:
 
-SPA routing fallback is configured in `apps/web/staticwebapp.config.json`.
+- Base path: `/hijri/`
+- SPA deep-link fallback: `apps/web/public/404.html`
 
-See PLAN.md for full details.
+## SEO and indexing
 
-## GitHub Pages deployment
+Included in repo:
 
-Production URL:
-- https://sameraamar.github.io/hijri/
+- Page metadata and structured data in `apps/web/index.html`
+- `robots.txt` at `apps/web/public/robots.txt`
+- Sitemap at `apps/web/public/sitemap.xml`
 
-Notes:
-- Vite base path is configured for GitHub Pages (`/hijri/`).
-- SPA refresh/deep-link fallback is handled by `apps/web/public/404.html`.
+After deployment:
 
-## SEO / search indexing
+1. Verify URL-prefix property in Google Search Console: `https://sameraamar.github.io/hijri/`
+2. Submit sitemap: `https://sameraamar.github.io/hijri/sitemap.xml`
+3. Request indexing for the main routes from URL Inspection
 
-This repo includes baseline SEO for the live GitHub Pages site:
-- Canonical URL and metadata in `apps/web/index.html`
-- `robots.txt` in `apps/web/public/robots.txt`
-- Sitemap in `apps/web/public/sitemap.xml`
+## Disclaimer
 
-After each production deployment, verify indexing:
-1. Open Google Search Console for property `https://sameraamar.github.io`.
-2. Submit sitemap: `https://sameraamar.github.io/hijri/sitemap.xml`.
-3. Use URL Inspection on `https://sameraamar.github.io/hijri/` and request indexing.
+Astronomical outputs are informational and educational. Official religious announcements may follow local authorities and different conventions.
+
+## License
+
+MIT
