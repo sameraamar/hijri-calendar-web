@@ -13,7 +13,7 @@ Open-source web app for exploring the Hijri calendar with location-aware astrono
 | ![Hijri Calendar — Calendar page](docs/images/hijri-calendar-calendar-page.png) | **Calendar page** — Monthly Hijri/Gregorian view with method selector and location panel. |
 | ![Hijri Calendar — Visibility details popup](docs/images/hijri-calendar-visibility-popup.png) | **Visibility details popup** — Crescent score breakdown (altitude, elongation, lag, age, illumination). |
 | ![Hijri Calendar — Holidays page](docs/images/hijri-calendar-holidays-page.png) | **Holidays page** — Year-based Islamic events with visibility likelihood details. |
-| ![Hijri Calendar — Theory and Methods page](docs/images/hijri-calendar-methods-page.png) | **Theory and Methods page** — Implemented methods plus research-oriented references. |
+| ![Hijri Calendar — Navigation and methods page](docs/images/hijri-calendar-navigation-and-methods-page.png) | **Navigation and methods page** — Full top menu with method selector and theory/method options. |
 
 ## Features
 
