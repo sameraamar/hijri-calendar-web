@@ -9,11 +9,12 @@ Open-source web app for exploring the Hijri calendar with location-aware astrono
 
 | Screenshot | Caption |
 |---|---|
-| ![Hijri Calendar — App overview](docs/images/hijri-calendar-overview-page.png) | **App overview** — Main navigation, method selector, language switcher, and overall layout. |
+| ![Hijri Calendar — Navigation and methods page](docs/images/hijri-calendar-navigation-and-methods-page.png) | **Navigation and methods page** — Full top menu with method selector and theory/method options. |
 | ![Hijri Calendar — Calendar page](docs/images/hijri-calendar-calendar-page.png) | **Calendar page** — Monthly Hijri/Gregorian view with method selector and location panel. |
+| ![Hijri Calendar — Concepts and references (English)](docs/images/hijri-calendar-concepts-and-references-page-en.png) | **Concepts and references (English)** — Research-oriented section summarizing scientific papers and visually explaining key crescent-visibility terms. |
+| ![Hijri Calendar — Concepts and references (Arabic)](docs/images/hijri-calendar-concepts-and-references-page-ar.png) | **Concepts and references** — Research-oriented section summarizing scientific papers and visually explaining key crescent-visibility terms. |
 | ![Hijri Calendar — Visibility details popup](docs/images/hijri-calendar-visibility-popup.png) | **Visibility details popup** — Crescent score breakdown (altitude, elongation, lag, age, illumination). |
 | ![Hijri Calendar — Holidays page](docs/images/hijri-calendar-holidays-page.png) | **Holidays page** — Year-based Islamic events with visibility likelihood details. |
-| ![Hijri Calendar — Navigation and methods page](docs/images/hijri-calendar-navigation-and-methods-page.png) | **Navigation and methods page** — Full top menu with method selector and theory/method options. |
 
 ## Features
 
